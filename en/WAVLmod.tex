@@ -1,0 +1,33 @@
+\section{Alternative WAVL Tree Balancing Algorithm}
+
+For our purposes standard algorithm for working with WAVL trees cannot be used. It is guaranteed that no more than one rotation occurs during insert or delete. Nonetheless, the number of rank changes can be up to $O(\log n)$. 
+
+Fortunately, the algorithm can be modified in such a way that no operation requires more than $O(1)$ changes. The problems arose from promote and demote which can propagate from the inserted (respectively deleted) vertex all the way to the root. We will call the sequence of vertices that had their ranks increased by promote during one insertion a {\em promotion path}. Similarly, all vertices demoted during one deletion will be refered to as {\em demotion path}. Our modifications handles all changes along such paths as one modification. Only one such path is created using the standard rules and up to one other can be split during an operation. With the required rotation, these are the only changes performed by our alternative algorithm.
+
+An extra field is added to each vertex if it is the top of a {\em modifying path}, i.e. promotion or demotion path. It points to the bottom vertex of the path.
+
+A vertex can be a part of at most one modifying path at any time, this will become apparent from the procedures for insert and delete. When descending down the tree, it is easy to determine where we leave the modifying path. When we compare the value of a vertex to searched key, we also compare to the end of modifying path and if the comarison outcomes differ, we leave the path at this vertex. 
+
+Rank of vertices that belong to a modifying path can be inferred rather easily. One exception is the second case of demote where rank of vertices not on the path is decreased, although this poses a mere inconvenience for implementation, not a fundamental problem.
+
+\subsubsection{Find, Predecessor \& Successor}
+
+Since promote and demote steps do not change the structure of the tree (they only change the ranks), all searching operations remains identical.
+
+\subsubsection{Insert}
+
+Inserts starts from the root of the tree. We use a stack to keep the list of modifying paths along the way -- as we descend down the tree, we add the pairs of top and bottom vertices of modifying paths to this stack in vertices where the path field is not null. 
+
+When the insertion is performed, we start ascension back to the root. During this stage we use the stack with paths to be aware of true ranks. If there are no vertices violation the rank invariants, the insertion process ends. Otherwise we will use one of the rules prescribed the standard algorithm. 
+
+If we were to perform a promote though, we simply start a counter of promotes. If it is discovered that only one or two promotes are necessary, these should be performed without delay. Otherwise the top of promotion path is marked as such. 
+
+If the changes proceed to a vertex that is part of an existing path, the insertion process ends in that vertex, possibly producing a rotation. If the vertex is the end of the path, it is shortened. If the vertex is in the middle of the path, the path is split in two, or destroyed by adjusting ranks of all vertices on it if short enough.
+
+If the changes end in a rotation, all vertices taking part in this rotation whose are excluded from any path they might be on. The change from that path is applied to those vertices. The paths are either shortened or destroyed when their length becomes one -- we simply adjust the length of the last vertex on such path. One path might go through the locality of rotation, this path is devided into two if sufficiently long.
+
+\subsubsection{Delete}
+
+The process is very similar to insert. Again, delete starts from the root. Stack of paths is maintained. 
+
+After the delete, rules from standard deletion are used. The same principles as during insert apply.
