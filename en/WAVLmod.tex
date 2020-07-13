@@ -2,7 +2,7 @@
 
 For our purposes standard algorithm for working with WAVL trees cannot be used. It is guaranteed that no more than one rotation occurs during insert or delete. Nonetheless, the number of rank changes can be up to $O(\log n)$. 
 
-Fortunately, the algorithm can be modified in such a way that no operation requires more than $O(1)$ changes. It will come with the price of roughly four times as many rules for balancing. Given that WAVL trees compared to AVL trees already have noticeably more complicated implemntation, this makes the structure ill suited for other usege. 
+Fortunately, the algorithm can be modified in such a way that no operation requires more than $O(1)$ changes. It will come with the price of roughly four times as many rules for balancing. Given that WAVL trees compared to AVL trees already have noticeably more complicated implementation, this makes the structure ill suited for other usage. 
 
 The problems in WAVL trees arose from promote and demote operations which can propagate from the inserted (respectively deleted) vertex all the way to the root. We will call the sequence of vertices that had their ranks increased by promote during one insertion a {\em promotion path}. Similarly, all vertices demoted during one deletion will be refered to as a {\em demotion path}. Our modifications handles all changes along such paths as one modification. Only one such path is created using the standard rules and up to one other can be split during an operation. With the required rotation, these are the only changes performed by our alternative algorithm.
 
@@ -14,13 +14,60 @@ A vertex can be a part of at most one modifying path at any time, this will beco
 
 Rank of vertices that belong to a modifying path can be inferred rather easily. If we know that a promotion path continues here, the value should be increased by one. If a demotion path continues through, the type of demotion is determined from the rank of the child not on the path. The only tricky part is the second case of demote where rank of vertices not on the path is decreased, although this poses a mere inconvenience for implementation, not a fundamental problem.
 
+Next we describe auxiliary procedures used for keeping the tree balanced. These are relied upon by insert and delete.
+
+\subsection{Walk}
+
+Walk descends from the root of the tree to a specified key and builds a temporary {\em walking path} of vertices corresponding to those visited on the path from root to searched key. Modifications are written to those temporary vertices.
+
+\subsection{Extract from demotion path}
+
+This procedure is given a vertex on a walking path that is also part of a demotion path. The demotion path is split in two parts with the specified vertex separating them. This is achieved by modifying the vertex on top the demotion path and the vertex directly below the specified vertex. There can only be one part if the specified vertex lies on the end of the demotion path. Should any of the new parts be a single vertex, it is demoted immediately. The specifed vertex is demoted.
+
+The changes are written both to the walking path and the ranked tree.
+
+We see that this operation will update at most three vertices.
+
+\subsection{Extract from promotion path}
+
+Very analogous to previous operation. The only difference being promotion in place of demotion.
+
+We see that this operation will update at most three vertices.
+
+\subsection{Rotate promotion}
+
+This procedure receives a vertex on a walking path where the rank rule is violated and rotation is necessary. It is assumed that it is not part of any modifying path and that its $0$-child on the walking path is neither. 
+
+It should be noted that the specified vertex will have a child on the walking path. This follows from the fact that a parent of a newly inserted leaf will not be a $(0,2)$ vertex.
+
+The kind of rotation needed can be deduced locally. Should there be additional modifications from modifying paths, these will be apparent (as marked as such at the top of corresponding modifying path). 
+
+Required rotation is performed, it may be needed to remove one more vertex from modifying path in case of double rotation.
+
+It suffices to write all changes to the original ranked tree since balancing will end by this step and walking path will be abandoned.
+
+\subsection{Rotate demotion}
+
+This procedure receives a vertex on a walking path where the rank rule is violated and rotation is necessary. It is assumed that it is not part of any modifying path and that its child on the walking path is neither. 
+
+It suffices to write all changes to the original ranked tree since balancing will end by this step and walking path will be abandoned.
+
+\subsection{Pass promotion up}
+
+\subsection{Pass demotion up}
+
 \subsection{Find, Predecessor \& Successor}
 
-Since promote and demote steps do not change the structure of the tree (they only change the ranks), all searching operations remain identical.
+Since promote and demote steps do not change the structure of the tree (they only change the ranks), all searching operations remain identical to their counterparts in standard algorithm.
+
+
+The following operations form the interface of the WAVL tree.
 
 \subsection{Insert}
 
-Inserts starts from the root of the tree. We use a stack to keep the list of vertices visited, we add those with calculated actual ranks and with pointers to start and end of the modifying path they are on, where applicable.
+Inserts starts from the root of the tree. We use a list to keep the list of vertices visited, we add those with calculated actual ranks and with pointers to start and end of the modifying path they are on, where applicable.
+
+
 
 When the insertion is performed, we start ascension back to the root. During this stage we use the stack with paths to be aware of true ranks. If there are no vertices violation the rank invariants, the insertion process ends. Otherwise we will use one of the rules prescribed the standard algorithm, but we also have to take special care with ends of modifying paths. The paths are either shortened or destroyed when their length becomes one -- we simply adjust the rank of the last vertex on such path. Below is the list of all cases that can arise based on the type of vertex that is being processed.
 

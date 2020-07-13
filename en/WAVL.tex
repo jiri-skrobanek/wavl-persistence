@@ -1,0 +1,29 @@
+\section{Weak AVL tree}
+
+\begin{defn}
+A binary tree is said to be {\em ranked binary tree} if all vertices have non-negative integer ranks assigned. External vertices are by convention given rank $-1$. We denote $r(V)$ the rank of vertex $V$.
+\end{defn}
+
+\begin{defn}
+Vertex $V$ having left child $L$ and right child $R$ (both of which may be external) in ranked binary tree is called $(a,b)$-vertex if $r(V) - r(L) = a$ and $r(V) - r(L) = b$.
+\end{defn}
+
+\begin{thm}
+Let $S$ be a finite subset of $\{ (a,b) | a,b \in \N \}$ and $T$ a ranked tree with $n$ vertices. If it holds that for every $(i,j)-$vertex in $T$ $(i,j) \in S$, then the height of $T$ is $\Theta(\log n)$.
+\end{thm}
+
+\begin{myproof}
+TODO
+\end{myproof}
+
+\begin{defn}
+A ranked tree is said to be {\em Weak AVL tree} if all its vertices are either $(1,1), (1,2), (2,1)$ or $(2,2)$ and all leaves are of rank 0.
+\end{defn}
+
+TODO: discuss operations
+
+We get the following.
+
+\begin{prop}
+Insertion and deletion on a Weak AVL tree have time complexity $\Theta(\log n)$ and require at most one rotation.
+\end{prop}
