@@ -1,3 +1,5 @@
+
+
 \section{Original Weak AVL tree}
 
 \begin{defn}
@@ -19,6 +21,112 @@ TODO
 \begin{defn}
 A ranked tree is said to be {\em Weak AVL tree} if all its vertices are either $(1,1), (1,2), (2,1)$ or $(2,2)$ and all leaves are of rank 0.
 \end{defn}
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[sibling distance=32pt]
+\Tree
+[ \edge node[auto=right]{1 or 2}; [.Y
+    \edge node[auto=right] {0};
+    \node[draw,triangle]{~};
+    \edge node[auto=left] {1};
+    \node[draw,triangle]{~};
+] ]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=32pt]
+\Tree
+[ \edge node[auto=right]{0 or 1}; [.Y
+    \edge node[auto=right] {1};
+    \node[draw,triangle]{~};
+    \edge node[auto=left] {2};
+    \node[draw,triangle]{~};
+] ]
+\end{tikzpicture}
+\end{center}
+\caption{Promote step}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[sibling distance=32pt]
+\Tree
+[ \edge node[auto=right]{1 or 2}; [.z
+    \edge node[auto=right] {0};
+    [   .x 
+        \edge node[auto=right] {1}; 
+        \node[draw,triangle]{A}; 
+        \edge node[auto=left] {1};
+        \node[draw,triangle]{B}; ]
+    \edge node[auto=left] {2};
+    \node[draw,triangle]{C};
+] ]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=32pt]
+\Tree
+[ \edge node[auto=right]{1 or 2}; [.x
+    \edge node[auto=right] {1};
+    \node[draw,triangle]{A};
+    \edge node[auto=left] {1};
+    [   .z 
+        \edge node[auto=right] {1}; 
+        \node[draw,triangle]{B}; 
+        \edge node[auto=left] {1}; 
+        \node[draw,triangle]{C}; ]
+] ]
+\end{tikzpicture}
+\end{center}
+\caption{Promote rotation step}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[sibling distance=8pt]
+\Tree
+[ 
+    \edge node[auto=right]{1 or 2}; 
+    [
+        .z
+        \edge node[auto=right] {0};
+        [   
+            .x 
+            \edge node[auto=right] {2}; 
+            \node[draw,triangle]{A}; 
+            \edge node[auto=left] {1};
+            [
+                .y
+                \node[draw,triangle]{B};
+                \node[draw,triangle]{C}; 
+            ]
+        ]
+        \edge node[auto=left] {2};
+        \node[draw,triangle]{D};
+    ] 
+]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=8pt]
+\Tree
+[ \edge node[auto=right]{1 or 2}; [.y
+    \edge node[auto=right] {1};
+    [ 
+        .x
+        \edge node[auto=right] {1};
+        \node[draw,triangle]{A};
+        \node[draw,triangle]{B};
+    ]
+    \edge node[auto=left] {1};
+    [   .z 
+        \node[draw,triangle]{C}; 
+        \edge node[auto=left] {1}; 
+        \node[draw,triangle]{D}; ]
+] ]
+\end{tikzpicture}
+\end{center}
+\caption{Promote double rotation step}
+\end{figure}
+
 
 TODO: discuss operations
 

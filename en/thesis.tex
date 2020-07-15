@@ -51,6 +51,18 @@
 \usepackage{paralist}       % improved enumerate and itemize
 \usepackage{xcolor}         % typesetting in color
 
+\usepackage{tikz-qtree}
+
+\usetikzlibrary{shapes.geometric}
+\tikzset{every tree node/.style={minimum width=2em,draw,circle},
+         blank/.style={draw=none},
+         edge from parent/.style=
+         {draw,edge from parent path={(\tikzparentnode) -- (\tikzchildnode.north)}},
+         level distance=1.2cm,
+         triangle/.style={regular polygon, regular polygon sides=3}
+         }
+
+
 %%% Basic information on the thesis
 
 % Thesis title in English (exactly as in the formal assignment)

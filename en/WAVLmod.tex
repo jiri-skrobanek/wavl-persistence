@@ -122,3 +122,99 @@ The proposition below follows from this algorithm.
 \begin{prop}
 WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the structure are needed for insert and delete, while $\mathcal{O}(n)$ space is needed to store the structure and complexity of operation with the tree remains $\mathcal{O}(\log n)$.
 \end{prop}
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[sibling distance=8pt]
+\Tree
+[
+.~
+\edge node[auto=right] {1};
+[ 
+    .~
+    \edge node[auto=right] {1};
+    [  .~ \edge node[auto=right] {1}; [.~ \edge node[auto=right] {0}; X \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {1}; ~ ]
+    \edge node[auto=left] {1};
+    [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+] 
+\edge node[auto=left] {1};
+[ 
+    .~
+    \edge node[auto=right] {1};
+    [  .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+    \edge node[auto=left] {1};
+    [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+]
+]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=8pt]
+\Tree
+[
+.\node[red]{~};
+\edge[red] node[auto=right] {1};
+[ 
+    .\node[red]{~};
+    \edge[red] node[auto=right] {1};
+    [  .\node[red]{~}; \edge[red] node[auto=right] {1}; [.\node[red]{~}; \edge node[auto=right] {1}; X \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {2}; ~ ]
+    \edge node[auto=left] {2};
+    [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+] 
+\edge node[auto=left] {2};
+[ 
+    .~
+    \edge node[auto=right] {1};
+    [  .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+    \edge node[auto=left] {1};
+    [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+]
+]
+\end{tikzpicture}
+\end{center}
+\caption{Exemplar promotion path creation}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[sibling distance=8pt]
+\Tree
+[ \edge node[auto=right]{2}; [.Y
+    \edge node[auto=right] {3};
+    \node[draw,triangle]{~};
+    \edge node[auto=left] {2};
+    [.~ \edge node[auto=right] {2}; \node[draw,triangle]{~}; \edge node[auto=left] {2}; \node[draw,triangle]{~};]
+] ]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=8pt]
+\Tree
+[ \edge node[auto=right]{2}; [.Y
+    \edge node[auto=right] {2};
+    \node[draw,triangle]{~};
+    \edge node[auto=left] {1};
+    [.~ \edge node[auto=right] {2}; \node[draw,triangle]{~}; \edge node[auto=left] {2}; \node[draw,triangle]{~};]
+] ]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=8pt]
+\Tree
+[ \edge node[auto=right]{2}; [.Y
+    \edge node[auto=right] {3};
+    \node[draw,triangle]{~};
+    \edge node[auto=left] {1};
+    [.~ \edge node[auto=right] {2}; \node[draw,triangle]{~}; \edge node[auto=left] {2}; \node[draw,triangle]{~};]
+] ]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=8pt]
+\Tree
+[ \edge node[auto=right]{2}; [.Y
+    \edge node[auto=right] {2};
+    \node[draw,triangle]{~};
+    \edge node[auto=left] {1};
+    [.~ \edge node[auto=right] {1}; \node[draw,triangle]{~}; \edge node[auto=left] {1}; \node[draw,triangle]{~};]
+] ]
+\end{tikzpicture}
+\end{center}
+\caption{The only case where double demotion can arise}
+\end{figure}
