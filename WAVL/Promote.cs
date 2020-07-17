@@ -9,14 +9,8 @@ namespace WAVL
      
         private void DeleteFromPromotionPath(List<FullNode<K, V>> path, int index)
         {
-            // Only actual nodes are updated, no changes done to fullnodes, this is not needed as rebalancing will not proceed to other nodes.
-
-            // TODO: change path
-
             var removed = path[index];
-
             var end = removed.PathStart.Base.ModPathEnd;
-
 
             int lowerlen = 0;
 
@@ -69,7 +63,7 @@ namespace WAVL
                 var lowertop = GetPromotionContinuation(path[index]);
 
                 lowertop.PromotionStart = true;
-                lowertop.ModPathEnd = removed.PathStart.Base.ModPathEnd;
+                lowertop.ModPathEnd = end;
             }
 
             // Upper part
@@ -280,13 +274,11 @@ namespace WAVL
         /// Promote the first vertex and continue upwards.
         /// </summary>
         /// <param name="path"></param>
-        Node<K, V> MovePromotionUp(List<FullNode<K, V>> path)
+        private Node<K, V> MovePromotionUp(List<FullNode<K, V>> path)
         {
             var lastrank = 0;
             if (path[0].Left != null) lastrank = Math.Max(lastrank, path[0].Left.rank);
             if (path[0].Right != null) lastrank = Math.Max(lastrank, path[0].Right.rank);
-
-            var promotedRankChild = path[i - 1].Rank + 1;
 
             for (int i = 0; i < path.Count; i++)
             {
@@ -301,7 +293,7 @@ namespace WAVL
                         // Remove from Demotion path, implement rank decrease, handle other child, end
 
                         DeleteFromDemotionPath(path, i);
-                        FinishPromotionPath(i - 2);
+                        FinishPromotionPath(path, i - 2);
                         path[i - 1].Base.rank++;
                         return PickRotationPromote(path, i);
                     }
@@ -309,20 +301,19 @@ namespace WAVL
                     {
                         // (1,1)-vertex, remove from demotion path
 
-                        FinishPromotionPath(i - 1);
+                        FinishPromotionPath(path, i - 1);
                         DeleteFromDemotionPath(path, i);
                         return path.Last().Base;
                     }
                 }
 
-
                 else if (path[i].Promoted)
                 {
                     // Cannot happen that promote would be needed.
 
-                    if (promotedRankChild == path[i].Rank)
+                    if (lastrank == path[i].Rank)
                     {
-                        FinishPromotionPath(i - 2);
+                        FinishPromotionPath(path, i - 2);
                         path[i - 1].Base.rank++;
                         DeleteFromPromotionPath(path, i);
                         // A) 1-child was promoted
@@ -332,7 +323,7 @@ namespace WAVL
                     }
                     else
                     {
-                        FinishPromotionPath(i - 1);
+                        FinishPromotionPath(path, i - 1);
                         // B) 2-child was promoted
 
                         // Split path in two
@@ -340,16 +331,14 @@ namespace WAVL
                         DeleteFromPromotionPath(path, i);
                         return path.Last().Base;
                     }
-
-
-
                 }
 
                 else if (path[i].RankDecreasedByParent)
                 {
                     // Remove parent from demoting path, do rotation at parent
                     DeleteFromPromotionPath(path, i + 1);
-                    FinishPromotionPath(i - 1);
+                    FinishPromotionPath(path, i - 1);
+                    // (0,1) change to (1,2)
                     path[i].Base.rank++;
                     return PickRotationPromote(path, i + 1);
                 }
@@ -357,23 +346,73 @@ namespace WAVL
                 else if (lastrank < path[i].Rank)
                 {
                     // Invariant holds.
-                    FinishPromotionPath(i - 1);
+                    FinishPromotionPath(path, i - 1);
                     return path.Last().Base;
                 }
                 else
                 {
-                    // Rotation or promotion
-
-                    var other = path[i - 1]
+                    if (i == 0)
+                    {
+                        // Leaf got a child, add to promotion path candidades
+                        lastrank = path[i].Rank + 1;
+                        continue;
                     }
+                    else if (path[i].Left == path[i - 1].Base)
+                    {
+                        // See the true rank of right child
+                        if (path[i].Right.RankWithOwnOffset + 1 == path[i].Rank)
+                        {
+                            // Promote
+                            lastrank = path[i].Rank + 1;
+                            continue;
+                        }
+                        else
+                        {
+                            // Rotation
+                            FinishPromotionPath(path, i - 2);
+                            path[i - 1].Base.rank++;
+                            return PickRotationPromote(path, i);
+                        }
+                    }
+                    else
+                    {
+                        if (path[i].Left.RankWithOwnOffset + 1 == path[i].Rank)
+                        {
+                            // Promote
+                            lastrank = path[i].Rank + 1;
+                            continue;
+                        }
+                        else
+                        {
+                            // Rotation
+                            FinishPromotionPath(path, i - 2);
+                            path[i - 1].Base.rank++;
+                            return PickRotationPromote(path, i);
+                        }
+                    }
+                }
             }
 
-
+            throw new ArgumentException("Empty path");
         }
 
-        void FinishPromotionPath(int index)
+        private void FinishPromotionPath(List<FullNode<K,V>> path, int index)
         {
+            if (index < 0) return;
+            if (index == 0)
+            {
+                path[0].Base.rank++;
+                return;
+            }
 
+            for (int i = 0; i <= index; i++)
+            {
+                path[i].Promoted = true;
+                path[i].PathStart = path[index];
+            }
+
+            path[index].Base.ModPathEnd = path[0].Base;
+            path[index].Base.PromotionStart = true;
         }
     }
 }

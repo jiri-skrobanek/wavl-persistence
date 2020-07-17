@@ -67,6 +67,8 @@ namespace WAVL
             this.DemotionStart = false;
             this.ModPathEnd = null;
         }
+
+        public int RankWithOwnOffset => rank + (DemotionStart ? -1 : 0) + (DemotionStart2 ? -1 : 0) + (PromotionStart ? 1 : 0);
     }
 
 
