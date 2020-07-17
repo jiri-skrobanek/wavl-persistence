@@ -17,6 +17,10 @@ namespace WAVL
         private void DeleteFromDemotionPath(List<FullNode<K, V>> path, int index)
         {
             var removed = path[index];
+            var modpathend = removed.PathStart.Base.ModPathEnd;
+            Node<K,V> modpathend2 = null;
+            if (removed.Demoted == 2) { modpathend2 = removed.PathStart2.Base.DemotionStart2 ? removed.PathStart2.Base.ModPathEnd2 : removed.PathStart2.Base.ModPathEnd; }
+
             // The length of demotion path
             int newlen = 0, newlen2 = 0;
             // The length of the demotion path of walking path
@@ -31,9 +35,9 @@ namespace WAVL
             var v = path[index].Base;
             while (true)
             {
-                if (removed.Base.ModPathEnd == v) break;
+                if (modpathend == v) break;
 
-                v = v.CompareTo(removed.Base.ModPathEnd) > 0 ? v.Left : v.Right;
+                v = v.CompareTo(modpathend) > 0 ? v.Left : v.Right;
 
                 if (v == null) break;
                 newlen++;
@@ -52,7 +56,7 @@ namespace WAVL
                 }
                 else if (newlen == 1)
                 {
-                    if (index > 0 && path[index - 1].Base == removed.Base.ModPathEnd)
+                    if (index > 0 && path[index - 1].Base == modpathend)
                     {
                         WriteDemotion(index - 1);
                     }
@@ -62,12 +66,12 @@ namespace WAVL
                         other.rank--;
 
                         // Demote child if needed
-
-                        if (other.rank == other.Right?.rank)
+                        // It is not on a path because it is a (1,1)-vertex
+                        if (other.rank == other.Right?.RankWithOwnOffset)
                         {
                             other.Right.rank--;
                         }
-                        if (other.rank == other.Left?.rank)
+                        if (other.rank == other.Left?.RankWithOwnOffset)
                         {
                             other.Left.rank--;
                         }
@@ -76,7 +80,7 @@ namespace WAVL
                 else
                 {
                     // Update the whole segment on path
-                    for (int i = 0; i < lowerlen; i++)
+                    for (int i = 1; i <= lowerlen; i++)
                     {
                         if (path[index - i].PathStart == path[index])
                         {
@@ -143,9 +147,9 @@ namespace WAVL
             v = path[index].Base;
             while (true)
             {
-                if (removed.Base.ModPathEnd2 == v) break;
+                if (modpathend2 == v) break;
 
-                v = v.CompareTo(removed.Base.ModPathEnd2) > 0 ? v.Left : v.Right;
+                v = v.CompareTo(modpathend2) > 0 ? v.Left : v.Right;
 
                 if (v == null) break;
                 newlen2++;
@@ -155,30 +159,41 @@ namespace WAVL
                 if (GetDemotionContinuation2(path[i]) == path[i - 1].Base) lowerlen++; else break;
             }
 
-            if (newlen == 0)
+            if (newlen2 == 0)
             {
                 // bottom was removed, no action needed
             }
             else if (newlen == 0 && newlen2 == 1)
             {
-                // TODO
+                // Vertex below index is on one path and should be removed.
 
-                if (index > 0 && path[index - 1].Base == removed.Base.ModPathEnd)
+                if (index > 0 && path[index - 1].Base == modpathend2)
                 {
-                    WriteDemotion(index - 1);
+                    // On walking path
+                    DemoteChildIfNeeded(index - 1);
+                    path[index - 1].Demoted = 0;
+                    path[index - 1].DemotedChild = false;
+                    path[index - 1].PathStart = null;
+                    path[index - 1].PathStart2 = null;
+                    path[index - 1].Base.rank--;
+                    path[index - 1].Base.DemotionStart = false;
+                    path[index - 1].Base.DemotionStart2 = false;
+                    path[index - 1].Base.ModPathEnd = null;
+                    path[index - 1].Base.ModPathEnd2 = null;
                 }
                 else
                 {
-                    var other = GetDemotionContinuation(path[index]);
+                    // Not on walking path
+                    var other = GetDemotionContinuation2(removed);
                     other.rank--;
 
                     // Demote child if needed
 
-                    if (other.rank == other.Right?.rank)
+                    if (other.rank == other.Right?.RankWithOwnOffset)
                     {
                         other.Right.rank--;
                     }
-                    if (other.rank == other.Left?.rank)
+                    if (other.rank == other.Left?.RankWithOwnOffset)
                     {
                         other.Left.rank--;
                     }
@@ -186,32 +201,131 @@ namespace WAVL
             }
             else if (newlen == 1 && newlen2 == 1)
             {
-                // TODO
+                // Vertex below index is on two paths and should be removed.
+
+                if (index > 0 && path[index - 1].Base == modpathend)
+                {
+                    // On walking path
+                    DemoteChildIfNeeded(index - 1);
+                    path[index - 1].Demoted = 0;
+                    path[index - 1].DemotedChild = false;
+                    path[index - 1].PathStart = null;
+                    path[index - 1].PathStart2 = null;
+                    path[index - 1].Base.rank -= 2;
+                    path[index - 1].Base.DemotionStart = false;
+                    path[index - 1].Base.DemotionStart2 = false;
+                    path[index - 1].Base.ModPathEnd = null;
+                    path[index - 1].Base.ModPathEnd2 = null;
+                }
+                else
+                {
+                    // Not on walking path
+                    var other = GetDemotionContinuation(removed);
+                    other.rank -= 2;
+
+                    // Demote child if needed
+
+                    if (other.rank == other.Right?.RankWithOwnOffset)
+                    {
+                        other.Right.rank--;
+                    }
+                    if (other.rank == other.Left?.RankWithOwnOffset)
+                    {
+                        other.Left.rank--;
+                    }
+                }
             }
-            else if (newlen == 1 && newlen2 == 3)
+            else if (newlen == 1)
             {
-                // TODO
-            }
-            else if (newlen == 1 && newlen2 == 3)
-            {
-                // TODO
+                if (index > 0 && path[index - 1].Base == modpathend2)
+                {
+                    // Demote first son once and update the rest of second path
+                    DemoteChildIfNeeded(index - 1);
+                    path[index - 1].Demoted = 1;
+                    path[index - 1].DemotedChild = false;
+                    path[index - 1].PathStart = path[index - 1].PathStart2;
+                    path[index - 1].PathStart2 = null;
+                    path[index - 1].Base.rank--;
+                    path[index - 1].Base.DemotionStart = true;
+                    path[index - 1].Base.ModPathEnd = modpathend2;
+                    path[index - 1].Base.ModPathEnd2 = null;
+
+                    // Update the whole segment on path
+                    for (int i = 2; i <= lowerlen2; i++)
+                    {
+                        if (path[index - i].PathStart2 == removed.PathStart2)
+                        {
+                            path[index - i].PathStart2 = path[index - 1];
+                        }
+                        else
+                        {
+                            path[index - i].PathStart = path[index - 1];
+                        }
+                    }
+                }
+                else
+                {
+                    // Not on walking path
+                    var other = GetDemotionContinuation(path[index]);
+                    other.rank--;
+                    other.ModPathEnd = modpathend2;
+                    other.DemotionStart = true;
+
+                    // one child must be demoted 
+                    if(other.CompareTo(modpathend2) > 0)
+                    {
+                        other.Right.rank--;
+                    }
+                    else
+                    {
+                        other.Left.rank--;
+                    }
+                }
             }
             else
             {
-                // TODO
-
-                // Update the whole segment on path
-                for (int i = 0; i < lowerlen; i++)
+                if (index > 0 && path[index - 1].Base == modpathend2)
                 {
-                    path[index - i].PathStart = path[index - 1];
+                    // Demote first son once and update the rest of second path
+                    path[index - 1].Base.DemotionStart = true;
+                    path[index - 1].Base.DemotionStart2 = true;
+                    path[index - 1].Base.ModPathEnd = modpathend;
+                    path[index - 1].Base.ModPathEnd2 = modpathend2;
+
+                    // Update the whole segment for both paths
+                    for (int i = 1; i <= lowerlen2; i++)
+                    {
+                        if (path[index - i].PathStart == removed.PathStart2)
+                        {
+                            path[index - i].PathStart = path[index - 1];
+                        }
+                        else
+                        {
+                            path[index - i].PathStart2 = path[index - 1];
+                        }
+                    }
+                    for (int i = 1; i <= lowerlen; i++)
+                    {
+                        if (path[index - i].PathStart == removed.PathStart)
+                        {
+                            path[index - i].PathStart = path[index - 1];
+                        }
+                        else
+                        {
+                            path[index - i].PathStart2 = path[index - 1];
+                        }
+                    }
                 }
+                else
+                {
+                    // Update the top outside of path
+                    var lowertop = GetDemotionContinuation(path[index]);
 
-                // Update the top outside of path
-
-                var lowetop = GetDemotionContinuation(path[index]);
-
-                lowertop.DemotionStart = true;
-                lowertop.ModPathEnd = removed.PathStart.Base.ModPathEnd;
+                    lowertop.DemotionStart = true;
+                    lowertop.DemotionStart2 = true;
+                    lowertop.ModPathEnd = modpathend;
+                    lowertop.ModPathEnd2 = modpathend2;
+                }
             }
 
             // Upper part
@@ -245,41 +359,18 @@ namespace WAVL
                 path[index + 1].Base.ModPathEnd = null;
                 path[index + 1].Base.ModPathEnd2 = null;
             }
-            else if (removed.PathStart == path[index + 1] && removed.PathStart2 == path[index + 2])
-            {
-                DemoteChildIfNeeded(index + 1);
-                path[index + 1].Demoted = 0;
-                path[index + 1].DemotedChild = false;
-                path[index + 1].PathStart = null;
-                path[index + 1].PathStart2 = null;
-                path[index + 1].Base.rank -= 2;
-                path[index + 1].Base.DemotionStart = false;
-                path[index + 1].Base.DemotionStart2 = false;
-                path[index + 1].Base.ModPathEnd = null;
-                path[index + 1].Base.ModPathEnd2 = null;
-
-                DemoteChildIfNeeded(index + 2);
-                path[index + 2].Demoted = 0;
-                path[index + 2].DemotedChild = false;
-                path[index + 2].PathStart = null;
-                path[index + 2].PathStart2 = null;
-                path[index + 2].Base.rank--;
-                path[index + 2].Base.DemotionStart = false;
-                path[index + 2].Base.DemotionStart2 = false;
-                path[index + 2].Base.ModPathEnd = null;
-                path[index + 2].Base.ModPathEnd2 = null;
-            }
             else if (removed.PathStart == path[index + 1])
             {
+                // Remove first path, replace by second for this vertex
                 DemoteChildIfNeeded(index + 1);
                 path[index + 1].Demoted--;
                 path[index + 1].DemotedChild = false;
-                path[index + 1].PathStart = null;
+                path[index + 1].PathStart = path[index + 1].PathStart2;
                 path[index + 1].PathStart2 = null;
-                path[index + 1].Base.rank -= 2;
-                path[index + 1].Base.DemotionStart = false;
+                path[index + 1].Base.rank -= 1;
+                path[index + 1].Base.DemotionStart = path[index + 1].Base.DemotionStart2;
                 path[index + 1].Base.DemotionStart2 = false;
-                path[index + 1].Base.ModPathEnd = null;
+                path[index + 1].Base.ModPathEnd = path[index + 1].Base.ModPathEnd2;
                 path[index + 1].Base.ModPathEnd2 = null;
 
                 if (removed.PathStart2.Base.ModPathEnd2 == removed.Base)
