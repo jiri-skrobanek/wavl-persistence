@@ -566,7 +566,7 @@ namespace WAVL
         {
             var z = path[i].Base;
 
-            if (z.rank == z.Left.rank + 3)
+            if (z.rank == z.Left.RankWithOwnOffset + 3)
             {
                 var y = z.Right;
 
@@ -577,7 +577,7 @@ namespace WAVL
 
                 if (y.Right != null)
                 {
-                    var diff = y.rank - y.Right.rank + (y.Right.PromotionStart ? -1 : 0) + (y.Right.DemotionStart ? 1 : 0);
+                    var diff = y.rank - y.Right.RankWithOwnOffset;
 
                     if (diff == 1)
                     {
@@ -619,7 +619,7 @@ namespace WAVL
 
                 if (y.Left != null)
                 {
-                    var diff = y.rank - y.Left.rank + (y.Left.PromotionStart ? -1 : 0) + (y.Left.DemotionStart ? 1 : 0);
+                    var diff = y.rank - y.Left.RankWithOwnOffset;
 
                     if (diff == 1)
                     {
@@ -659,7 +659,7 @@ namespace WAVL
                 }
                 else
                 {
-                    if (path[i + 1].CompareTo(x) > 0)
+                    if (path[i + 1].Base.CompareTo(u) > 0)
                     {
                         path[i + 1].Base.Left = u;
                     }
