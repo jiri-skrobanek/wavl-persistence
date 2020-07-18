@@ -34,10 +34,10 @@ namespace WAVL
             Node<K, V> prev = null;
             var current = Root;
 
-            while (current.Key != Key)
+            while (!current.Key.Equals(Key))
             {
                 prev = current;
-                current = current.Key.CompareTo(K) > 0 ?
+                current = current.Key.CompareTo(Key) > 0 ?
                     current.Right : current.Left;
             }
 
@@ -45,6 +45,7 @@ namespace WAVL
 
             if (current.Left == null && current.Right == null)
             {
+                // Leaf
                 if (prev.Right == current) prev.Right = null;
                 else prev.Left = null;
 
@@ -56,7 +57,7 @@ namespace WAVL
                 current.Key = current.Right.Key;
                 current.Right = null;
 
-                BalancePath(GetPath(current));
+                BalancePath(GetPath(current.Key));
             }
 
             else if (current.Right == null)
@@ -64,7 +65,7 @@ namespace WAVL
                 current.Key = current.Left.Key;
                 current.Left = null;
 
-                BalancePath(GetPath(current));
+                BalancePath(GetPath(current.Key));
             }
 
             else if (prev.Key.CompareTo(Key) > 0)
@@ -78,7 +79,7 @@ namespace WAVL
                 if (current.Left == null)
                 {
                     prev.Right = null;
-                    BalancePath(GetPath(prev));
+                    BalancePath(GetPath(prev.Key));
                 }
                 else
                 {
@@ -98,7 +99,7 @@ namespace WAVL
                 if (current.Right == null)
                 {
                     prev.Left = null;
-                    BalancePath(GetPath(prev));
+                    BalancePath(GetPath(prev.Key));
                 }
                 else
                 {
@@ -231,8 +232,6 @@ namespace WAVL
 
         public Node<K, V> BalancePath(List<FullNode<K, V>> path)
         {
-            var start = path[0];
-
             path.Reverse();
 
             // Handle first vertex, it could have one of its children that was a leaf added or deleted.
@@ -248,8 +247,8 @@ namespace WAVL
                 path.RemoveAt(0);
             }
 
-            var l = start.Rank - (path[0].Left == null ? -1 : path[0].Left.rank);
-            var r = start.Rank - (path[0].Right == null ? -1 : path[0].Right.rank);
+            var l = path[0].Rank - (path[0].Left == null ? -1 : path[0].Left.rank);
+            var r = path[0].Rank - (path[0].Right == null ? -1 : path[0].Right.rank);
 
             if (path[0].Demoted == 1)
             {
@@ -314,7 +313,7 @@ namespace WAVL
                         return PickRotationDemote(path, 0);
                     }
                 }
-                else if (start.Rank + 1 == l || start.Rank + 1 == r)
+                else if (path[0].Rank + 1 == l || path[0].Rank + 1 == r)
                 {
                     return MovePromotionUp(path);
                 }
