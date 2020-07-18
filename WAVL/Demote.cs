@@ -6,7 +6,7 @@ namespace WAVL
 {
     public partial class Tree<K, V> where K : IComparable<K>, IEquatable<K>
     {
-      
+
         /// <summary>
         /// Removes a vertex from a demotion path, its rank is overwritten by the decreased value.
         /// If it has a child that should have its value changed, this is also performed. 
@@ -18,7 +18,7 @@ namespace WAVL
         {
             var removed = path[index];
             var modpathend = removed.PathStart.Base.ModPathEnd;
-            Node<K,V> modpathend2 = null;
+            Node<K, V> modpathend2 = null;
             if (removed.Demoted == 2) { modpathend2 = removed.PathStart2.Base.DemotionStart2 ? removed.PathStart2.Base.ModPathEnd2 : removed.PathStart2.Base.ModPathEnd; }
 
             // The length of demotion path
@@ -272,7 +272,7 @@ namespace WAVL
                     other.DemotionStart = true;
 
                     // one child must be demoted 
-                    if(other.CompareTo(modpathend2) > 0)
+                    if (other.CompareTo(modpathend2) > 0)
                     {
                         other.Right.rank--;
                     }
@@ -455,6 +455,10 @@ namespace WAVL
             }
         }
 
+        /// <summary>
+        /// Creates a demotion path from a chain of demotions done at path
+        /// </summary>
+        /// <returns>New root of the tree</returns>
         private Node<K, V> MoveDemotionUp(List<FullNode<K, V>> path)
         {
             // Value of previous node after demotion
@@ -475,6 +479,17 @@ namespace WAVL
 
                 if (current.Promoted)
                 {
+                    // Special leaf case first
+                    if (path[i].Left == null && path[i].Right == null)
+                    {
+                        DeleteFromPromotionPath(path, 0);
+                        path[0].Base.rank = 0;
+                        if (path.Count == 1) return path[0].Base;
+                        path.RemoveAt(0);
+                        lastrank = 0;
+                        continue;
+                    }
+
                     if (current.Rank - lastrank == 2)
                     {
                         FinishDemotionPath(i - 1);
@@ -484,15 +499,38 @@ namespace WAVL
                     }
                     else
                     {
+
+                        DemoteWithChild(i - 1);
                         // Rotation will be needed.
                         FinishDemotionPath(i - 2);
-                        path[i - 1].Base.rank--;
+
                         DeleteFromPromotionPath(path, i);
                         return PickRotationDemote(path, i);
                     }
                 }
-                else if (current.Demoted > 0)
+                else if (current.Demoted == 2)
                 {
+                    // Must be at least rank 2
+                    // Must have come from 3-son
+
+                    DemoteWithChild(i - 1);
+                    FinishDemotionPath(i - 2);
+                    DeleteFromDemotionPath(path, i);
+                    return PickRotationDemote(path, i);
+                }
+                else if (current.Demoted == 1)
+                {
+                    // Special leaf case first
+                    if (path[i].Left == null && path[i].Right == null)
+                    {
+                        DeleteFromDemotionPath(path, 0);
+                        path[0].Base.rank = 0;
+                        if (path.Count == 1) return path[0].Base;
+                        path.RemoveAt(0);
+                        lastrank = 0;
+                        continue;
+                    }
+
                     if (current.Rank == lastrank + 2)
                     {
                         FinishDemotionPath(i - 1);
@@ -502,10 +540,30 @@ namespace WAVL
                     }
                     else
                     {
-                        FinishDemotionPath(i - 2);
-                        path[i - 1].Base.rank--;
-                        DeleteFromDemotionPath(path, i);
-                        return PickRotationDemote(path, i);
+                        // 3-son is marked
+                        // Examine children of 1-child
+                        var (l, r) = GetTypeOf1ChildVertex(current.Base);
+
+                        if (r == l && r + 2 == current.Rank)
+                        {
+                            // Second demote here
+                            lastrank = current.Rank - 1;
+                            continue;
+                        }
+                        else if (i == 0)
+                        {
+                            // Rotation
+                            DeleteFromDemotionPath(path, 0);
+                            return PickRotationDemote(path, 0);
+                        }
+                        else
+                        {
+                            // Rotation
+                            DemoteWithChild(i - 1);
+                            FinishDemotionPath(i - 2);
+                            DeleteFromDemotionPath(path, i);
+                            return PickRotationDemote(path, i);
+                        }
                     }
                 }
                 else if (current.RankDecreasedByParent)
@@ -514,14 +572,35 @@ namespace WAVL
                     DeleteFromDemotionPath(path, i + 1);
                     return path.Last().Base;
                 }
+                else if (path[i].Left == null && path[i].Right == null)
+                {
+                    path[0].Base.rank = 0;
+                    if (path.Count == 1) return path[0].Base;
+                    path.RemoveAt(0);
+                    lastrank = 0;
+                    continue;
+                }
                 else if (current.Rank == lastrank + 3)
                 {
-                    lastrank = current.Rank - 1;
+                    var (l, r) = GetTypeOf1ChildVertex(current.Base);
 
-                    // TODO
+                    if(current.Rank - l == 2 || current.Rank - r == 2)
+                    {
+                        // Rotate
+                        DemoteWithChild(i - 1);
+                        FinishDemotionPath(i - 2);
+                        return PickRotationDemote(path, i);
+                    }
+                    else
+                    {
+                        // Demote
+                        lastrank = current.Rank - 1;
+                        continue;
+                    }
                 }
                 else
                 {
+                    // Invariant holds
                     FinishDemotionPath(i - 1);
                     return path.Last().Base;
                 }
@@ -531,6 +610,69 @@ namespace WAVL
 
             FinishDemotionPath(path.Count - 1);
             return path.Last().Base;
+
+            (int r, int l) GetTypeOf1ChildVertex(Node<K, V> node)
+            {
+                Node<K, V> onechild = null;
+                if (node.Left != null && node.Left.RankWithOwnOffset > lastrank)
+                    onechild = node.Left;
+                else onechild = node.Right;
+
+                int r = -1, l = -1;
+
+                if (onechild.Right != null)
+                {
+                    r = onechild.Right.RankWithOwnOffset;
+                }
+                if (onechild.Left != null)
+                {
+                    l = onechild.Left.RankWithOwnOffset;
+                }
+
+                if (onechild.PromotionStart)
+                {
+                    if (onechild.ModPathEnd.CompareTo(onechild) > 0) r++;
+                    else l++;
+                }
+
+                if (onechild.DemotionStart)
+                {
+                    if (onechild.ModPathEnd.CompareTo(onechild) > 0) r++;
+                    else l++;
+                }
+
+                if (onechild.DemotionStart2)
+                {
+                    if (onechild.ModPathEnd2.CompareTo(onechild) > 0) r++;
+                    else l++;
+                }
+
+                return (r, l);
+            }
+
+            void DemoteWithChild(int index)
+            {
+                if (index < 0) return;
+                FullNode<K, V> node = path[index];
+                Node<K, V> onechild = null;
+                if (node.Demoted == 1)
+                {
+                    // Demoted == 1
+                    DeleteFromDemotionPath(path, index);
+                }
+
+                if (node.Left != null && node.Left.RankWithOwnOffset + 1 == node.Rank)
+                    onechild = node.Left;
+                if (node.Right != null && node.Right.RankWithOwnOffset + 1 == node.Rank)
+                    onechild = node.Right;
+
+                if (onechild != null)
+                {
+                    onechild.rank--;
+                }
+
+                node.Base.rank--;
+            }
 
             void FinishDemotionPath(int pos)
             {
@@ -545,13 +687,31 @@ namespace WAVL
 
                 for (int i = 0; i <= pos; i++)
                 {
-                    path[i].Demoted = true;
-                    path[i].DemotedChild = (path[i].Base.Right?.rank == path[i].Rank) || (path[i].Base.Left?.rank == path[i].Rank);
-                    path[i].PathStart = path[pos];
+                    if(path[i].Demoted == 1)
+                    {
+                        path[i].PathStart2 = path[pos];
+                        path[i].DemotedChild = true;
+                    }
+                    else
+                    {
+                        path[i].PathStart = path[pos];
+                        path[i].DemotedChild = (path[i].Base.Right?.rank == path[i].Rank) || (path[i].Base.Left?.rank == path[i].Rank);
+                    }
+
+                    path[i].Demoted++;
+                    
                 }
 
-                path[pos].Base.ModPathEnd = path[0].Base;
-                path[pos].Base.DemotionStart = true;
+                if(path[pos].Base.ModPathEnd != null)
+                {
+                    path[pos].Base.ModPathEnd2 = path[0].Base;
+                    path[pos].Base.DemotionStart2 = true;
+                }
+                else
+                {
+                    path[pos].Base.ModPathEnd = path[0].Base;
+                    path[pos].Base.DemotionStart = true;
+                }
             }
         }
 
