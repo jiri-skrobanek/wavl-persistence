@@ -8,9 +8,10 @@ namespace WAVL
     {
         public Node<K, V> Root;
 
-        // OK
         public void Insert(K Key, V Value)
         {
+            // Key must not be present in tree!
+
             if (Root == null) { Root = new Node<K, V>(Key, Value); return; }
 
             var path = GetPath(Key);
@@ -31,6 +32,8 @@ namespace WAVL
 
         public void Delete(K Key)
         {
+            // Key must be present in tree!
+
             Node<K, V> prev = null;
             var current = Root;
 
@@ -45,6 +48,13 @@ namespace WAVL
 
             if (current.Left == null && current.Right == null)
             {
+                if (prev == null) 
+                { 
+                    // Deleted last vertex.
+                    Root = null; 
+                    return; 
+                }
+
                 // Leaf
                 if (prev.Right == current) prev.Right = null;
                 else prev.Left = null;
@@ -230,127 +240,57 @@ namespace WAVL
             return nodes;
         }
 
+        /// <summary>
+        /// Choose what balacing is needed and carry it out.
+        /// </summary>
+        /// <param name="path">Path beginning at a parent of deleted/inserted vertex</param>
+        /// <returns>new root of tree</returns>
         public Node<K, V> BalancePath(List<FullNode<K, V>> path)
         {
             path.Reverse();
 
+            if (path.Count == 0) throw new ArgumentException("Empty walking path");
             // Handle first vertex, it could have one of its children that was a leaf added or deleted.
+            var first = path[0];
 
-            // Check if it is a leaf with non-zero rank.
-            if (path[0].Rank > 0 && path[0].Left == null && path[0].Right == null)
+            // If leaf, go to demote
+            if (first.Left == null && first.Right == null)
             {
-                if (path[0].Demoted > 0) DeleteFromDemotionPath(path, 0);
-
-                if (path[0].Promoted) DeleteFromPromotionPath(path, 0);
-                // Demote first vertex and remove it from path
-                path[0].Base.rank--;
-                path.RemoveAt(0);
+                if (first.Rank > 0)
+                    return MoveDemotionUp(path);
+                else return path.Last().Base;
             }
 
-            var l = path[0].Rank - (path[0].Left == null ? -1 : path[0].Left.rank);
-            var r = path[0].Rank - (path[0].Right == null ? -1 : path[0].Right.rank);
-
-            if (path[0].Demoted == 1)
+            if (first.Left != null && first.Right != null)
             {
-                // Either 2-son was deleted, in which case we do a rotation
-                if (l == 3 || r == 3)
+                // Insert
+                if(first.Demoted > 0)
                 {
                     DeleteFromDemotionPath(path, 0);
-                    return PickRotationDemote(path, 0);
                 }
-
-                // Or 2-son external vertex became an internal vertex
-                DeleteFromDemotionPath(path, 0);
+                if(first.Promoted)
+                {
+                    DeleteFromPromotionPath(path, 0);
+                }
+                // No further action needed
                 return path.Last().Base;
             }
-            if (path[0].Demoted == 2)
+            
+            if(first.Rank == 2 && (first.Left == null || first.Right == null))
             {
-                DeleteFromDemotionPath(path, 0);
-
-                if (l == 3 || r == 3)
-                    // 2-son was deleted
-                    return PickRotationDemote(path, 0);
-
-
-
-                // This special case is not needed, only for better comprehension
+                // 3-child, demote
+                return MoveDemotionUp(path);
             }
-            else if (path[0].Promoted)
+
+            // Demote is not required
+            // Try finding 0-son, the vertex must have rank 0 and internal child.
+            if(first.Rank == 0)
             {
-                if (l == 3 || r == 3)
-                    // Either 2-son leaf was deleted
-                    PickRotationPromote(path, 0);
-
-                // Or 2-son external vertex was replaced by 1-son leaf.
-                DeleteFromPromotionPath(path, 0);
-
-                return path.Last().Base;
+                return MovePromotionUp(path);
             }
-            else if (path[0].RankDecreasedByParent)
-            {
-                // This node had 2 children, one was deleted. The deleted leaf node was 1 son, so parent should simply be removed from demotion path.
 
-                // The path must begin at parent.
-                DeleteFromDemotionPath(path, 1);
-
-                return path.Last().Base;
-            }
-            else
-            {
-
-                if (l > 1 && r > 1)
-                {
-                    if (l < 3 && r < 3)
-                    {
-                        return path.Last().Base;
-                    }
-                    else if (l == 2 || r == 2)
-                    {
-                        return MoveDemotionUp(path);
-                    }
-                    else
-                    {
-                        return PickRotationDemote(path, 0);
-                    }
-                }
-                else if (path[0].Rank + 1 == l || path[0].Rank + 1 == r)
-                {
-                    return MovePromotionUp(path);
-                }
-                else
-                {
-                    return PickRotationPromote(path, 0);
-                }
-            }
+            // Not called on correct path, but no reason to fail.
+            return path.Last().Base;
         }
-
-        // Delete, discontinue
-        void CutBottomFromDemotionPath(List<FullNode<K, V>> path, int index)
-        {
-            path[index].Base.rank--;
-
-            if (path[index].PathStart == path[index + 1])
-            {
-                path[index + 1].Base.DemotionStart = false;
-                path[index + 1].Base.ModPathEnd = null;
-                path[index + 1].Base.rank--;
-                if (path[index + 1].DemotedChild)
-                {
-                    if (path[index + 1].Base.Left == path[index].Base)
-                    {
-                        path[index + 1].Base.Right.rank--;
-                    }
-                    else
-                    {
-                        path[index + 1].Base.Left.rank--;
-                    }
-                }
-            }
-            else
-            {
-                path[index].PathStart.Base.ModPathEnd = path[index + 1].Base;
-            }
-        }
-
     }
 }

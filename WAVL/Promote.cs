@@ -294,7 +294,7 @@ namespace WAVL
 
                         DeleteFromDemotionPath(path, i);
                         FinishPromotionPath(path, i - 2);
-                        path[i - 1].Base.rank++;
+                        PromoteAt(i - 1);
                         return PickRotationPromote(path, i);
                     }
                     else
@@ -370,7 +370,7 @@ namespace WAVL
                         {
                             // Rotation
                             FinishPromotionPath(path, i - 2);
-                            path[i - 1].Base.rank++;
+                            PromoteAt(i - 1);
                             return PickRotationPromote(path, i);
                         }
                     }
@@ -386,7 +386,7 @@ namespace WAVL
                         {
                             // Rotation
                             FinishPromotionPath(path, i - 2);
-                            path[i - 1].Base.rank++;
+                            PromoteAt(i - 1);
                             return PickRotationPromote(path, i);
                         }
                     }
@@ -394,6 +394,12 @@ namespace WAVL
             }
 
             throw new ArgumentException("Empty path");
+
+            void PromoteAt(int index)
+            {
+                if (index < 0) return;
+                path[index].Base.rank++;
+            }
         }
 
         private void FinishPromotionPath(List<FullNode<K,V>> path, int index)
