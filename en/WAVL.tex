@@ -11,11 +11,18 @@ Vertex $V$ having left child $L$ and right child $R$ (both of which may be exter
 \end{defn}
 
 \begin{thm}
-Let $S$ be a finite subset of $\{ (a,b) | a,b \in \N \}$ and $T$ a ranked tree with $n$ vertices. If it holds that for every $(i,j)-$vertex in $T$ $(i,j) \in S$, then the height of $T$ is $\Theta(\log n)$.
+Let $S$ be a finite subset of ${(\mathbb{Z} _ +)}^2$ and $T$ a ranked tree with $n$ vertices. If it holds that for every $(i,j)$-vertex in $T$ that $(i,j) \in S$, then the height of $T$ is $\Theta(\log n)$.
 \end{thm}
 
 \begin{myproof}
-TODO
+Let us denote $m$ the maximum allowed rank difference by $S$.
+We prove this by induction on the rank of the root vertex. We establish a lower bound on the number of vertices in a tree with root of rank $r$. 
+We suppose that it holds for every lower rank $q$, that the number of vertices in a tree with root of rank $q$ is at least $\exp(qc)$ for some positive constant $c$. 
+Then to continue the induction we need the following: $$ 1 + 2\exp((r-m)c) \geq \exp(rc) $$ $$ \log 2 + (r-m)c \geq rc $$ $$ \log 2 \geq cm $$
+We see that setting $c$ will be always possible.
+The base case of rank zero: The inequality obviously holds for leaves (only possible vertices with rank zero).\\
+Then $n \geq \exp(qc)$, if $q$ is the rank of root of $T$. The height of $T$ is in turn at most $ \log(n)/c $. 
+The other inclusion applies to all kinds of binary search trees.
 \end{myproof}
 
 \begin{defn}
