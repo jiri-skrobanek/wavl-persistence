@@ -12,6 +12,7 @@ Vertex $V$ having left child $L$ and right child $R$ (both of which may be exter
 
 \begin{thm}
 Let $S$ be a finite subset of ${(\mathbb{Z} _ +)}^2$ and $T$ a ranked tree with $n$ vertices. If it holds that for every $(i,j)$-vertex in $T$ that $(i,j) \in S$, then the height of $T$ is $\Theta(\log n)$.
+\label{thm-rbt-depth}
 \end{thm}
 
 \begin{myproof}
@@ -137,7 +138,7 @@ A ranked tree is said to be {\em Weak AVL tree} if all its vertices are either $
 
 TODO: discuss operations
 
-We get the following.
+We get the following as a corollary of theorem \ref{thm-rbt-depth}.
 
 \begin{prop}
 Insertion and deletion on a Weak AVL tree have time complexity $\Theta(\log n)$ and require at most one rotation.

@@ -1,0 +1,12 @@
+First of all we introduce the hierarchy of data structures with respect to persistence.
+
+\begin{itemize}
+\item {\bfseries Ephemeral data structures} Past states are destroyed by new changes and irretrievably lost.
+\item {\bfseries Semi-persistent data structures} Past states are stored and can be accessed for reading. Historical versions form a linear order.
+\item {\bfseries (Fully-)persistent data structures} Versions form a rooted tree, additional changes can be made to any existing version, creating a new version as a child vertex.
+\item {\bfseries Functional data structures} No changes are permitted to written data.
+\end{itemize}
+
+This division is by no means universally adopted, but provides an interesting perspective regardless.
+
+\section{List Ordering}
