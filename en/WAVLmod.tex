@@ -58,6 +58,7 @@ When a vertex had its rank decreased by a demote of second kind on its parent, u
 
 \begin{prop}
 At any given time between operations, any vertex is either a part of one promotion path, one or two demotion paths, or no modifying path at all.
+\label{thm-constant-paths}
 \end{prop}
 
 \begin{myproof}
@@ -78,11 +79,11 @@ If there is a sufficient amount candidate of vertices for a path from the first 
 \end{myproof}
 
 \begin{prop}
-Only a constant number of modifying path changes ever arises during one tree operation (insert/delete).
+Only a constant number of modifying path changes ever arises during one tree operation (insert/delete). Path creation, splitting, and deletion are counted as changes.
 \end{prop}
 
 \begin{myproof}
-ahoj
+The statement follows from the properties of prescribed rules above. To modify a path, some of its vertices must change. The state of vertices in only at most constant distance from the walking path is modified. Up to one new modifying path is created. Other paths can be split or deleted only if they have a vertex in constant distance from the bottom of walking path or top of the new modifying path. Proposition \ref{thm-constant-paths} limits the number of such other paths to a constant.
 \end{myproof}
 
 \begin{prop}

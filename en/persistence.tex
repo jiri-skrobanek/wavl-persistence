@@ -9,4 +9,29 @@ First of all we introduce the hierarchy of data structures with respect to persi
 
 This division is by no means universally adopted, but provides an interesting perspective regardless.
 
+With a persistent data structure, we essentially want to have one data structure for every existing version. Insert and delete return a new version handle instead of making changes to the existing version. Obviously, copying the data structure every time is one option how to achieve this, albeit not a great one. To prevent using extra memory and increased time complexity of operations however, more intricate methods must be employed.
+\section{Persistence through Path-Copying}
+
+Binary search tree can be converted into a persistent one rather easily.
+One possible approach is called path-copying. It is based on the observation that most of the tree does not change during an operation.
+
+When a new version of the tree should by created by delete or insert, new copies are allocated only for vertices that are changed by the operation and their ancestors. This typically means that only path from the inserted/deleted vertex to the root is newly allocated, plus constant number of other vertices. The new vertices carry pointers to the old vertices where subtree rooted at such a vertex is not modified in any way.
+
+With reasonable variants of binary search trees, achieved time complexity in a tree with $n$ vertices is $\Theta(\log n)$ per operation and $\Theta(\log n)$ memory for insert/delete.
+
+The downside of this method is the increased memory complexity. There is no known construction that would not increase memory complexity by copying the paths.
+
+\section{Fat Vertices}
+
+To reduce the inefficiency of path-copying, fat vertices were devised. We will explain this technique only for semi-persistence first.
+
+To take advantage of fat vertices, we need the balancing algorithm to limit the number of vertices that change in one operation. This was the goal of modified WAVL-balancing algorithm all along.
+
+A fat vertex stores is generally a dictionary of standard vertices indexed by versions. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
+
+
+\section{Parallel Semi-Persistence with WAVL Trees}
+
 \section{List Ordering}
+
+\section{Fully-Persistent WAVL Tree}

@@ -1,3 +1,26 @@
-\section{Weight balanced tree}
+\section{Weight-balanced tree}
 
-In our algorithm for persistent binary tree, we will also need weight balanced (originally BB[$\alpha$]) trees. Here we describe their properties.
+In our algorithm for persistent binary tree, we will also need weight-balanced (originally BB[$\alpha$]) trees. Here we describe their properties.
+
+Weight-balanced trees form a class of binary search trees. The strategy of maintaining balance in weigh-balanced trees uses a different approach from that of a rank-balanced trees.
+
+A vertex of a weight-balanced tree has these entries stored (in addition to key and value): {\em size} of subtree rooted at that vertex and pointers to {\em left} and {\em right} child. By definition the size of external vertex is 0. {\em Weight} of a vertex is then defined as size + 1.
+
+\begin{defn}
+Let $\alpha \in (0,1/2)$ be constant. We call a binary search T an {\em $\alpha$-weight-balanced tree} if it holds for every vertex $v$ of T that $weight(left(v)) \geq \alpha \cdot weight(v)$ \& $weight(right(v)) \geq \alpha \cdot weight(v) $.
+\end{defn}
+
+\begin{prop}
+Let $\alpha \in (0,1/2)$ be constant. Every $\alpha$-weight-balanced tree $T$ with $n$ vertices has depth $\Theta(\log n)$. 
+\end{prop}
+
+\begin{myproof}
+Let us consider an inner vertex of size $s$ with children of sizes $s_l$ and $s_r$. Then from the definition of weight-balanced trees:
+
+$$s_l + 1 \geq \alpha (s_r+1)$$
+$$ s = s_l + s_r + 1 $$
+$$ s \geq \alpha (s_r+1) + s_r $$
+$$ s \geq (1+\alpha)s_r $$
+
+Which implies that size of parent is at least a constant factor greater than of each of its children.
+\end{myproof}
