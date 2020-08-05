@@ -25,13 +25,41 @@ The downside of this method is the increased memory complexity. There is no know
 
 To reduce the inefficiency of path-copying, fat vertices were devised. We will explain this technique only for semi-persistence first.
 
-To take advantage of fat vertices, we need the balancing algorithm to limit the number of vertices that change in one operation. This was the goal of modified WAVL-balancing algorithm all along.
+To take advantage of fat vertices, we need the balancing algorithm to limit the number of vertices that change in one operation. This was the goal of modified WAVL-balancing algorithm all along. Furthermore, we need a limit on pointers that can target one vertex at one time.
 
 A fat vertex stores is generally a dictionary of standard vertices indexed by versions. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
 
+Temporarily, we will allow the capacity of fat vertex to be exceeded. This will have to be fixed however, before the ongoing operation finishes.
+
+\begin{prop}
+Suppose any binary search tree balancing algorithm satisfying the following properties:
+\begin{itemize}
+\item 
+Any $n$ successive operations on initially empty tree make $\mathcal{O}(n)$ vertex changes in total to the tree. 
+\item 
+There is a constant bound on the number of pointers to any one vertex at any time.
+\end{itemize}
+Then this algorithm with the addition of fat vertices for semi-persistence, consumes $\mathcal{O}(n)$ space for the entire history of $n$ operations starting from an empty tree.
+\end{prop}
+
+\begin{myproof}
+We denote the number of pointer fields per vertex as $p$ and maximum number of pointers to one vertex at a time as $x$. We then define the number of slots in fat vertex as $s = p + x + 1$.\\
+We define the potential of the structure as the sum of numbers of occupied slots in all most recent versions of vertices. (Thus initially zero.) Allocation of new fat vertex will cost one unit of energy. This cost can be charged from the potential or the operation. We will show that the operation needs to by charged only a constant amount of energy per one vertex modification by the original algorithm (to compensate increase in potential or pay for allocations), from which the proposition follows.\\
+For insert, a new vertex is created (which increases potential by a constant). During rebalancing of the tree, $r$ vertices are to be modified. Let us consider this sequence of modifications one by one. We send one floating unit of energy to each of the $r$ vertices.\\
+If a modification of $v$ is second or later modification of $v$ during this operation, changes are simply written to the slot for this version.\\
+Otherwise, number of used slots is checked. If there is one or more empty available, new slot is used, taking default values of fields from preceding slot. This increases potential by one, which is covered by the floating unit of energy.\\
+If no slots are available, new fat vertex $v'$ is allocated and one of its slots is used. This decreases potential by $p+x$. The floating unit of energy is used to pay for allocation of the new vertex. Next, fat vertices to corresponding current version interval of vertices having pointers to $v$ need to have this reflected. Additionally inverse pointers to $v'$ need to be set. These are at most $p+x$ changes to other vertices that may use their new empty slots. The decrease in potential is used to send one unit of energy to every such vertex that need an update. Changes are executed recursively and by will not require extra energy to be charged on the operation.\\
+We must remark, that recursively triggered changes must end, since only one slot can be added per vertex of the tree.
+\end{myproof}
+
+We see that WAVL trees can be used for semi-persistence even in their original form, along with many other binary search trees.
 
 \section{Parallel Semi-Persistence with WAVL Trees}
+
+
 
 \section{List Ordering}
 
 \section{Fully-Persistent WAVL Tree}
+
+Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing this operation on this version, thus consuming superlinear amount space.
