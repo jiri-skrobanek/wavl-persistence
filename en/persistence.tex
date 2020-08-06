@@ -2,7 +2,7 @@ First of all we introduce the hierarchy of data structures with respect to persi
 
 \begin{itemize}
 \item {\bfseries Ephemeral data structures} Past states are destroyed by new changes and irretrievably lost.
-\item {\bfseries Semi-persistent data structures} Past states are stored and can be accessed for reading. Historical versions form a linear order.
+\item {\bfseries Semi-persistent data structures} Past states are stored and can be accessed for reading, modifying operations are only allowed on the most recent version. Operations produce return a new version handle. Historical versions form a linear order.
 \item {\bfseries (Fully-)persistent data structures} Versions form a rooted tree, additional changes can be made to any existing version, creating a new version as a child vertex.
 \item {\bfseries Functional data structures} No changes are permitted to written data.
 \end{itemize}
@@ -25,9 +25,10 @@ The downside of this method is the increased memory complexity. There is no know
 
 To reduce the inefficiency of path-copying, fat vertices were devised. We will explain this technique only for semi-persistence first.
 
+A fat vertex stores is generally a dictionary of standard vertices indexed by versions. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
+
 To take advantage of fat vertices, we need the balancing algorithm to limit the number of vertices that change in one operation. This was the goal of modified WAVL-balancing algorithm all along. Furthermore, we need a limit on pointers that can target one vertex at one time.
 
-A fat vertex stores is generally a dictionary of standard vertices indexed by versions. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
 
 Temporarily, we will allow the capacity of fat vertex to be exceeded. This will have to be fixed however, before the ongoing operation finishes.
 
