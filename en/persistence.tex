@@ -49,11 +49,12 @@ We define the potential of the structure as the sum of numbers of occupied slots
 For insert, a new vertex is created (which increases potential by a constant). During rebalancing of the tree, $r$ vertices are to be modified. Let us consider this sequence of modifications one by one. We send one floating unit of energy to each of the $r$ vertices.\\
 If a modification of $v$ is second or later modification of $v$ during this operation, changes are simply written to the slot for this version.\\
 Otherwise, number of used slots is checked. If there is one or more empty available, new slot is used, taking default values of fields from preceding slot. This increases potential by one, which is covered by the floating unit of energy.\\
-If no slots are available, new fat vertex $v'$ is allocated and one of its slots is used. This decreases potential by $p+x$. The floating unit of energy is used to pay for allocation of the new vertex. Next, fat vertices to corresponding current version interval of vertices having pointers to $v$ need to have this reflected. Additionally inverse pointers to $v'$ need to be set. These are at most $p+x$ changes to other vertices that may use their new empty slots. The decrease in potential is used to send one unit of energy to every such vertex that need an update. Changes are executed recursively and by will not require extra energy to be charged on the operation.\\
-We must remark, that recursively triggered changes must end, since only one slot can be added per vertex of the tree.
+If no slots are available, new fat vertex $v'$ is allocated and one of its slots is used. This decreases potential by $p+x$. The floating unit of energy is used to pay for allocation of the new vertex. Next, fat vertices to corresponding current version interval of vertices having pointers to $v$ need to have this reflected. Additionally inverse pointers to $v'$ need to be set. These are at most $p+x$ changes to other vertices that may use their new empty slots. The decrease in potential is used to send one unit of energy to every such vertex that need an update. Changes are executed recursively and by will not require extra energy to be charged on the operation.
 \end{myproof}
 
 We see that WAVL trees can be used for semi-persistence even in their original form, along with many other binary search trees.
+
+In fact, for semi-persistence fat vertices may be defined differently. It suffices that only values of changed fields and pointers are written into slots. Thus each fat vertex carries a set of default values for every field and pointer, these values are used if not overridden by a slot. This approach may lead to lower memory consumption and cannot be used for full persistence.
 
 \section{Parallel Semi-Persistence with WAVL Trees}
 
@@ -61,6 +62,23 @@ We see that WAVL trees can be used for semi-persistence even in their original f
 
 \section{List Ordering}
 
+Moving from semi-persistence to full-persistence we encounter an obstacle -- versions no longer form implicit linear order. Nonetheless, to work with fat vertices, we need to be able to determine slots that carry values correct for current version. To achieve this, we need to identify an interval of versions the current vesion would fall into. For this we will try to introduce an ordering to versions of the persistent data structure.
+
+Version do form a rooted tree with the original version in the root. We can also order children of every vertex by the order of their creation. (the latest creation first) We then define the desired ordering as the order of vertices corresponding to versions as they are visited by an in-order traversal.
+
+In reality, we will also insert other elements into the ordering that will be helper version and will not be used to represent the state of the entire structure after a sequence of operations. This can be disregarded for now.
+
+With the ordering defined, we still need a way to efficiently represent it in memory. The operation we really need are
+
+\begin{itemize}
+	\item InsertSuccessor(Version),
+	\item Compare(VersionA, VersionB).
+\end{itemize}
+
+To preserve the speed of semi-persistence, \texttt{Compare} must be \bigO{1} and \texttt{InsertSuccessor} \bigO{\log n} at least amortized. Weight-balanced trees that were introduced in the previous chapter are ideally suited for this purpose.
+
+For every vertex in the weight-balanced tree, we will store encoding of the path from root to it in form of sequence of 0s and 1s. 1 for right child, 0 for left child. We know that depth of the tree must be logarithmic. (Here we tacitly assume that arithmetic with numbers of size on the order of number of versions can be done in constant time.) So comparing version is efficient. Inserting a successor version is also straight-forward. Rebuilding of some subtree will not change order of versions as all path encodings will recalculated.
+
 \section{Fully-Persistent WAVL Tree}
 
-Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing this operation on this version, thus consuming superlinear amount space.
+Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing this operation on this version, thus consuming super-linear amount of space.
