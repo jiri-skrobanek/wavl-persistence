@@ -23,12 +23,22 @@ The downside of this method is the increased memory complexity. There is no know
 
 \section{Fat Vertices}
 
-To reduce the inefficiency of path-copying, fat vertices were devised. We will explain this technique only for semi-persistence first.
+To reduce the inefficiency of path-copying, fat vertices were devised. We will explain this technique only for semi-persistence first. Full persistence requires the use of a few extra tricks and ordering on the versions.
 
-A fat vertex stores is generally a dictionary of standard vertices indexed by versions. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
+A fat vertex stores is generally a dictionary of standard vertices indexed by versions. We call values of this dictionary fields. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
+
+Contents of one slot are a version handle, all pointers a vertex would have, then inverse pointers to fat vertices that have slots pointing to this fat vertex for this version and 
+some fields, notably key and value. Not all fields need to be versioned. For example balancing information may be stored only for the latest version, i.e. in red-black trees color is only used for balancing and is thus not needed to be available for old versions. 
+
+One vertex in the original binary search then corresponds to a doubly-linked list of fat vertices. When the vertex should change, new state of the vertex is written into a slot of the last fat vertex in the list. As all slots become occupied in the last fat vertex and it needs to be modified, new vertex is allocated.
+
+Modifications of a single vertex during one operation are all written to single slot, there is no need for using more slots.
+
+When a new fat vertex $x$ is allocated, one of its slots is immediately taken. Pointers must be updated in other fat vertices that pointed to the fat vertex preceding $x$ in the list. This is done either by inserting new slot into them (copying all values from the latest slot and replacing pointers to the predecessor by pointers to $x$.). Or by directly updating the pointers if the version is already present. 
+
+Recursive allocations may be triggered, which is not a problem if there is only a small amount of them. This is ensured by setting the size of fat vertices suitably. We can place an upper bound on the number of newly allocated fat vertices -- total number of vertices in the tree (including deleted vertices). At most one new slot is occupied for every vertex in the tree.
 
 To take advantage of fat vertices, we need the balancing algorithm to limit the number of vertices that change in one operation. This was the goal of modified WAVL-balancing algorithm all along. Furthermore, we need a limit on pointers that can target one vertex at one time.
-
 
 Temporarily, we will allow the capacity of fat vertex to be exceeded. This will have to be fixed however, before the ongoing operation finishes.
 
@@ -44,7 +54,7 @@ Then this algorithm with the addition of fat vertices for semi-persistence, cons
 \end{prop}
 
 \begin{myproof}
-We denote the number of pointer fields per vertex as $p$ and maximum number of pointers to one vertex at a time as $x$. We then define the number of slots in fat vertex as $s = p + x + 1$.\\
+We denote the number of pointer fields per vertex as $p$ and maximum number of vertices pointing to one vertex at a time as $x$. We then define the number of slots in fat vertex as $s = p + x + 1$ (higher value is also possible).\\
 We define the potential of the structure as the sum of numbers of occupied slots in all most recent versions of vertices. (Thus initially zero.) Allocation of new fat vertex will cost one unit of energy. This cost can be charged from the potential or the operation. We will show that the operation needs to by charged only a constant amount of energy per one vertex modification by the original algorithm (to compensate increase in potential or pay for allocations), from which the proposition follows.\\
 For insert, a new vertex is created (which increases potential by a constant). During rebalancing of the tree, $r$ vertices are to be modified. Let us consider this sequence of modifications one by one. We send one floating unit of energy to each of the $r$ vertices.\\
 If a modification of $v$ is second or later modification of $v$ during this operation, changes are simply written to the slot for this version.\\
@@ -56,9 +66,32 @@ We see that WAVL trees can be used for semi-persistence even in their original f
 
 In fact, for semi-persistence fat vertices may be defined differently. It suffices that only values of changed fields and pointers are written into slots. Thus each fat vertex carries a set of default values for every field and pointer, these values are used if not overridden by a slot. This approach may lead to lower memory consumption and cannot be used for full persistence.
 
+\begin{figure}
+	\centering
+	\ttfamily
+	\begin{tabular}{cccccc}
+		Rank  & Previous &  Next   &      & &          \\ \hline
+		Left1 &  Right1  & Parent1 & Key1 & Value1 &  Version1 \\ \hline
+		Left2 &  Right2  & Parent2 & Key2 & Value2 & Version2 \\ \hline
+		Left3 &  Right3  & Parent3 & Key3 & Value3 & Version3 \\ \hline
+		Left4 &  Right4  & Parent4 & Key4 & Value4 & Version4 \\ \hline
+		Left5 &  Right5  & Parent5 & Key5 & Value5 & Version5 \\ \hline
+		Left6 &  Right6  & Parent6 & Key6 & Value6 & Version6 \\ \hline
+	\end{tabular}
+	\normalfont
+\caption{Layout for WAVL semi-persistent tree fat vertex}
+\end{figure}
+
 \section{Parallel Semi-Persistence with WAVL Trees}
 
+Insertion and deletion in a WAVL tree can be also carried out top-down. %TODO: Link
+It is also possible to preemptively perform rotations, promotes and demotes when descending to make sure that more changes of high ranks will not be needed. It can be shown that there at most \bigO{1} modifications of the structure per operation (amortized), albeit the constant proves to be rather high. These facts lay a solid foundation to parallel semi-persistence.
 
+When we enter a fat vertex, we lock it for other threads of computation. Conversely, lock is lifted when the fat vertex is left. Since all threads begin locking at the root and descend towards the leaves, no deadlocking is possible.
+
+Applying the algorithm with semi-persistence we must however ensure that before unlocking a fat node, none of its children may run out of slots leading to allocation of a replacement. Since there can be at most one new slot occupied for every fat node in one operation, it suffices to allocate new fat vertex for every fat vertex without empty slots before releasing its parent.
+
+If we increase the number of slots in a fat vertex by at least one, complexity remains the same.
 
 \section{List Ordering}
 
