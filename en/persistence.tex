@@ -10,9 +10,10 @@ First of all we introduce the hierarchy of data structures with respect to persi
 This division is by no means universally adopted, but provides an interesting perspective regardless.
 
 With a persistent data structure, we essentially want to have one data structure for every existing version. Insert and delete return a new version handle instead of making changes to the existing version. Obviously, copying the data structure every time is one option how to achieve this, albeit not a great one. To prevent using extra memory and increased time complexity of operations however, more intricate methods must be employed.
+
 \section{Persistence through Path-Copying}
 
-Binary search tree can be converted into a persistent one rather easily.
+Binary search tree can be converted into a fully-persistent one rather easily.
 One possible approach is called path-copying. It is based on the observation that most of the tree does not change during an operation.
 
 When a new version of the tree should by created by delete or insert, new copies are allocated only for vertices that are changed by the operation and their ancestors. This typically means that only path from the inserted/deleted vertex to the root is newly allocated, plus constant number of other vertices. The new vertices carry pointers to the old vertices where subtree rooted at such a vertex is not modified in any way.
@@ -21,11 +22,33 @@ With reasonable variants of binary search trees, achieved time complexity in a t
 
 The downside of this method is the increased memory complexity. There is no known construction that would not increase memory complexity by copying the paths.
 
+\section{Multiple versions in one vertex}
+
+To limit memory consumption we may rather choose to let vertices carry their properties for all versions. This in reality means that we must store a collection of changes together with versions when they happened. 
+
+When we arrive at a vertex asking for the state in version $A$, we must go through the collection of changes to figure out what the state in version $A$ should be. In fact, it will be easier to just copy all of the other fields the vertex possesses as well if one of them changes. One change will therefore hold new values for all fields of the vertex. The issue of how to effectively determine which changes should be applied will be addressed later through introduction of total ordering of all versions.
+
+Looking at the memory consumption, it appears clear that the amount consumed stems from the total number of changes done by the balancing algorithm across all operations.
+
+What remains to solve though is to choose the right kind of collection for versions of changes for one vertex. Surely using linked lists or arrays will inevitably lead to unsatisfactorily inefficient processing of applicable changes. Unfortunately as it turns out, even other data structures will let us down here.
+
+With this approach, we can reach linear memory complexity (with the total number of changes). On the other hand execution time will be hurt. We can reach the following amortized complexity depending on the chosen data structure:
+
+\begin{tabular}{ll}
+Linked list & \bigO{n \log n} \\
+Binary search tree & \bigO{\log^2 n} \\
+Q-fast trie & \bigO{\log ^{3/2} n}, semi-persistence only \\
+Y-fast trie & \bigO{\log n \log \log n}, semi-persistence only, on average
+
+\end{tabular}
+
+\input{figures/version-dictionaries}
+
 \section{Fat Vertices}
 
-To reduce the inefficiency of path-copying, fat vertices were devised. We will explain this technique only for semi-persistence first. Full persistence requires the use of a few extra tricks and ordering on the versions.
+Following up on the idea of multiple versions in one vertex, fat vertices were devised. We will explain this technique only for semi-persistence first. Full persistence requires the use of a few extra tricks and ordering on the versions.
 
-A fat vertex stores is generally a dictionary of standard vertices indexed by versions. We call values of this dictionary fields. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
+A fat vertex stores is generally a dictionary of standard vertices indexed by versions. We call values of this dictionary slots. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
 
 Contents of one slot are a version handle, all pointers a vertex would have, then inverse pointers to fat vertices that have slots pointing to this fat vertex for this version and 
 some fields, notably key and value. Not all fields need to be versioned. For example balancing information may be stored only for the latest version, i.e. in red-black trees color is only used for balancing and is thus not needed to be available for old versions. 

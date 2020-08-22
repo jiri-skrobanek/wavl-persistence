@@ -89,3 +89,14 @@
 \newcommand{\mc}[1]{\multicolumn{1}{c}{#1}}
 
 \newcommand{\bigO}[1]{$\mathcal{O}(#1)$}
+
+\newenvironment{vdTable}[1]{
+\begin{tabular}{|m{0.06\textwidth} m{0.06\textwidth} m{0.06\textwidth} m{0.06\textwidth} m{0.06\textwidth}|}
+\hline
+& & \bfseries #1 & & \\
+}{
+\\ \hline
+	\end{tabular}
+}
+
+%https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
