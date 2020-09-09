@@ -29,7 +29,7 @@ namespace WAVL
             {
                 if (removed.Base.ModPathEnd == v) break;
 
-                v = v.CompareTo(removed.Base.ModPathEnd) > 0 ? v.Left : v.Right;
+                v = v > removed.Base.ModPathEnd ? v.Left : v.Right;
 
                 if (v == null) break;
                 newlen++;
@@ -97,7 +97,7 @@ namespace WAVL
                 {
                     return null;
                 }
-                return node.PathStart.Base.ModPathEnd.CompareTo(node.Base) > 0 ?
+                return node.PathStart.Base.ModPathEnd > node.Base ?
                 node.Right : node.Left;
             }
         }
@@ -123,7 +123,7 @@ namespace WAVL
 
                 var leaf = path[0].Base.Left.rank == 0 ? path[0].Base.Left : path[0].Base.Right;
 
-                if (x.CompareTo(z) > 0)
+                if (x > z)
                 {
                     // Right rotation
                     if (x.Right == leaf)
@@ -184,7 +184,7 @@ namespace WAVL
 
                 var y = path[i - 2].Base;
 
-                if (y.CompareTo(x) > 0 && x.CompareTo(z) > 0)
+                if (y > x && x > z)
                 {
                     // Right simple rotation
 
@@ -196,7 +196,7 @@ namespace WAVL
                     return ReturnUpper(y);
                 }
 
-                else if (y.CompareTo(x) < 0 && x.CompareTo(z) < 0)
+                else if (y < x && x < z)
                 {
                     // Left simple rotation
 
@@ -208,11 +208,11 @@ namespace WAVL
                     return ReturnUpper(x);
                 }
 
-                else if (x.CompareTo(z) > 0)
+                else if (x > z)
                 {
                     // Right double rotation
 
-                    var y = x.Left;
+                    y = x.Left;
 
                     y.CutTopIfNeeded();
 
@@ -231,7 +231,7 @@ namespace WAVL
                 else
                 {
                     // Left double rotation
-                    var y = x.Right;
+                    y = x.Right;
 
                     y.CutTopIfNeeded();
 
@@ -256,7 +256,7 @@ namespace WAVL
                 }
                 else
                 {
-                    if (path[i + 1].CompareTo(x) > 0)
+                    if (path[i + 1].Base > x)
                     {
                         path[i + 1].Base.Left = u;
                     }

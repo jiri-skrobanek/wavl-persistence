@@ -37,7 +37,7 @@ namespace WAVL
             {
                 if (modpathend == v) break;
 
-                v = v.CompareTo(modpathend) > 0 ? v.Left : v.Right;
+                v = v > modpathend ? v.Left : v.Right;
 
                 if (v == null) break;
                 newlen++;
@@ -149,7 +149,7 @@ namespace WAVL
             {
                 if (modpathend2 == v) break;
 
-                v = v.CompareTo(modpathend2) > 0 ? v.Left : v.Right;
+                v = v > modpathend2 ? v.Left : v.Right;
 
                 if (v == null) break;
                 newlen2++;
@@ -272,7 +272,7 @@ namespace WAVL
                     other.DemotionStart = true;
 
                     // one child must be demoted 
-                    if (other.CompareTo(modpathend2) > 0)
+                    if (other > modpathend2)
                     {
                         other.Right.rank--;
                     }
@@ -423,7 +423,7 @@ namespace WAVL
                 {
                     return null;
                 }
-                return path[index].PathStart.Base.ModPathEnd.CompareTo(node.Base) > 0 ?
+                return path[index].PathStart.Base.ModPathEnd > node.Base ?
                 node.Right : node.Left;
             }
 
@@ -433,7 +433,7 @@ namespace WAVL
                 {
                     return null;
                 }
-                return path[index].PathStart.Base.ModPathEnd2.CompareTo(node.Base) > 0 ?
+                return path[index].PathStart.Base.ModPathEnd2 > node.Base ?
                 node.Right : node.Left;
             }
 
@@ -613,7 +613,7 @@ namespace WAVL
 
             (int r, int l) GetTypeOf1ChildVertex(Node<K, V> node)
             {
-                Node<K, V> onechild = null;
+                Node<K, V> onechild;
                 if (node.Left != null && node.Left.RankWithOwnOffset > lastrank)
                     onechild = node.Left;
                 else onechild = node.Right;
@@ -631,19 +631,19 @@ namespace WAVL
 
                 if (onechild.PromotionStart)
                 {
-                    if (onechild.ModPathEnd.CompareTo(onechild) > 0) r++;
+                    if (onechild.ModPathEnd > onechild) r++;
                     else l++;
                 }
 
                 if (onechild.DemotionStart)
                 {
-                    if (onechild.ModPathEnd.CompareTo(onechild) > 0) r++;
+                    if (onechild.ModPathEnd > onechild) r++;
                     else l++;
                 }
 
                 if (onechild.DemotionStart2)
                 {
-                    if (onechild.ModPathEnd2.CompareTo(onechild) > 0) r++;
+                    if (onechild.ModPathEnd2 > onechild) r++;
                     else l++;
                 }
 
@@ -819,7 +819,7 @@ namespace WAVL
                 }
                 else
                 {
-                    if (path[i + 1].Base.CompareTo(u) > 0)
+                    if (path[i + 1].Base > u)
                     {
                         path[i + 1].Base.Left = u;
                     }

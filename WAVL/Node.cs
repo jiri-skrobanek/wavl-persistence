@@ -39,6 +39,10 @@ namespace WAVL
 
         public int CompareTo(Node<K, V> other) => Key.CompareTo(other.Key);
 
+        public static bool operator <(Node<K,V> a, Node<K,V> b) => a.CompareTo(b) < 0;
+
+        public static bool operator >(Node<K, V> a, Node<K, V> b) => a.CompareTo(b) > 0;
+
         /// <summary>
         /// Remove this vertex from the top of path it is on.
         /// </summary>
