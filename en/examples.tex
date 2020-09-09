@@ -1,0 +1,47 @@
+Some of the examples may have more elegant solutions using a different approach. Here the goal is to present the kind of problems where persistence may prove useful and help develop reasoning needed to see other applications should they be encountered by the reader.
+
+\section{Point location in a plane}
+
+\section{???}
+
+Imagine a version control system is used in a repository with branching history. Each version is stored as a patch to another parent version. Now persistent binary tree could be used for queries of files by the last time of modification in history of that particular version.
+
+\section{Binary search in a tree}
+
+Assume we have a rooted tree $T$, totally ordered set $S$ and a function $f: V(T) \rightarrow S$ satisfying that for every vertex $v$ and every ancestor $w$ of $v$ it holds $f(v) \leq f(w)$. 
+
+% f is evaluated in constant time.
+
+We would like to quickly answer large number of queries of the following kind: For given $s \in S$ locate an ancestor $w$ of a vertex $v$ such that $f(w) \leq s$ and for every ancestor $u$ of $w$ it holds that $f(u) > s$. (There is obviously at most one suitable vertex $w$.)
+
+We will build a data structure based on semi-persistent binary search tree which will enable answering this kind of queries in \bigO{\log n} where $n$ denotes the number of vertices of $T$.
+
+The first step is numbering vertices of $T$ by in-order traversal. Next, we construct a structure to answer LCA queries on the tree. %reference?
+
+Now we will finally start building the semi-persistent tree. We add numbers assign to the vertices of $T$ in order of decreasing value of $f$. This involves sorting the vertices by value of $f$ and we store this sorted array for future use. Vertices in the semi-persistent tree are ordered by the assigned numbers. This is the entire preparation phase which takes \bigO{n \log n} time. The structure requires only \bigO{n} memory to store.
+
+In order to locate vertex $w$ for given $v$ and $s$, we locate the version of the semi-persistent tree with all vertices that have value of $f$ grater than $s$. This is done by binary search in the sorted array of vertices. Once the correct version is found we find lower bound and upper bound of $v$. One of these vertices must an ancestor of $v$. This can be verified with the help of LCA structure. If both of those vertices are ancestors of $v$, we take the one further from root. 
+
+We have now located the last ancestor of $v$ with value of $f$ greater than $s$. One of its children must be the queried vertex.
+
+Other solution without employment of persistence could be e.g. with the help of heavy-light decomposition. This would incur a slowdown to \bigO{n \log ^2 n} though.
+
+\section{Dynamic binary search in a tree}
+
+In the previous example we considered that the tree $T$ where queries would be conducted would be static. With full persistence we can afford to add vertices. % remove?
+
+Let $m$ denote the total number of vertices added to the tree.
+
+We will maintain a fully-persistent balanced binary search tree $P$ with vertices ordered by values of $f$. When we want to insert a vertex $z$ to $T$, we also add this vertex to the version of $P$ which was created by adding the parent of $z$. This insert will thus cost \bigO{\log m}.
+
+A query with $s \in S$ and $v \in V(T)$ is simply answered by a search in $P$ in the version created by adding $v$ to $T$. Complexity will be \bigO{\log m}.
+
+Deleting leaves is easy -- no actual procedure is needed. Support for deletion of non-leaf vertices $z$ from $T$ can also be added. Precisely that means that all children of $z$ become children of parent of $z$. (For simplicity we will assume that root will never be deleted, which is a reasonable assumption as an extra root can be added.) 
+
+Vertices are placed into a disjoint-find-union data structure. When a vertex is deleted, it is united with its parent in this data structure. It can be seen that every component in the DFU has a unique root. When searching through $P$ instead of using values of vertices directly, we search the DFU and use vertex found as root of component in the DFU.
+
+This clearly does not break the ordering of vertices in $P$, as there are no possible keys between those of a vertex and its parent for every version. 
+ 
+Not to store excessively many deleted vertices in $P$ and the DFU, we rebuild the entire data structure from the latest version of $T$ when the amount of deleted vertices reaches at least half of the total amount of vertices. The cost to rebuild the tree is obviously amortized into a constant per delete.
+ 
+Depending on the ratio between types of operations, complexity of the queries may be increased. %TODO: Is this amortized completely?

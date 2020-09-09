@@ -1,0 +1,39 @@
+
+\begin{figure}
+	\begin{center}
+		\begin{tikzpicture}[sibling distance=8pt]
+		\Tree[ 
+		\edge node[auto=right] {1 or 2};
+		[   
+		.x 
+		\edge node[auto=right] {3}; 
+		\node[draw,triangle]{A}; 
+		\edge node[auto=left] {1};
+		[
+		.y
+		\edge node[auto=right] {2};
+		\node[draw,triangle]{B};
+		\edge node[auto=left] {2};
+		\node[draw,triangle]{C}; 
+		] ] ]
+		\end{tikzpicture}
+		\qquad
+		\begin{tikzpicture}[sibling distance=8pt]
+		\Tree[ 
+		\edge node[auto=right] {2 or 3};
+		[   
+		.x 
+		\edge node[auto=right] {2}; 
+		\node[draw,triangle]{A}; 
+		\edge node[auto=left] {1};
+		[
+		.y
+		\edge node[auto=right] {1};
+		\node[draw,triangle]{B};
+		\edge node[auto=left] {1};
+		\node[draw,triangle]{C}; 
+		] ] ]
+		\end{tikzpicture}
+	\end{center}
+	\caption{Demote of the second kind step}
+\end{figure}

@@ -338,3 +338,16 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+*.aux
+*.toc
+*.pdf
+*.lof
+*.log
+*.fls
+*.lot
+*.out
+*.bib
+*.xmpi
+*.xmpdata
+*.fdb_latexmk

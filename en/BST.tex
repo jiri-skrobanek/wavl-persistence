@@ -1,0 +1,23 @@
+For the purposes of this thesis, binary search tree will be a data structure composed of internal vertices (or nodes). Every internal vertex carries a key. Keys are members of a set of linearly ordered items and naturally extend this ordering to vertices. In addition, internal vertices are allowed to carry constant amount of information in fields (for example about tree structure) and to have constant number of pointers to other vertices. An internal node has two pointers to child vertices -- left and right. Any of the two can be an external vertex. External vertices are not represented in memory, all pointers to external vertices are equal and must not be dereferenced. For the specific application, it can be beneficial to assume external vertices have some default values of their fields. An internal left child must precede its parent in the linear order, conversely an internal right child must come after its parent in the linear order.
+
+Binary search trees naturally represent finite ordered trees which where every vertex has degree at most three and root and degree at most two.
+
+When we work with binary search trees, we typically use a specific algorithm that only accepts specific subclass of BSTs on input. Should it modify the BST, the resulting tree will still belong to the same class. Standard operations with BSTs are:
+
+\begin{itemize}
+	\item \texttt{Find(Tree, Key)}
+	\item \texttt{Insert(Tree, Key, Value)}
+	\item \texttt{Delete(Tree, Key)}
+	\item \texttt{Min(Tree)}
+	\item \texttt{Max(Tree)}
+	\item \texttt{Predecessor(Tree, Key)}
+	\item \texttt{Successor(Tree, Key)}
+	\item \texttt{LowerBound(Tree, Key)}
+	\item \texttt{UpperBound(Tree, Key)}
+\end{itemize}
+
+Of the operations described here, typically only \texttt{Insert} and \texttt{Delete} alter the BST. (Notable exception to this are splay trees.) We will call operations that modify the BST {\em altering}, remaining operations {\em non-altering}.
+
+We do not place any restrictions on the 
+
+In the rest of this chapter, we will discuss some variants of binary search trees useful for persistence.
