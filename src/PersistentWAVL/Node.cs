@@ -9,7 +9,7 @@ namespace PersistentWAVL
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
-    public class Node<K, V> : IComparable<Node<K, V>> where K : IComparable<K>
+    public class Node<K, V> : IComparable<Node<K, V>> where K : class, IComparable<K>
     {
         #region Fields
         public int rank = 0;
@@ -24,10 +24,7 @@ namespace PersistentWAVL
         #endregion
 
         #region Pointers
-        private FatNode<K, V> _modPathEnd = null, _modPathEnd2 = null;
-
-        // 1 and 2 need not mean anything, both have to check every time
-        private FatNode<K, V> _modPathStart = null, _modPathStart2 = null;
+        private K _modPathEnd = null, _modPathEnd2 = null;
 
         private FatNode<K, V> _parent, _left, _right;
         #endregion
@@ -168,75 +165,31 @@ namespace PersistentWAVL
                 }
             }
 
+            
+            public K ModPathEnd 
+            { 
+                get => Node._modPathEnd; 
+                set 
+                { 
+                    if (MustCopy) 
+                        Node.CopyForVersion(Version); 
+                    Node._modPathEnd = value; 
+                } 
+            }
+
+            public K ModPathEnd2
+            {
+                get => Node._modPathEnd2;
+                set
+                {
+                    if (MustCopy)
+                        Node.CopyForVersion(Version);
+                    Node._modPathEnd2 = value;
+                }
+            }
+
+
             #region Pointers
-            public NodeAccessor ModPathEnd => new NodeAccessor(Version, Node._modPathEnd.GetNodeForVersion(Version));
-
-            public NodeAccessor ModPathEnd2 => new NodeAccessor(Version, Node._modPathEnd2.GetNodeForVersion(Version));
-
-            public void SetModPathEndAsFirstPathForBottom(NodeAccessor node)
-            {
-                if (MustCopy) Node.CopyForVersion(Version);
-                Node._modPathEnd = null;
-                if (node != null)
-                {
-                    var inverseNode = node.Node.FatNode.GetNodeForVersion(Version);
-                    if (inverseNode.Version == Version)
-                    {
-                        inverseNode.CopyForVersion(Version);
-                    }
-                    inverseNode._modPathStart = Node.FatNode;
-                }
-                Node._modPathEnd = node.Node.FatNode;
-            }
-
-            public void SetModPathEndAsSecondPathForBottom(NodeAccessor node)
-            {
-                if (MustCopy) Node.CopyForVersion(Version);
-                Node._modPathEnd = null;
-                if (node != null)
-                {
-                    var inverseNode = node.Node.FatNode.GetNodeForVersion(Version);
-                    if (inverseNode.Version == Version)
-                    {
-                        inverseNode.CopyForVersion(Version);
-                    }
-                    inverseNode._modPathStart2 = Node.FatNode;
-                }
-                Node._modPathEnd = node.Node.FatNode;
-            }
-
-            public void SetModPathEnd2AsFirstPathForBottom(NodeAccessor node)
-            {
-                if (MustCopy) Node.CopyForVersion(Version);
-                Node._modPathEnd2 = null;
-                if (node != null)
-                {
-                    var inverseNode = node.Node.FatNode.GetNodeForVersion(Version);
-                    if (inverseNode.Version == Version)
-                    {
-                        inverseNode.CopyForVersion(Version);
-                    }
-                    inverseNode._modPathStart = Node.FatNode;
-                }
-                Node._modPathEnd2 = node.Node.FatNode;
-            }
-
-            public void SetModPathEnd2AsSecondPathForBottom(NodeAccessor node)
-            {
-                if (MustCopy) Node.CopyForVersion(Version);
-                Node._modPathEnd2 = null;
-                if (node != null)
-                {
-                    var inverseNode = node.Node.FatNode.GetNodeForVersion(Version);
-                    if (inverseNode.Version == Version)
-                    {
-                        inverseNode.CopyForVersion(Version);
-                    }
-                    inverseNode._modPathStart2 = Node.FatNode;
-                }
-                Node._modPathEnd2 = node.Node.FatNode;
-            }
-
             public NodeAccessor Left
             {
                 get => new NodeAccessor(Version, Node._left.GetNodeForVersion(Version));
@@ -253,7 +206,7 @@ namespace PersistentWAVL
                         }
                         inverseNode._parent = Node.FatNode;
                     }
-                    Node._modPathEnd2 = value.Node.FatNode;
+                    Node._left = value.Node.FatNode;
                 }
             }
 
@@ -279,10 +232,28 @@ namespace PersistentWAVL
             #endregion
 
             private bool MustCopy => this.Version == Node.Version;
-
+            
+            #region Operators
             public static bool operator <(NodeAccessor a, NodeAccessor b) => a.Node.CompareTo(b.Node) < 0;
 
             public static bool operator >(NodeAccessor a, NodeAccessor b) => a.Node.CompareTo(b.Node) > 0;
+
+            public static bool operator <(NodeAccessor a, K b) => a.Node.Key.CompareTo(b) < 0;
+
+            public static bool operator >(NodeAccessor a, K b) => a.Node.Key.CompareTo(b) > 0;
+
+            public static bool operator <(K a, NodeAccessor b) => a.CompareTo(b.Node.Key) < 0;
+
+            public static bool operator >(K a, NodeAccessor b) => a.CompareTo(b.Node.Key) > 0;
+
+            public static bool operator ==(NodeAccessor a, K b) => !(a < b || a > b);
+
+            public static bool operator !=(NodeAccessor a, K b) => a < b || a > b;
+
+            public static bool operator !=(K a, NodeAccessor b) => a < b || a > b;
+
+            public static bool operator ==(K a, NodeAccessor b) => !(a < b || a > b);
+            #endregion
 
             public int RankWithOwnOffset => rank + (DemotionStart ? -1 : 0) + (DemotionStart2 ? -1 : 0) + (PromotionStart ? 1 : 0);
 
@@ -291,7 +262,7 @@ namespace PersistentWAVL
             /// </summary>
             public void CutTopIfNeeded()
             {
-                if (this.ModPathEnd == null) return;
+                if (ModPathEnd == null) return;
 
                 if (PromotionStart)
                 {

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PersistentWAVL
 {
-    public partial class Tree<K, V> where K : IComparable<K>, IEquatable<K>
+    public partial class Tree<K, V> where K : class, IComparable<K>, IEquatable<K>
     {
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace PersistentWAVL
         {
             var removed = path[index];
             var modpathend = removed.PathStart.Base.ModPathEnd;
-            Node<K, V>.NodeAccessor modpathend2 = null;
+            K modpathend2 = default;
             if (removed.Demoted == 2) { modpathend2 = removed.PathStart2.Base.DemotionStart2 ? removed.PathStart2.Base.ModPathEnd2 : removed.PathStart2.Base.ModPathEnd; }
 
             // The length of demotion path
@@ -99,7 +99,7 @@ namespace PersistentWAVL
 
                     lowertop.DemotionStart2 = lowertop.DemotionStart;
                     lowertop.DemotionStart = true;
-                    if (lowertop.ModPathEnd == null)
+                    if (lowertop.ModPathEnd == default)
                     {
                         lowertop.ModPathEnd2 = removed.PathStart.Base.ModPathEnd;
                     }
@@ -122,11 +122,11 @@ namespace PersistentWAVL
                 {
                     if (removed.PathStart.Demoted == 1)
                     {
-                        removed.PathStart.Base.ModPathEnd = path[index + 1].Base;
+                        removed.PathStart.Base.ModPathEnd = path[index + 1].Base.Key;
                     }
                     else
                     {
-                        removed.PathStart.Base.ModPathEnd2 = path[index + 1].Base;
+                        removed.PathStart.Base.ModPathEnd2 = path[index + 1].Base.Key;
                     }
                 }
 
@@ -376,11 +376,11 @@ namespace PersistentWAVL
 
                 if (removed.PathStart2.Base.ModPathEnd2 == removed.Base)
                 {
-                    removed.PathStart2.Base.ModPathEnd = path[index + 2].Base;
+                    removed.PathStart2.Base.ModPathEnd = path[index + 2].Base.Key;
                 }
                 else
                 {
-                    removed.PathStart2.Base.ModPathEnd2 = path[index + 2].Base;
+                    removed.PathStart2.Base.ModPathEnd2 = path[index + 2].Base.Key;
                 }
             }
             else
@@ -389,19 +389,19 @@ namespace PersistentWAVL
 
                 if (removed.PathStart.Base.ModPathEnd == removed.Base)
                 {
-                    removed.PathStart.Base.ModPathEnd = path[index + 1].Base;
+                    removed.PathStart.Base.ModPathEnd = path[index + 1].Base.Key;
                 }
                 else
                 {
-                    removed.PathStart.Base.ModPathEnd2 = path[index + 1].Base;
+                    removed.PathStart.Base.ModPathEnd2 = path[index + 1].Base.Key;
                 }
                 if (removed.PathStart2.Base.ModPathEnd2 == removed.Base)
                 {
-                    removed.PathStart2.Base.ModPathEnd = path[index + 1].Base;
+                    removed.PathStart2.Base.ModPathEnd = path[index + 1].Base.Key;
                 }
                 else
                 {
-                    removed.PathStart2.Base.ModPathEnd2 = path[index + 1].Base;
+                    removed.PathStart2.Base.ModPathEnd2 = path[index + 1].Base.Key;
                 }
             }
 
@@ -415,7 +415,7 @@ namespace PersistentWAVL
                 path[pos].DemotedChild = false;
                 path[pos].PathStart = null;
                 path[pos].Base.rank--;
-                path[pos].Base.ModPathEnd = null;
+                path[pos].Base.ModPathEnd = default;
             }
 
             Node<K, V>.NodeAccessor GetDemotionContinuation(FullNode<K, V> node)
@@ -705,12 +705,12 @@ namespace PersistentWAVL
 
                 if (path[pos].Base.ModPathEnd != null)
                 {
-                    path[pos].Base.ModPathEnd2 = path[0].Base;
+                    path[pos].Base.ModPathEnd2 = path[0].Base.Key;
                     path[pos].Base.DemotionStart2 = true;
                 }
                 else
                 {
-                    path[pos].Base.ModPathEnd = path[0].Base;
+                    path[pos].Base.ModPathEnd = path[0].Base.Key;
                     path[pos].Base.DemotionStart = true;
                 }
             }

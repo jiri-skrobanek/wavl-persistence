@@ -2,7 +2,7 @@
 
 namespace PersistentWAVL
 {
-    public class FullNode<K, V> : IComparable<FullNode<K, V>> where K : IComparable<K>
+    public class FullNode<K, V> : IComparable<FullNode<K, V>> where K : class, IComparable<K>
     {
         public FullNode(Node<K, V>.NodeAccessor @base)
         {

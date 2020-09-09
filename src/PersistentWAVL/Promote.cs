@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PersistentWAVL
 {
-    public partial class Tree<K, V> where K : IComparable<K>, IEquatable<K>
+    public partial class Tree<K, V> where K : class, IComparable<K>, IEquatable<K>
     {
 
         private void DeleteFromPromotionPath(List<FullNode<K, V>> path, int index)
@@ -78,7 +78,7 @@ namespace PersistentWAVL
             }
             else
             {
-                removed.PathStart.Base.ModPathEnd = path[index + 1].Base;
+                removed.PathStart.Base.ModPathEnd = path[index + 1].Base.Key;
             }
 
             WritePromotion(index);
@@ -418,7 +418,7 @@ namespace PersistentWAVL
                 path[i].PathStart = path[index];
             }
 
-            path[index].Base.ModPathEnd = path[0].Base;
+            path[index].Base.ModPathEnd = path[0].Base.Key;
             path[index].Base.PromotionStart = true;
         }
     }

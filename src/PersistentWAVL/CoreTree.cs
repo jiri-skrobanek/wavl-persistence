@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PersistentWAVL
 {
-    public partial class Tree<K, V> where K : IComparable<K>, IEquatable<K>
+    public partial class Tree<K, V> where K : class, IComparable<K>, IEquatable<K>
     {
         public VersionHandle Version { get; private set; }
 
@@ -17,6 +17,18 @@ namespace PersistentWAVL
         }
 
         public static Tree<K, V> GetNew => new Tree<K, V> { Version = VersionHandle.GetNew() };
+
+        public Node<K,V>.NodeAccessor Find(K Key)
+        {
+            var current = Root;
+
+            while(current != null && current != Key)
+            {
+                current = current.Key.CompareTo(Key) > 0 ? current.Left : current.Right;
+            }
+
+            return current;
+        }
 
         public Tree<K, V> Insert(K Key, V Value)
         {
@@ -80,6 +92,7 @@ namespace PersistentWAVL
 
             else if (current.Left == null)
             {
+                SwapModPathEnds(current.Key, current.Right.Key);
                 current.Key = current.Right.Key;
                 current.Right = null;
 
@@ -88,6 +101,7 @@ namespace PersistentWAVL
 
             else if (current.Right == null)
             {
+                SwapModPathEnds(current.Key, current.Left.Key);
                 current.Key = current.Left.Key;
                 current.Left = null;
 
@@ -100,6 +114,7 @@ namespace PersistentWAVL
 
                 while (current.Right != null) { prev = current; current = current.Right; };
 
+                SwapModPathEnds(Key, current.Key);
                 sub.Key = current.Key;
 
                 if (current.Left == null)
@@ -109,6 +124,7 @@ namespace PersistentWAVL
                 }
                 else
                 {
+                    SwapModPathEnds(Key, current.Left.Key);
                     current.Key = current.Left.Key;
                     current.Left = null;
                     top = BalancePath(GetPath(current.Key));
@@ -120,6 +136,7 @@ namespace PersistentWAVL
 
                 while (current.Left != null) { prev = current; current = current.Left; };
 
+                SwapModPathEnds(Key, current.Key);
                 sub.Key = current.Key;
 
                 if (current.Right == null)
@@ -129,6 +146,7 @@ namespace PersistentWAVL
                 }
                 else
                 {
+                    SwapModPathEnds(Key, current.Right.Key);
                     current.Key = current.Right.Key;
                     current.Right = null;
                     top = BalancePath(GetPath(current.Key));
@@ -136,6 +154,38 @@ namespace PersistentWAVL
             }
 
             return new Tree<K, V> { Root = top, Version = newVersion };
+
+            // Update the Key in all pmodifying paths that end with the vertex subject to key change.
+            void SwapModPathEnds(K first, K second)
+            {
+                List<Node<K, V>.NodeAccessor> nodes = new List<Node<K, V>.NodeAccessor>(2);
+
+                var c1 = Root;
+                while (c1 != null)
+                {
+                    if (c1.ModPathEnd == second || c1.ModPathEnd2 == second)
+                        nodes.Add(c1);
+                    c1 = c1.Key.CompareTo(second) > 0 ? c1.Left : c1.Right;
+                }
+
+                c1 = Root;
+                while(c1 != null)
+                {
+                    if (c1.ModPathEnd == first)
+                        c1.ModPathEnd = second;
+                    if (c1.ModPathEnd2 == first)
+                        c1.ModPathEnd2 = second;
+                    c1 = c1.Key.CompareTo(first) > 0 ? c1.Left : c1.Right;
+                }
+
+                foreach(var node in nodes)
+                {
+                    if (c1.ModPathEnd == second)
+                        c1.ModPathEnd = first;
+                    if (c1.ModPathEnd2 == second)
+                        c1.ModPathEnd2 = first;
+                }
+            }
         }
 
         /// <summary>
@@ -160,7 +210,7 @@ namespace PersistentWAVL
                 if (current.PromotionStart)
                 {
                     promoting = true;
-                    bottom = current.ModPathEnd;
+                    bottom = Find(current.ModPathEnd);
                     top = v;
                 }
                 if (current.DemotionStart)
@@ -168,12 +218,12 @@ namespace PersistentWAVL
                     demoting++;
                     if (demoting == 1)
                     {
-                        bottom = current.ModPathEnd;
+                        bottom = Find(current.ModPathEnd);
                         top = v;
                     }
                     else
                     {
-                        bottom2 = current.ModPathEnd;
+                        bottom2 = Find(current.ModPathEnd);
                         top2 = v;
                     }
                 }
@@ -182,12 +232,12 @@ namespace PersistentWAVL
                     demoting++;
                     if (demoting == 1)
                     {
-                        bottom = current.ModPathEnd;
+                        bottom = Find(current.ModPathEnd);
                         top = v;
                     }
                     else
                     {
-                        bottom2 = current.ModPathEnd2;
+                        bottom2 = Find(current.ModPathEnd2);
                         top2 = v;
                     }
                 }

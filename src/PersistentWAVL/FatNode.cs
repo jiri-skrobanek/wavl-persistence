@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace PersistentWAVL
 {
-    public class FatNode<K, V> where K : IComparable<K>
+    public class FatNode<K, V> where K : class, IComparable<K>
     {
         public const int SizeLimit = 11;
 
