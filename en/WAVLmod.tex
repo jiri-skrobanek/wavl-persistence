@@ -303,3 +303,11 @@ WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the
 \end{center}
 \caption{The only case where double demotion can arise}
 \end{figure}
+
+\subsection{Keys in place of pointers for path ends}
+
+Layout of vertex can be modified slightly. It is possible to store key of the vertex where modifying path ends instead of pointer to it.
+
+The drawback is that whenever a key is changed, path to the root must be checked for vertices referring the old key as a path end. Fortunately, this seldom happens. Prior to performing most operations, vertices are excluded from any modifying paths. In fact, only delete procedure must be changed to explicitly check for references. (Due to swapping keys.)
+
+The aforementioned complication causes this approach to be less comfortable, there is no incentive to use it without other reasons. The benefit stems from decreasing the number of pointers per vertex, which will be useful during conversion to persistent data structure.

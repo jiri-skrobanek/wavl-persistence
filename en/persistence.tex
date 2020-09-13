@@ -138,3 +138,7 @@ For every vertex in the weight-balanced tree, we will store encoding of the path
 \section{Fully-Persistent WAVL Tree}
 
 Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing this operation on this version, thus consuming super-linear amount of space.
+
+\begin{prop}
+Suppose any order of splitting fat vertices with the number of slots exceeding the set limit $l$ during an operation on a tree $T$.
+\end{prop}
