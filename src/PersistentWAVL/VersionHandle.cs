@@ -6,24 +6,18 @@ namespace PersistentWAVL
 {
     public class VersionHandle : IComparable<VersionHandle>
     {
-        public int CompareTo(VersionHandle other)
-        {
-            throw new NotImplementedException();
-        }
+        public int CompareTo(VersionHandle other) => versionNode.CompareTo(other.versionNode);
 
-        private ulong Key;
+        private Version.VersionNode versionNode;
 
-        public VersionHandle GetSuccessor()
-        {
+        public VersionHandle GetSuccessor() => new VersionHandle { versionNode = versionNode.GetSuccessor };
 
-        }
-
-        public static VersionHandle GetNew()
-        {
-
-        }
+        public static VersionHandle GetNew() => new VersionHandle { versionNode = new Version.VersionNode() };
 
         public static bool operator >=(VersionHandle a, VersionHandle b) => a.CompareTo(b) >= 0;
         public static bool operator <=(VersionHandle a, VersionHandle b) => a.CompareTo(b) <= 0;
+
+        public static bool operator >(VersionHandle a, VersionHandle b) => a.CompareTo(b) > 0;
+        public static bool operator <(VersionHandle a, VersionHandle b) => a.CompareTo(b) < 0;
     }
 }

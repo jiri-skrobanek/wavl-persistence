@@ -26,7 +26,7 @@ namespace PersistentWAVL
         #region Pointers
         private K _modPathEnd = null, _modPathEnd2 = null;
 
-        private FatNode<K, V> _parent, _left, _right;
+        internal FatNode<K, V> _parent, _left, _right;
         #endregion
 
         public VersionHandle Version;
@@ -47,6 +47,28 @@ namespace PersistentWAVL
             this.Value = Value;
             this.Version = Version;
             this.FatNode = FatNode;
+        }
+        
+        /// <summary>
+        /// Copy constructor, adds to the fat vertex
+        /// </summary>
+        public Node(VersionHandle Version, Node<K,V> node)
+        {
+            node.FatNode.Slots.Add(Version, this);
+
+            DemotionStart = node.DemotionStart;
+            DemotionStart2 = node.DemotionStart2;
+            FatNode = node.FatNode;
+            Key = node.Key;
+            PromotionStart = node.PromotionStart;
+            rank = node.rank;
+            Value = node.Value;
+            this.Version = Version;
+            _left = node._left;
+            _modPathEnd = node._modPathEnd;
+            _modPathEnd2 = node._modPathEnd2;
+            _parent = node._parent;
+            _right = node._right;
         }
 
         public override string ToString() => $"<{Key.ToString()}:{Value.ToString()}>";
