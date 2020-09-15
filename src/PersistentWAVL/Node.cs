@@ -187,16 +187,16 @@ namespace PersistentWAVL
                 }
             }
 
-            
-            public K ModPathEnd 
-            { 
-                get => Node._modPathEnd; 
-                set 
-                { 
-                    if (MustCopy) 
-                        Node.CopyForVersion(Version); 
-                    Node._modPathEnd = value; 
-                } 
+
+            public K ModPathEnd
+            {
+                get => Node._modPathEnd;
+                set
+                {
+                    if (MustCopy)
+                        Node.CopyForVersion(Version);
+                    Node._modPathEnd = value;
+                }
             }
 
             public K ModPathEnd2
@@ -222,11 +222,15 @@ namespace PersistentWAVL
                     if (value != null)
                     {
                         var inverseNode = value.Node.FatNode.GetNodeForVersion(Version);
-                        if (inverseNode.Version == Version)
+                        // If nothing to set, end.
+                        if (inverseNode._parent != Node.FatNode)
                         {
-                            inverseNode.CopyForVersion(Version);
+                            if (inverseNode.Version == Version)
+                            {
+                                inverseNode.CopyForVersion(Version);
+                            }
+                            inverseNode._parent = Node.FatNode;
                         }
-                        inverseNode._parent = Node.FatNode;
                     }
                     Node._left = value.Node.FatNode;
                 }
@@ -242,15 +246,21 @@ namespace PersistentWAVL
                     if (value != null)
                     {
                         var inverseNode = value.Node.FatNode.GetNodeForVersion(Version);
-                        if (inverseNode.Version == Version)
+                        // If nothing to set, end.
+                        if (inverseNode._parent != Node.FatNode)
                         {
-                            inverseNode.CopyForVersion(Version);
+                            if (inverseNode.Version == Version)
+                            {
+                                inverseNode.CopyForVersion(Version);
+                            }
+                            inverseNode._parent = Node.FatNode;
                         }
-                        inverseNode._parent = Node.FatNode;
                     }
                     Node._right = value.Node.FatNode;
                 }
             }
+
+            public NodeAccessor Top => new NodeAccessor(Version, Node._parent.GetNodeForVersion(Version));
             #endregion
 
             private bool MustCopy => this.Version == Node.Version;
@@ -385,6 +395,12 @@ namespace PersistentWAVL
                 DemotionStart2 = false;
                 ModPathEnd = null;
                 ModPathEnd2 = null;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is NodeAccessor accessor &&
+                       EqualityComparer<Node<K, V>>.Default.Equals(Node, accessor.Node);
             }
         }
     }
