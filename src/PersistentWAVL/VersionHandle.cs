@@ -10,7 +10,7 @@ namespace PersistentWAVL
 
         private Version.VersionNode versionNode;
 
-        public VersionHandle GetSuccessor() => new VersionHandle { versionNode = versionNode.GetSuccessor };
+        public VersionHandle GetSuccessor() => new VersionHandle { versionNode = versionNode.GetSuccessor() };
 
         public static VersionHandle GetNew() => new VersionHandle { versionNode = new Version.VersionNode() };
 

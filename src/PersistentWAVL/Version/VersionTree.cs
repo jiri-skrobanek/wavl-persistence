@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime;
 using System.Text;
 
 namespace PersistentWAVL.Version
 {
+    [DebuggerDisplay("VersionNode depth = {depth} key = {key>>63-depth}")]
     internal class VersionNode : IComparable<VersionNode>
     {
         private const ulong alpha1 = 3, alpha2 = 2;
@@ -14,16 +16,16 @@ namespace PersistentWAVL.Version
         VersionNode Parent;
         int size = 1;
         int depth = 0;
-        ulong key = 0;
+        ulong key = 1UL << 63;
 
         internal VersionNode()
         { }
 
-        private static VersionNode fromList(VersionNode parent, ReadOnlySpan<VersionNode> list, ulong right)
+        internal static VersionNode FromList(VersionNode parent, ReadOnlySpan<VersionNode> list, ulong right)
         {
             if (list.Length == 0)
                 return null;
-            var middle = list[(list.Length + 1) / 2];
+            var middle = list[(list.Length-1) / 2];
             if (parent == null)
             {
                 middle.depth = 0;
@@ -36,8 +38,8 @@ namespace PersistentWAVL.Version
                 middle.key = parent.key + right * (1UL << (63 - middle.depth));
                 middle.Parent = parent;
             }
-            middle.Left = fromList(middle, list.Slice(0, list.Length / 2), 0);
-            middle.Right = fromList(middle, list.Slice(1 + list.Length / 2), 1);
+            middle.Left = FromList(middle, list.Slice(0, (list.Length - 1) / 2 ), 0);
+            middle.Right = FromList(middle, list.Slice((list.Length + 1) / 2), 1);
             middle.size = list.Length;
             return middle;
         }
@@ -49,12 +51,12 @@ namespace PersistentWAVL.Version
             preorderListing(treeNode, nodes, 0);
             if (parent == null)
             {
-                fromList(null, nodes, 1);
+                FromList(null, nodes, 1);
             }
             else if (parent.Left == treeNode)
-                parent.Left = fromList(parent, nodes, 0);
+                parent.Left = FromList(parent, nodes, 0);
             else
-                parent.Right = fromList(parent, nodes, 1);
+                parent.Right = FromList(parent, nodes, 1);
 
             static void preorderListing(VersionNode node, VersionNode[] list, int index)
             {
@@ -71,9 +73,9 @@ namespace PersistentWAVL.Version
             }
         }
 
-        public VersionNode GetSuccessor => insert(this, this.key);
+        internal VersionNode GetSuccessor() => insert(this, this.key);
 
-        VersionNode insert(VersionNode treeNode, ulong key)
+        internal VersionNode insert(VersionNode treeNode, ulong key)
         {
             VersionNode current = treeNode, target = null;
             while (current.Parent != null)
@@ -87,14 +89,13 @@ namespace PersistentWAVL.Version
                         current = current.Left;
                         continue;
                     }
-                    current.Left = new VersionNode()
+                    target = current.Left = new VersionNode()
                     {
                         size = 1,
                         key = current.key,
                         depth = current.depth + 1,
                         Parent = current
                     };
-                    current.size++;
                     break;
                 }
                 else
@@ -104,17 +105,17 @@ namespace PersistentWAVL.Version
                         current = current.Right;
                         continue;
                     }
-                    current.Right = new VersionNode()
+                    target = current.Right = new VersionNode()
                     {
                         size = 1,
                         key = current.key + (1UL << 63 - current.depth),
                         depth = current.depth + 1,
                         Parent = current,
                     };
-                    current.size++;
                     break;
                 }
             }
+            current.size++;
             while (current.Parent != null)
             {
                 current.Parent.size++;
@@ -122,7 +123,7 @@ namespace PersistentWAVL.Version
             }
             while (current != target)
             {
-                if (key > current.key)
+                if (current.CompareTo(target) < 0)
                 {
                     if ((ulong)current.Right.size * alpha1 > (ulong)current.size * alpha2)
                     {
@@ -156,7 +157,11 @@ namespace PersistentWAVL.Version
                 return -1;
             }
             // Ancestor/Descendant relationship
-            return other.depth - depth;
+            if(depth == other.depth)
+                return 0;
+            if (depth > other.depth)
+                return ((key >> 63 - d - 1) & 1UL) == 1 ? 1 : -1;
+            return ((other.key >> 63 - d - 1) & 1UL) == 1 ? -1 : 1;
         }
     }
 }
