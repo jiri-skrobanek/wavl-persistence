@@ -110,11 +110,15 @@ In fact, for semi-persistence fat vertices may be defined differently. It suffic
 Insertion and deletion in a WAVL tree can be also carried out top-down. %TODO: Link
 It is also possible to preemptively perform rotations, promotes and demotes when descending to make sure that more changes of high ranks will not be needed. It can be shown that there at most \bigO{1} modifications of the structure per operation (amortized), albeit the constant proves to be rather high. These facts lay a solid foundation to parallel semi-persistence.
 
-When we enter a fat vertex, we lock it for other threads of computation. Conversely, lock is lifted when the fat vertex is left. Since all threads begin locking at the root and descend towards the leaves, no deadlocking is possible.
+What is unfortunate, is the delete procedure, which must locate an additional vertex to swap values in case of the deleted vertex having two children. So we will assume that delete is not possible for now.
+
+When we enter a fat vertex, we lock it for other threads of computation. Conversely, lock is lifted when the fat vertex is left. Since all threads begin locking at the root and descend towards the leaves, no deadlocking is possible. %TODO: This is wrong!
 
 Applying the algorithm with semi-persistence we must however ensure that before unlocking a fat node, none of its children may run out of slots leading to allocation of a replacement. Since there can be at most one new slot occupied for every fat node in one operation, it suffices to allocate new fat vertex for every fat vertex without empty slots before releasing its parent.
 
 If we increase the number of slots in a fat vertex by at least one, complexity remains the same.
+
+%TODO: Delete: 1. lock larger part, 2. Ghost vertices
 
 \section{List Ordering}
 
@@ -139,6 +143,8 @@ For every vertex in the weight-balanced tree, we will store encoding of the path
 
 Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing this operation on this version, thus consuming super-linear amount of space.
 
+For achieving full persistence, we will build upon the technique of fat vertices. Now however, simply allocating new vertex when we run out of empty slots in the old one will not do. It remains crucial that occupied slots of one fat vertex form an interval of existing versions. In particular, It will be needed to insert between existing versions
+
 \begin{prop}
-Suppose any order of splitting fat vertices with the number of slots exceeding the set limit $l$ during an operation on a tree $T$.
+Suppose any order of splitting fat vertices with the number of slots exceeding the set limit $l$ during an operation on a tree $T$. Regardless of the way for choosing the next node to be split, number of occupied slots in all nodes will remain under .
 \end{prop}
