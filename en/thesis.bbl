@@ -1,0 +1,13 @@
+\begin{thebibliography}{1}
+
+\bibitem{rank-balanced-trees}
+B.~Haeupler, S.~Sen, and R.~Tarjan.
+\newblock Rank-balanced trees.
+\newblock {\em ACM Transactions on Algorithms}, 11, 2015.
+
+\bibitem{confluently-persistent}
+James~R. Driscoll, Daniel D.~K. Sleator, and Robert~E. Tarjan.
+\newblock Fully persistent lists with catenation.
+\newblock {\em J. ACM}, 41(5):943–959, September 1994.
+
+\end{thebibliography}

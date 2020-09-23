@@ -2,7 +2,7 @@ First of all we introduce the hierarchy of data structures with respect to persi
 
 \begin{itemize}
 \item {\bfseries Ephemeral data structures} Past states are destroyed by new changes and irretrievably lost.
-\item {\bfseries Semi-persistent data structures} Past states are stored and can be accessed for reading, modifying operations are only allowed on the most recent version. Operations produce return a new version handle. Historical versions form a linear order.
+\item {\bfseries Semi-persistent data structures} (Sometimes partially persistent) Past states are stored and can be accessed for reading, modifying operations are only allowed on the most recent version. Operations produce return a new version handle. Historical versions form a linear order.
 \item {\bfseries (Fully-)persistent data structures} Versions form a rooted tree, additional changes can be made to any existing version, creating a new version as a child vertex.
 \item {\bfseries Functional data structures} No changes are permitted to written data.
 \end{itemize}
@@ -10,6 +10,8 @@ First of all we introduce the hierarchy of data structures with respect to persi
 This division is by no means universally adopted, but provides an interesting perspective regardless.
 
 With a persistent data structure, we essentially want to have one data structure for every existing version. Insert and delete return a new version handle instead of making changes to the existing version. Obviously, copying the data structure every time is one option how to achieve this, albeit not a great one. To prevent using extra memory and increased time complexity of operations however, more intricate methods must be employed.
+
+Going beyond this hierarchy, if fully-persistent data structure also supports merging or melding two different versions, it is called \textit{confluently persistent} \cite{confluently-persistent}. We will not investigate confluent persistence in this thesis further.
 
 \section{Persistence through Path-Copying}
 
@@ -38,7 +40,7 @@ With this approach, we can reach linear memory complexity (with the total number
 Linked list & \bigO{n \log n} \\
 Binary search tree & \bigO{\log^2 n} \\
 Q-fast trie & \bigO{\log ^{3/2} n}, semi-persistence only \\
-Y-fast trie & \bigO{\log n \log \log n}, semi-persistence only, on average
+Y-fast trie & \bigO{\log n \cdot \log \log n}, semi-persistence only, on average
 
 \end{tabular}
 
@@ -48,7 +50,7 @@ Y-fast trie & \bigO{\log n \log \log n}, semi-persistence only, on average
 
 Following up on the idea of multiple versions in one vertex, fat vertices were devised. We will explain this technique only for semi-persistence first. Full persistence requires the use of a few extra tricks and ordering on the versions.
 
-A fat vertex stores is generally a dictionary of standard vertices indexed by versions. We call values of this dictionary slots. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet.
+A fat vertex stores is generally a dictionary of standard vertices indexed by versions. We call values of this dictionary slots. The maximum size of this dictionary is set to a constant which is determined later. Instead of copying the vertex, we simply add new version into the dictionary. This stops the propagation of changes toward the root, provided the maximum has not been exceeded yet. Because of the limit on size of this dictionary, it may be implemented simply as a linked list.
 
 Contents of one slot are a version handle, all pointers a vertex would have, then inverse pointers to fat vertices that have slots pointing to this fat vertex for this version and 
 some fields, notably key and value. Not all fields need to be versioned. For example balancing information may be stored only for the latest version, i.e. in red-black trees color is only used for balancing and is thus not needed to be available for old versions. 
@@ -69,7 +71,7 @@ Temporarily, we will allow the capacity of fat vertex to be exceeded. This will 
 Suppose any binary search tree balancing algorithm satisfying the following properties:
 \begin{itemize}
 \item 
-Any $n$ successive operations on initially empty tree make $\mathcal{O}(n)$ vertex changes in total to the tree. 
+There is a constant $k$ such that for any $n$ successive operations on initially empty tree, the number of vertex changes made to the tree is at most $kn$. 
 \item 
 There is a constant bound on the number of pointers to any one vertex at any time.
 \end{itemize}
@@ -85,7 +87,13 @@ Otherwise, number of used slots is checked. If there is one or more empty availa
 If no slots are available, new fat vertex $v'$ is allocated and one of its slots is used. This decreases potential by $p+x$. The floating unit of energy is used to pay for allocation of the new vertex. Next, fat vertices to corresponding current version interval of vertices having pointers to $v$ need to have this reflected. Additionally inverse pointers to $v'$ need to be set. These are at most $p+x$ changes to other vertices that may use their new empty slots. The decrease in potential is used to send one unit of energy to every such vertex that need an update. Changes are executed recursively and by will not require extra energy to be charged on the operation.
 \end{myproof}
 
-We see that WAVL trees can be used for semi-persistence even in their original form, along with many other binary search trees.
+Regarding the time complexity, searching the correct slot in a fat vertex produces only constant overhead. Realizing that every operation can be charged on a memory allocation of a fat vertex such that there is a constant $c$ depending only on the balancing algorithm such that for every allocated fat vertex the number of operations charged on it is at most $c$.
+
+\begin{obs}
+Assuming the conditions from the previous proposition, the cost to write changes into fat vertices as amortized to \bigO{1} per operation.
+\end{obs}
+
+We see that WAVL trees can be used for semi-persistence even in their original form, along with many other binary search trees. Time complexity of operations with the tree depends on the original balancing algorithm used. With WAVL trees we get \bigO{\log n} per operation from the original algorithm in addition to the amortized \bigO{1}. Here $n$ is the size of the tree in the version that is queried.
 
 In fact, for semi-persistence fat vertices may be defined differently. It suffices that only values of changed fields and pointers are written into slots. Thus each fat vertex carries a set of default values for every field and pointer, these values are used if not overridden by a slot. This approach may lead to lower memory consumption and cannot be used for full persistence.
 
@@ -107,14 +115,33 @@ In fact, for semi-persistence fat vertices may be defined differently. It suffic
 
 \section{Parallel Semi-Persistence with WAVL Trees}
 
-Insertion and deletion in a WAVL tree can be also carried out top-down. %TODO: Link
-It is also possible to preemptively perform rotations, promotes and demotes when descending to make sure that more changes of high ranks will not be needed. It can be shown that there at most \bigO{1} modifications of the structure per operation (amortized), albeit the constant proves to be rather high. These facts lay a solid foundation to parallel semi-persistence.
+Insertion and deletion in a WAVL tree can be also carried out top-down\cite{rank-balanced-trees}.
+It is also possible to preemptively perform rotations, promotes and demotes when descending to make sure that more changes of high ranks will not be needed. This means that as insert or delete will descend down the tree towards the leaves processing vertices along some path, it will hold locks for vertices in at most constant distance from the vertex that the operation is currently processing.
 
-When we enter a fat vertex, we lock it for other threads of computation. Conversely, lock is lifted when the fat vertex is left. Since all threads begin locking at the root and descend towards the leaves, no deadlocking is possible.
+It can be shown that there at most \bigO{1} modifications of the structure per operation (amortized), albeit the constant proves to be rather high. These facts lay a solid foundation to parallel semi-persistence.
+
+What is unfortunate, is the delete procedure, which must locate an additional vertex to swap values in case of the deleted vertex having two children. So we will assume that delete is not possible for now.
+
+First of all two kinds of operations must be identified. 
+
+\begin{itemize}
+	\item Query on any version of the tree (id est find, min, max and range functions)
+	\item Insert (into the newest version of the tree)
+\end{itemize}
+
+Let us address data races between inserts first. For every insert, prior to all else, new version handle must be created. This is achieved simply by incrementing a version counter which is done in constant time and will not block other threads much. The insert itself follows.
+
+Locking procedure will be this: When we enter a fat vertex, we lock it for other threads of computation. Conversely, lock for a fat vertex is lifted when insert holding the lock  is unlocked by the original algorithm. Since all threads begin locking at the root and descend towards the leaves, no deadlocking is possible among inserts. This follows from the fact that rotations are only done among vertices locked by the same operation.
 
 Applying the algorithm with semi-persistence we must however ensure that before unlocking a fat node, none of its children may run out of slots leading to allocation of a replacement. Since there can be at most one new slot occupied for every fat node in one operation, it suffices to allocate new fat vertex for every fat vertex without empty slots before releasing its parent.
 
-If we increase the number of slots in a fat vertex by at least one, complexity remains the same.
+To address queries, we first assume that queries are only started on a version that was generated by already complete insert. In this situation, queries may pass through fat vertices with little regard to ongoing inserts. Queries will thus ignore locks on fat vertices. Only one thing must be considered -- modification of slots by insert (being non-atomic) requires exclusive write lock on the slots that are modified. Queries will require shared read-only lock. Since reading of information from slots by insert may only be obstructed by writing by the same insert, read-only lock is not needed in this case. No deadlocks will arise from this locking can be conducted starting from the head of slots linked list in all cases. 
+
+If we increase the number of slots in a fat vertex by at least one, asymptotic memory consumption remains linear with length of history. Time complexity for one operation remains the same as without this modification for concurrence, that is if time spend being blocked by other threads is excluded.
+
+Let us turn back to enabling delete. If delete operations are rare, we may simply treat them as inserts locking-wise and acknowledge that they blocking may ensue. Another approach would be to use the technique of \textit{ghost vertices}. That is to add a deleted flag to vertex layout, deleting would simply set this flag in corresponding slot. This will increase size of the tree. For the number of deleted vertices bounded by a polynomial in the number of remaining vertices for every version of the data structure, this preserves the asymptotic time complexity. 
+
+Otherwise, an entirely new data structure may be built from the latest versions of all vertices in the tree if the amount of deleted vertices exceeds a certain ratio to remaining vertices. The cost to build this new tree is amortized into the deletes from the preceding data structure.
 
 \section{List Ordering}
 
@@ -138,3 +165,9 @@ For every vertex in the weight-balanced tree, we will store encoding of the path
 \section{Fully-Persistent WAVL Tree}
 
 Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing this operation on this version, thus consuming super-linear amount of space.
+
+For achieving full persistence, we will build upon the technique of fat vertices. Now however, simply allocating new vertex when we run out of empty slots in the old one will not do. It remains crucial that occupied slots of one fat vertex form an interval of existing versions. In particular, It will be needed to insert between existing versions
+
+\begin{prop}
+Suppose any order of splitting fat vertices with the number of slots exceeding the set limit $l$ during an operation on a tree $T$. Regardless of the way for choosing the next node to be split, number of occupied slots in all nodes will remain under .
+\end{prop}
