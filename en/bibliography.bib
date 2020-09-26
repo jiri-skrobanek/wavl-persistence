@@ -1,0 +1,93 @@
+%
+%  An example of a bibliographical database for bibTeX
+%
+%  Recommended software for maintenance of *.bib files:
+%    JabRef, http://jabref.sourceforge.net/
+%
+%  BEWARE:
+%
+%    *  If a name contains a capital letter, which must be kept such,
+%       use curly brackets ({T}hailand, {HIV}).
+%
+%  ===========================================================================
+
+@ARTICLE{rank-balanced-trees,
+  title = {Rank-Balanced Trees},
+  author = {Haeupler, B. and Sen, S. and Tarjan, R.},
+  year = {2015},
+  journal = {ACM Transactions on Algorithms},
+  volume = {11}
+}
+
+@inproceedings{persistence-DSST,
+author = {Driscoll, J R and Sarnak, N and Sleator, D D and Tarjan, R E},
+title = {Making Data Structures Persistent},
+year = {1986},
+isbn = {0897911938},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/12130.12142},
+doi = {10.1145/12130.12142},
+booktitle = {Proceedings of the Eighteenth Annual ACM Symposium on Theory of Computing},
+pages = {109–121},
+numpages = {13},
+location = {Berkeley, California, USA},
+series = {STOC '86}
+}
+
+@article{confluently-persistent,
+author = {Driscoll, James R. and Sleator, Daniel D. K. and Tarjan, Robert E.},
+title = {Fully Persistent Lists with Catenation},
+year = {1994},
+issue_date = {Sept. 1994},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {41},
+number = {5},
+issn = {0004-5411},
+url = {https://doi.org/10.1145/185675.185791},
+doi = {10.1145/185675.185791},
+abstract = {This paper considers the problem of representing stacks with catenation so that any stack, old or new, is available for access or update operations. This problem arises in the implementation of list-based and functional programming languages. A solution is proposed requiring constant time and space for each stack operation except catenation, which requires O(log log k) time and space. Here k is the number of stack operations done before the catenation. All the resource bounds are amortized over the sequence of operations.},
+journal = {J. ACM},
+month = sep,
+pages = {943–959},
+numpages = {17},
+keywords = {amortization, stack, functional programming, queue, LISP, data structures, list, concatenation, catenation}
+}
+
+@article{link-cut,
+author = {Sleator, Daniel Dominic and Tarjan, Robert Endre},
+title = {Self-Adjusting Binary Search Trees},
+year = {1985},
+issue_date = {July 1985},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {32},
+number = {3},
+issn = {0004-5411},
+url = {https://doi.org/10.1145/3828.3835},
+doi = {10.1145/3828.3835},
+abstract = {The splay tree, a self-adjusting form of binary search tree, is developed and analyzed. The binary search tree is a data structure for representing tables and lists so that accessing, inserting, and deleting items is easy. On an n-node splay tree, all the standard search tree operations have an amortized time bound of O(log n) per operation, where by “amortized time” is meant the time per operation averaged over a worst-case sequence of operations. Thus splay trees are as efficient as balanced trees when total running time is the measure of interest. In addition, for sufficiently long access sequences, splay trees are as efficient, to within a constant factor, as static optimum search trees. The efficiency of splay trees comes not from an explicit structural constraint, as with balanced trees, but from applying a simple restructuring heuristic, called splaying, whenever the tree is accessed. Extensions of splaying give simplified forms of two other data structures: lexicographic or multidimensional search trees and link/cut trees.},
+journal = {J. ACM},
+month = jul,
+pages = {652–686},
+numpages = {35}
+}
+
+@article{range-trees,
+author = {Bentley, Jon Louis},
+title = {Decomposable searching problems},
+year = {1979},
+issue_date = {June 1979},
+publisher = {},
+address = {},
+volume = {8},
+number = {5},
+issn = {0020-0190},
+url = {https://doi.org/10.1016/0020-0190(79)90117-0},
+doi = {10.1016/0020-0190(79)90117-0},
+journal = {Information Processing Letters},
+month = jun,
+pages = {244-251},
+numpages = {8}
+}

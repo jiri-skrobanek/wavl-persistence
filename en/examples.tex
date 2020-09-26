@@ -1,6 +1,31 @@
 Some of the examples may have more elegant solutions using a different approach. Here the goal is to present the kind of problems where persistence may prove useful and help develop reasoning needed to see other applications should they be encountered by the reader.
 
-\section{Point location in a plane}
+\section{Point localization in a plane}
+
+Given a bounded connected subset of a plane partitioned into a finite set of faces, the goal is to respond to queries asking to which face a point $P$ belongs. We limit ourselves to polygonal faces.
+One special case of particular importance of this problem is finding the closest point, i.e. when the faces are Voronoi diagrams.
+
+To build the data structure we will follow a general idea of line-sweeping. We start by sorting vertices of all faces by the first coordinate. We will continually process these vertices in the order of increasing first coordinate. We maintain a sorted list of edges (in a semi-persistent BST) during this processing. The list contains edges that intersect with a sweeping-line parallel to the secondary axis in order of the intersections (sorted by the second coordinate). 
+
+Initially the list is empty and we set the sweeping line to intersect the first vertex.
+When we start processing a new vertex we imagine moving the sweeping line along the primary axis to intersect with the new vertex. We can easily observe that the order of edges cannot change during this virtual movement. (None of the edges can intersect except in a vertex.) It will happen, however, that edges must be either removed from the list or added to the list. When adding 
+
+We store pointers to the versions created in each in vertex in a sorted array.
+
+The number of vertices will be denoted $n$, the number of edges is thus bounded by $3n$. This follows from the partitioning being drawing of a planar graph. Complexity is therefore \bigO{n \log n} for pre-processing and \bigO{\log n} for one query.
+
+
+\section{Two-dimensional prefix interval listing}
+
+This application assumes a finite set of $n$ points in a two-dimensional plane. The request is to construct a data structure which could answer queries of the following kind: List %(the number of)
+all points $(x_i,y_i)$ satisfying $x_i < \bar x$ and $ y_i \in (\underset{\bar{}}{y}, \bar y) $.
+
+The first step in building data structure for these queries is to sort given points by $x$ coordinate. Then we proceed to add all points in order of increasing $x$ coordinate into a semi-persistent binary search tree. To answer a query with the same parameters as above. We first find a version of the BST where the point added is the greatest lesser than $\bar x$ using binary search on the versions. Then we search that version of the BST and list all points in the specified interval.
+
+With efficient implementation (as discussed in previous chapters), we get \bigO{n \log n} time to prepare the data structure, \bigO{\log n + f} time to answer a query where $f$ points are reported, and asymptotically linear memory consumption. The space requirement is an improvement over range trees\cite{range-trees}.
+
+This data structure can be used as an interval tree by looking at the difference between queries for two different $\bar x$ with the same range for $y$. %TODO: Make more efficient.
+
 
 \section{???}
 
@@ -45,3 +70,5 @@ This clearly does not break the ordering of vertices in $P$, as there are no pos
 Not to store excessively many deleted vertices in $P$ and the DFU, we rebuild the entire data structure from the latest version of $T$ when the amount of deleted vertices reaches at least half of the total amount of vertices. The cost to rebuild the tree is obviously amortized into a constant per delete.
  
 Depending on the ratio between types of operations, complexity of the queries may be increased. %TODO: Is this amortized completely?
+
+Alternatively, this problem may in addressed by adding a few extra operations to link/cut trees\cite{link-cut}.

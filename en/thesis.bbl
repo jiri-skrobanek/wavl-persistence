@@ -10,4 +10,14 @@ James~R. Driscoll, Daniel D.~K. Sleator, and Robert~E. Tarjan.
 \newblock Fully persistent lists with catenation.
 \newblock {\em J. ACM}, 41(5):943–959, September 1994.
 
+\bibitem{range-trees}
+Jon~Louis Bentley.
+\newblock Decomposable searching problems.
+\newblock {\em Information Processing Letters}, 8(5):244--251, June 1979.
+
+\bibitem{link-cut}
+Daniel~Dominic Sleator and Robert~Endre Tarjan.
+\newblock Self-adjusting binary search trees.
+\newblock {\em J. ACM}, 32(3):652–686, July 1985.
+
 \end{thebibliography}
