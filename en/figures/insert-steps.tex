@@ -2,7 +2,7 @@
 \begin{center}
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
-[ \edge node[auto=right]{1 or 2}; [.Y
+[ \edge node[auto=right]{1 or 2}; [.y
     \edge node[auto=right] {0};
     \node[draw,triangle]{~};
     \edge node[auto=left] {1};
@@ -12,7 +12,7 @@
 \qquad
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
-[ \edge node[auto=right]{0 or 1}; [.Y
+[ \edge node[auto=right]{0 or 1}; [.y
     \edge node[auto=right] {1};
     \node[draw,triangle]{~};
     \edge node[auto=left] {2};
@@ -27,12 +27,12 @@
 \begin{center}
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
-[ \edge node[auto=right]{1 or 2}; [.z
+[ \edge node[auto=right]{1 or 2}; [.y
     \edge node[auto=right] {0};
     [   .x 
         \edge node[auto=right] {1}; 
         \node[draw,triangle]{A}; 
-        \edge node[auto=left] {1};
+        \edge node[auto=left] {2};
         \node[draw,triangle]{B}; ]
     \edge node[auto=left] {2};
     \node[draw,triangle]{C};
@@ -45,7 +45,7 @@
     \edge node[auto=right] {1};
     \node[draw,triangle]{A};
     \edge node[auto=left] {1};
-    [   .z 
+    [   .y 
         \edge node[auto=right] {1}; 
         \node[draw,triangle]{B}; 
         \edge node[auto=left] {1}; 
@@ -53,7 +53,7 @@
 ] ]
 \end{tikzpicture}
 \end{center}
-\caption{Promote rotation step}
+\caption{Insert rotation step}
 \end{figure}
 
 \begin{figure}
@@ -63,7 +63,7 @@
 [ 
     \edge node[auto=right]{1 or 2}; 
     [
-        .z
+        .y
         \edge node[auto=right] {0};
         [   
             .x 
@@ -71,7 +71,7 @@
             \node[draw,triangle]{A}; 
             \edge node[auto=left] {1};
             [
-                .y
+                .w
                 \node[draw,triangle]{B};
                 \node[draw,triangle]{C}; 
             ]
@@ -84,7 +84,7 @@
 \qquad
 \begin{tikzpicture}[sibling distance=8pt]
 \Tree
-[ \edge node[auto=right]{1 or 2}; [.y
+[ \edge node[auto=right]{1 or 2}; [.w
     \edge node[auto=right] {1};
     [ 
         .x
@@ -93,12 +93,12 @@
         \node[draw,triangle]{B};
     ]
     \edge node[auto=left] {1};
-    [   .z 
+    [   .y 
         \node[draw,triangle]{C}; 
         \edge node[auto=left] {1}; 
         \node[draw,triangle]{D}; ]
 ] ]
 \end{tikzpicture}
 \end{center}
-\caption{Promote double rotation step}
+\caption{Insert double rotation step}
 \end{figure}

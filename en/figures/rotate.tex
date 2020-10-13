@@ -1,0 +1,24 @@
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[sibling distance=32pt]
+\Tree
+[ [.y
+    [   .x 
+        \node[draw,triangle]{A};
+        \node[draw,triangle]{B}; ]
+    \node[draw,triangle]{C};
+] ]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=32pt]
+\Tree
+[ [.x
+    \node[draw,triangle]{A};
+    [   .y 
+        \node[draw,triangle]{B}; 
+        \node[draw,triangle]{C}; ]
+] ]
+\end{tikzpicture}
+\end{center}
+\caption{Rotate step}
+\end{figure}

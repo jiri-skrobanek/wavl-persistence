@@ -1,4 +1,4 @@
-For the purposes of this thesis, binary search tree will be a data structure composed of internal vertices (or nodes). Every internal vertex carries a key. Keys are members of a set of linearly ordered items and naturally extend this ordering to vertices. In addition, internal vertices are allowed to carry constant amount of information in fields (for example about tree structure) and to have constant number of pointers to other vertices. An internal node has two pointers to child vertices -- left and right. Any of the two can be an external vertex. External vertices are not represented in memory, all pointers to external vertices are equal and must not be dereferenced. For the specific application, it can be beneficial to assume external vertices have some default values of their fields. An internal left child must precede its parent in the linear order, conversely an internal right child must come after its parent in the linear order.
+For the purposes of this thesis, binary search tree will be a data structure composed of internal vertices (or nodes). Every internal vertex carries a key. Keys are members of a set of linearly ordered items and naturally extend this ordering to vertices. In addition, internal vertices are allowed to carry constant amount of information in fields (for example about tree structure) and to have constant number of pointers to other vertices. An internal node has two pointers to child vertices -- left and right. Any of the two can be an external vertex. External vertices are not represented in memory, all pointers (null-pointers) to external vertices are equal and must not be dereferenced. For the specific application, it can be beneficial to assume external vertices have some default values of their fields. An internal left child must precede its parent in the linear order, conversely an internal right child must come after its parent in the linear order.
 
 Binary search trees naturally represent finite ordered trees which where every vertex has degree at most three and root and degree at most two.
 
@@ -19,5 +19,78 @@ When we work with binary search trees, we typically use a specific algorithm tha
 Of the operations described here, typically only \texttt{Insert} and \texttt{Delete} alter the BST. (Notable exception to this are splay trees.) We will call operations that modify the BST {\em altering}, remaining operations {\em non-altering}.
 
 We do not place any restrictions on the 
+
+\subsection{Standard implementations}
+
+We will mention here a basic implementation for three of those operations. Is is expected that the reader is familiar with these operations already.
+
+\subsubsection*{Find}
+Search for a key $k$ begins by assigning the root to a variable current vertex $v$. If $v$ has the searched key, the vertex is found. Otherwise if $k$ is greater than the key of $v$. We try to move the right child of $v$, otherwise to the left child. If such child we want to move to is external, we end unsuccessfully. 
+
+%TODO: Delete?
+
+\begin{algorithm}
+	\small
+	\SetAlgoLined
+	\KwResult{$v$}
+	$v \gets $ root of Tree\;
+	\While{$v \neq \Lambda$ }{
+		\If{Key = $k(v)$}{
+			\textbf{halt}\;
+		}
+		\eIf{Key $> k(v)$}{
+			$v \gets r(v)$\;
+		}{
+			$v \gets l(v)$\;
+		}
+	}
+	\caption{Find(Tree, Key)}
+\end{algorithm}
+
+
+\subsubsection*{Insert}
+The place where a vertex should be inserted is the same as for most BSTs. Descending from the root going to left child if the key being inserted is lower than the key of current vertex, to right child otherwise. This is repeated until a null-pointer is reached -- which will replaced by pointer to the new vertex. After the change rebalancing will typically follow.
+
+%TODO: Delete?
+
+\begin{algorithm}
+	\small
+	\SetAlgoLined
+	$v \gets $ root of Tree\;
+	$w \gets \Lambda$\;
+	\If{$v = \Lambda$}{
+		Create new vertex with Key and Value and set is as root of Tree\;
+		halt\;
+	}
+	\While{$v \neq \Lambda$ }{
+		$w \gets v$\;
+		\eIf{Key $> k(v)$}{
+			$v \gets r(v)$\;
+		}{
+			$v \gets l(v)$\;
+		}
+	}
+	$u \gets $ new vertex with Key and Value\;
+	\eIf{Key $> k(w)$}{	
+		$r(w) \gets u$\;
+	}{
+		$l(v) \gets u$\;
+	}
+	Rebalance Tree according to according to chosen algorithm.
+	\caption{Insert(Tree, Key, Value)}
+\end{algorithm}
+
+\subsubsection*{Delete}
+For deletion, the vertex $v$ subject to deletion is located first using find. If it is a leaf, it is then deleted. If it has only one child, it is deleted and its only child becomes child of the parent of $v$ directly. Otherwise successor to $v$ is found, it cannot have two children, so it is possible to swap Key and Value between those vertices and then run the deletion again, this time certainly removing a vertex. After a vertex is deleted, rebalancing follows.
+
+We will also describe here one common rebalancing step which is rotate.
+
+\subsection*{Rotate}
+
+For a vertex $y$ with parent $p$ and left child $x$ and right subtree $C$ where $x$ has left subtree $A$ and right subtree $B$, a rotate step (or rotation) along $xy$ makes $x$ to have parent $p$, left subtree $A$ and right child $y$. Subsequently, $y$ gets left subtree $B$ and keeps its right subtree $C$.
+
+For symmetry, rotating along $xy$ again from the resulting state, we would get the original tree before any rotations.
+
+\input{figures/rotate}
 
 In the rest of this chapter, we will discuss some variants of binary search trees useful for persistence.
