@@ -10,10 +10,10 @@ A binary tree is said to be {\em ranked binary tree} if all vertices have non-ne
 Vertex $V$ having left child $L$ and right child $R$ (both of which may be external) in ranked binary tree is called $(a,b)$-vertex if $r(V) - r(L) = a$ and $r(V) - r(L) = b$. $L$ and $R$ are called $a$-child and $b$-child.
 \end{defn}
 
-\begin{thm}
+\begin{prop}
 Let $S$ be a finite subset of ${(\mathbb{Z} _ +)}^2$ and $T$ a ranked tree with $n$ vertices. If it holds that for every $(i,j)$-vertex in $T$ that $(i,j) \in S$, then the height of $T$ is $\Theta(\log n)$.
 \label{thm-rbt-depth}
-\end{thm}
+\end{prop}
 
 \begin{myproof}
 Let us denote $m$ the maximum allowed rank difference by $S$.
@@ -78,20 +78,35 @@ We get the following as a corollary of theorem \ref{thm-rbt-depth}.
 Insertion and deletion on a Weak AVL tree have time complexity $\Theta(\log n)$ and require at most one rotation.
 \end{prop}
 
-WAVL trees also have good properties when we consider the amortized number of promote, demote, or rotate steps -- all average to a constant. Unfortunately, we will need constant number of modifications per operation even in the worst-case.
-
-\subsection{Top-down rebalancing}
-
-There is an alternative set of procedures for performing insert and delete in WAVL tree. Changes are performed during descent from the root while searching for the key in question. No return to the root ensues.
-
-For insert, we know that problematic vertices that cause promote to be passed upwards are (2,2). When we traverse the tree down from the root, passing through a vertex other than (2,2) ensures that rebalancing will not proceed through that vertex upwards. We thus only need to worry about long chains of (2,2)-vertices.
-
-Before moving to our modification of this algorithm, we list a property of WAVL trees that will be useful later. The proof is beyond the scope of this thesis and can be found in an article by Haeupler, Sen, and Tarjan \cite{rank-balanced-trees}. These results are obtained by cleverly defining a potential function on vertices of the BST.
+It is time to list a property of WAVL trees that will be useful later. The proof is beyond the scope of this thesis and can be found in an article by Haeupler, Sen, and Tarjan \cite{rank-balanced-trees}. These results are obtained by cleverly defining a potential function on vertices of the BST.
 
 \begin{defn}
 Insert and delete operation is said to be of rank $r$ if the highest rank of a vertex where rotation or rank change takes place is $r$.
 \end{defn}
 
-\begin{prop}
-There exist a constant $c_1$ greater than 1 such that for every ... %TODO: Some of the theorems from rbt article, probably without proofs.
-\end{prop}
+\begin{thm}
+In a WAVL tree with bottom-up rebalancing, there are \bigO{d} demote steps over all deletions, where $d$ denotes the total number of deletions. (With the tree initially empty.)
+\end{thm}
+
+\begin{thm}
+In a WAVL tree with bottom-up rebalancing, there are \bigO{m} promote steps over all insertions, where $m$ denoted the total number of insertions. (With the tree initially empty.)
+\end{thm}
+
+WAVL trees have good properties when we consider the amortized number of promote, demote, or rotate steps -- all average to a constant. The number of rotations is constant even in the worst case. Unfortunately, we will need constant number of modifications per operation even in the worst-case.
+
+\subsection{Top-down rebalancing}
+
+There is an alternative set of procedures for performing insert and delete in WAVL tree. Changes are performed during descent from the root while searching for the key in question. No return to the root ensues.
+
+For insert, we know that problematic vertices that cause promote to be passed upwards are $(0,1)$. When we traverse the tree down from the root during the find phase these must $(1,1)$. Passing through a vertex other than $(1,1)$ ensures that rebalancing will not proceed through that vertex upwards. We thus only need to worry about long chains of $(1,1)$-vertices when descending during the find phase of insert.
+
+Top-down rebalancing utilizes \textit{forced-reset} to remove these long chains of $(1,1)$-vertices. Forced reset is triggered by passing through the $k$-th $(1,1)$-vertex (denoted $d$)in a row during the find phase of insert. The last passed node that is not $(1,1)$ is called \textit{safe node}. We know that promoting $d$ might require rebalancing to be performed starting at $d$ to restore rank rules. We know however that this rebalancing will end at the safe node, taking \bigO{1} operations.
+With forced-reset prevents returning arbitrarily close to the root during rebalancing after the insert is performed.
+
+Similarly with delete, in which case problematic nodes are $(2,2)$ and $(2,1)$ with the 1-child being $(2,2)$. The remaining nodes are safe. Forced-reset triggers demote after passing through $l$ non-safe nodes. (Subsequent rebalancing ends after \bigO{1} steps.)
+
+As the next theorem claims, we can preserve the upper bound on rebalancing steps, the number of rotations during one operation unfortunately can be as high as \bigO{\log n}.
+
+\begin{thm}
+Setting $k=5$ and $l=3$, top-down rebalancing takes \bigO{m+d} steps where $m$ denotes the number of inserts and $d$ the number of deletes.
+\end{thm}
