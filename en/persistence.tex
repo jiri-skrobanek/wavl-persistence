@@ -154,8 +154,8 @@ In reality, we will also insert other elements into the ordering that will be he
 With the ordering defined, we still need a way to efficiently represent it in memory. The operations we really need are
 
 \begin{itemize}
-	\item InsertSuccessor(Version),
-	\item Compare(VersionA, VersionB).
+	\item \texttt{InsertSuccessor(Version)},
+	\item \texttt{Compare(VersionA, VersionB)}.
 \end{itemize}
 
 To preserve the speed of semi-persistence, \texttt{Compare} must be \bigO{1} and \texttt{InsertSuccessor} \bigO{\log n} at least amortized. Weight-balanced trees that were introduced in the previous chapter are ideally suited for this purpose.
