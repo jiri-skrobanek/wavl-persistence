@@ -3,3 +3,13 @@ To state the algorithms described in more exact manner the author implemented al
 %TODO: Lincense
 
 The goal of the implementation is solely to provide additional clarity into the algorithms. No special optimization has been carried out as this would likely only hinder understanding. It is not intended that someone would include the library in own project, nonetheless that is also possible.
+
+%TODO: Mention wrapper around persistence
+
+\subsection*{Size of fat vertices}
+
+In the previous chapter we have derived minimum size of fat vertices which guarantees logarithmic asymptotic complexity per operation and constant space per operation. It may be beneficial however to increase the size further.
+
+Recall that every splitting may result in additional slots being filled. This presents a memory overhead and slowdown of altering operations. Having more slots in a fat vertex, node-splitting will be less frequent on average. On the other hand, large number of slots causes slower lookup of the one bearing the relevant version. 
+
+Striving to reach the best performance with this data structure, the size of fat vertices must be set experimentally with respect to the ratio of operation types for every specific use-case.
