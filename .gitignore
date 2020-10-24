@@ -347,7 +347,7 @@ healthchecksdb
 *.fls
 *.lot
 *.out
-*.bib
+*.bbl
 *.xmpi
 *.xmpdata
 *.fdb_latexmk
