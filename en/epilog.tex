@@ -1,2 +1,12 @@
 \chapter*{Conclusion}
 \addcontentsline{toc}{chapter}{Conclusion}
+
+We introduced a family of binary search trees called rank balanced trees as a useful abstraction and a foundation for Weak AVL trees. Interesting properties of WAVL trees were discussed.
+
+We modified Weak AVL trees to only require a constant number of change per operation (preserving their structural properties). This construction is not known to have been discovered earlier.
+
+We reiterated a general process described by Driscoll et al.\cite{persistence-DSST} for making pointer data structures persistent. The described process was applied to obtain fully-persistent WAVL trees through our modification of that BSTs. Exemplar implementation was provided.
+
+Driscoll et al. used \textit{displacement paths} to deamortize time complexity of insert and delete operations for fully-persistent 2-3 trees. It remains to investigate the possibility of worst case time complexities per operation for WAVL trees. A technique alike that used for 2-3 trees might be used.
+
+Finally some applications of persistence were mentioned.
