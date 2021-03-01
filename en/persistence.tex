@@ -11,7 +11,7 @@ This division is by no means universally adopted, but provides an interesting pe
 
 With a persistent data structure, we essentially want to have one data structure for every existing version. Insert and delete return a new version handle instead of making changes to the existing version. Obviously, copying the data structure every time is one option how to achieve this, albeit not a great one. To prevent using extra memory and increased time complexity of operations however, more intricate methods must be employed.
 
-Going beyond this hierarchy, if fully-persistent data structure also supports merging or melding two different versions, it is called \textit{confluently persistent} \cite{confluently-persistent}. We will not investigate confluent persistence in this thesis further.
+Going beyond this hierarchy, if fully-persistent data structure also supports merging or melding two different versions, it is said to be \textit{confluently persistent}. Confluently persistent data structures are the subject of studies for example by Driscoll, Sleator, and Tarjan\cite{confluently-persistent-a} or Fiats and Kaplan\cite{confluently-persistent-b}. We will not investigate confluent persistence in this thesis further.
 
 \section{Persistence through Path-Copying}
 
