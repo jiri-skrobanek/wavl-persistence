@@ -1,0 +1,19 @@
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}
+\node (treen) {Tree};
+\node (accessor) [below=of treen] {Node Accessor};
+\node (full) [left=of accessor] {Full Node};
+\node (nod) [below=of accessor] {Node};
+\node (fat) [below=of full] {Fat Node};
+\draw[->] (treen) -- (accessor); 
+\draw[<->] (full) -- (accessor);
+\draw[->] (accessor) -- (nod);
+\draw[<->] (nod) -- (fat);
+\end{tikzpicture}
+\end{center}
+
+\caption{One Possible Schema of Persistent WAVL Tree}
+\label{fig-layers}
+
+\end{figure}
