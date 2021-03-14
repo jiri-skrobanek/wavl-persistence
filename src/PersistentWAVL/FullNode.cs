@@ -7,12 +7,12 @@ namespace PersistentWAVL
     /// </summary>
     public class FullNode<K, V> : IComparable<FullNode<K, V>> where K : class, IComparable<K>
     {
-        public FullNode(Node<K, V>.NodeAccessor @base)
+        internal FullNode(Node<K, V>.NodeAccessor @base)
         {
             Base = @base;
         }
 
-        public Node<K, V>.NodeAccessor Base;
+        internal Node<K, V>.NodeAccessor Base;
 
         /// <summary>
         /// The number of demotion paths this vertex is on
@@ -39,8 +39,8 @@ namespace PersistentWAVL
 
         public int CompareTo(FullNode<K, V> other) => this.Key.CompareTo(other.Key);
 
-        public Node<K, V>.NodeAccessor Left => Base.Left;
+        internal Node<K, V>.NodeAccessor Left => Base.Left;
 
-        public Node<K, V>.NodeAccessor Right => Base.Right;
+        internal Node<K, V>.NodeAccessor Right => Base.Right;
     }
 }
