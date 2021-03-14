@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace PersistentWAVL
 {
+    /// <summary>
+    /// Holds a collection of versions of one vertex.
+    /// </summary>
     public class FatNode<K, V> where K : class, IComparable<K>
     {
         public const int SizeLimit = 11;
@@ -26,11 +29,17 @@ namespace PersistentWAVL
             return Slots[max];
         }
 
+        /// <summary>
+        /// Validates that size of this fat node does not exceed given limit. 
+        /// Potentially splits this fat node.
+        /// </summary>
         public void CheckInvariant()
         {
             if (Slots.Count <= SizeLimit) return;
 
             var queue = new LinkedList<FatNode<K, V>>();
+
+            queue.AddLast(this);
 
             // The order is irrelevant as the node cannot become more than 
             // twice the size limit before being split at least once
@@ -55,6 +64,7 @@ namespace PersistentWAVL
 
             var newNode = new FatNode<K, V>();
 
+            // List of nodes that might need to updated.
             var refs = new HashSet<FatNode<K, V>>();
 
             foreach (var slot in Slots)

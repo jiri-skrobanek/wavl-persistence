@@ -5,11 +5,16 @@ using System.Text;
 
 namespace PersistentWAVL
 {
-    public partial class Tree<K, V> where K : class, IComparable<K>, IEquatable<K>
+    /// <summary>
+    /// Represents one version of the binary search tree data structure
+    /// </summary>
+    /// <typeparam name="K">Type of keys</typeparam>
+    /// <typeparam name="V">Type of values</typeparam>
+    public partial class Tree<K, V> : ITree<K, V> where K : class, IComparable<K>, IEquatable<K>
     {
         public VersionHandle Version { get; private set; }
 
-        public Node<K, V>.NodeAccessor Root { get; private set; }
+        internal Node<K, V>.NodeAccessor Root { get; private set; }
 
         private Tree()
         {
@@ -18,11 +23,13 @@ namespace PersistentWAVL
 
         public static Tree<K, V> GetNew => new Tree<K, V> { Version = VersionHandle.GetNew() };
 
-        public Node<K,V>.NodeAccessor Find(K Key)
+        public V Find(K Key) => _find(Key).Value;
+
+        private Node<K, V>.NodeAccessor _find(K Key)
         {
             var current = Root;
 
-            while(current != null && current != Key)
+            while (current != null && current != Key)
             {
                 current = current.Key.CompareTo(Key) > 0 ? current.Left : current.Right;
             }
@@ -30,18 +37,22 @@ namespace PersistentWAVL
             return current;
         }
 
+        /// <summary>
+        /// Inserts an entry not present in the current version.
+        /// </summary>
+        /// <returns>New version with inserted vertex</returns>
         public Tree<K, V> Insert(K Key, V Value)
         {
             var newVersion = Version.GetSuccessor();
             // Key must not be present in tree!
 
-            var n = new Node<K, V>.NodeAccessor(newVersion, new Node<K, V>(Key, Value, newVersion));
+            var n = new Node<K, V>(Key, Value, newVersion).GetTemporaryAccessorForVersion(newVersion);
 
-            if (Root == null) return new Tree<K, V> { Root = n, Version = newVersion };
+            if (Root is null) return new Tree<K, V> { Root = n, Version = newVersion };
 
-            var path = GetPath(Key);
+            var path = GetPath(Key, newVersion);
 
-            if (Key.CompareTo(path.Last().Base.Key) > 0)
+            if (Key.CompareTo(path.Last().Key) < 0)
             {
                 path.Last().Base.Left = n;
             }
@@ -50,13 +61,24 @@ namespace PersistentWAVL
                 path.Last().Base.Right = n;
             }
 
-            var top = BalancePath(path);
+            var top = BalancePath(path).GetPermanentAccessor();
+
+            Node<K,V>.RemoveListOfAccessors();
 
             return new Tree<K, V> { Root = top, Version = newVersion };
         }
 
+        /// <summary>
+        /// Removes an element with specified key producing a new version.
+        /// </summary>
+        /// <returns>New version with deleted vertex.</returns>
         public Tree<K, V> Delete(K Key)
         {
+            if (Root is null) throw new InvalidOperationException("Cannot delete from empty tree.");
+            // If there is only one vertex return null. 
+            // This is a technical detail and behaviour may be changed to produce empty tree with a new version.
+            if (Root.Left is null && Root.Right is null) return null;
+
             // Key must be present in tree!
 
             var newVersion = Version.GetSuccessor();
@@ -87,7 +109,7 @@ namespace PersistentWAVL
                 if (prev.Right == current) prev.Right = null;
                 else prev.Left = null;
 
-                top = BalancePath(GetPath(prev.Key));
+                top = BalancePath(GetPath(prev.Key, newVersion));
             }
 
             else if (current.Left == null)
@@ -96,7 +118,7 @@ namespace PersistentWAVL
                 current.Key = current.Right.Key;
                 current.Right = null;
 
-                top = BalancePath(GetPath(current.Key));
+                top = BalancePath(GetPath(current.Key, newVersion));
             }
 
             else if (current.Right == null)
@@ -105,7 +127,7 @@ namespace PersistentWAVL
                 current.Key = current.Left.Key;
                 current.Left = null;
 
-                top = BalancePath(GetPath(current.Key));
+                top = BalancePath(GetPath(current.Key, newVersion));
             }
 
             else if (prev.Key.CompareTo(Key) > 0)
@@ -120,14 +142,14 @@ namespace PersistentWAVL
                 if (current.Left == null)
                 {
                     prev.Right = null;
-                    top = BalancePath(GetPath(prev.Key));
+                    top = BalancePath(GetPath(prev.Key, newVersion));
                 }
                 else
                 {
                     SwapModPathEnds(Key, current.Left.Key);
                     current.Key = current.Left.Key;
                     current.Left = null;
-                    top = BalancePath(GetPath(current.Key));
+                    top = BalancePath(GetPath(current.Key, newVersion));
                 }
             }
             else
@@ -142,18 +164,22 @@ namespace PersistentWAVL
                 if (current.Right == null)
                 {
                     prev.Left = null;
-                    top = BalancePath(GetPath(prev.Key));
+                    top = BalancePath(GetPath(prev.Key, newVersion));
                 }
                 else
                 {
                     SwapModPathEnds(Key, current.Right.Key);
                     current.Key = current.Right.Key;
                     current.Right = null;
-                    top = BalancePath(GetPath(current.Key));
+                    top = BalancePath(GetPath(current.Key, newVersion));
                 }
             }
 
-            return new Tree<K, V> { Root = top, Version = newVersion };
+            var newRoot = top.GetPermanentAccessor();
+
+            Node<K, V>.RemoveListOfAccessors();
+
+            return new Tree<K, V> { Root = newRoot, Version = newVersion };
 
             // Update the Key in all pmodifying paths that end with the vertex subject to key change.
             void SwapModPathEnds(K first, K second)
@@ -169,7 +195,7 @@ namespace PersistentWAVL
                 }
 
                 c1 = Root;
-                while(c1 != null)
+                while (c1 != null)
                 {
                     if (c1.ModPathEnd == first)
                         c1.ModPathEnd = second;
@@ -178,7 +204,7 @@ namespace PersistentWAVL
                     c1 = c1.Key.CompareTo(first) > 0 ? c1.Left : c1.Right;
                 }
 
-                foreach(var node in nodes)
+                foreach (var node in nodes)
                 {
                     if (c1.ModPathEnd == second)
                         c1.ModPathEnd = first;
@@ -189,13 +215,15 @@ namespace PersistentWAVL
         }
 
         /// <summary>
-        /// Descend from the root and locate a vertex with the given key.
+        /// Descend from the root and locate a vertex with the given key. 
+        /// Must be used with direct successor version of root.
         /// </summary>
         /// <returns>List of vertices on the path</returns>
-        public List<FullNode<K, V>> GetPath(K Key)
+        public List<FullNode<K, V>> GetPath(K Key, VersionHandle forVersion)
         {
             List<FullNode<K, V>> nodes = new List<FullNode<K, V>>();
-            var current = Root;
+            var current = new Node<K, V>.NodeAccessor(forVersion, Root.Node);
+            Root.Node.GetTemporaryAccessorForVersion(forVersion);
             int demoting = 0;
             bool promoting = false;
             Node<K, V>.NodeAccessor bottom = null, bottom2 = null;
@@ -210,7 +238,7 @@ namespace PersistentWAVL
                 if (current.PromotionStart)
                 {
                     promoting = true;
-                    bottom = Find(current.ModPathEnd);
+                    bottom = _find(current.ModPathEnd);
                     top = v;
                 }
                 if (current.DemotionStart)
@@ -218,12 +246,12 @@ namespace PersistentWAVL
                     demoting++;
                     if (demoting == 1)
                     {
-                        bottom = Find(current.ModPathEnd);
+                        bottom = _find(current.ModPathEnd);
                         top = v;
                     }
                     else
                     {
-                        bottom2 = Find(current.ModPathEnd);
+                        bottom2 = _find(current.ModPathEnd);
                         top2 = v;
                     }
                 }
@@ -232,12 +260,12 @@ namespace PersistentWAVL
                     demoting++;
                     if (demoting == 1)
                     {
-                        bottom = Find(current.ModPathEnd);
+                        bottom = _find(current.ModPathEnd);
                         top = v;
                     }
                     else
                     {
-                        bottom2 = Find(current.ModPathEnd2);
+                        bottom2 = _find(current.ModPathEnd2);
                         top2 = v;
                     }
                 }
@@ -313,7 +341,7 @@ namespace PersistentWAVL
         /// </summary>
         /// <param name="path">Path beginning at a parent of deleted/inserted vertex</param>
         /// <returns>new root of tree</returns>
-        public Node<K, V>.NodeAccessor BalancePath(List<FullNode<K, V>> path)
+        internal Node<K, V>.NodeAccessor BalancePath(List<FullNode<K, V>> path)
         {
             path.Reverse();
 

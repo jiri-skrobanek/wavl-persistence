@@ -17,7 +17,8 @@ namespace PersistentWAVL
 
             for (int i = index; i > 0; i--)
             {
-                if (GetPromotionContinuation(path[i]) == path[i - 1].Base) lowerlen++; else break;
+                if (GetPromotionContinuation(path[i]) == path[i - 1].Base) lowerlen++; 
+                else break;
             }
 
             // Now decide if the length of the new path will be at least two.
@@ -394,7 +395,9 @@ namespace PersistentWAVL
                 }
             }
 
-            throw new ArgumentException("Empty path");
+            // Finish promotion at root
+            FinishPromotionPath(path, path.Count - 1);
+            return path.Last().Base;
 
             void PromoteAt(int index)
             {
