@@ -7,8 +7,6 @@ namespace PersistentWAVL
     /// <summary>
     /// Whenever a write is executed, check version. If version is not equal, copy the node and add slot to fat vertex.
     /// </summary>
-    /// <typeparam name="K"></typeparam>
-    /// <typeparam name="V"></typeparam>
     public class Node<K, V> : IComparable<Node<K, V>> where K : class, IComparable<K>
     {
         #region Fields
@@ -77,6 +75,8 @@ namespace PersistentWAVL
 
         public void CopyForVersion(VersionHandle newversion)
         {
+            // TODO: This is utterly broken.
+
             FatNode.Slots[Version] = (Node<K,V>)MemberwiseClone();
             Version = newversion.GetSuccessor();
             FatNode.Slots[Version] = (Node<K,V>)MemberwiseClone();
@@ -92,7 +92,7 @@ namespace PersistentWAVL
         public class NodeAccessor
         {
             #region Proper fields
-            private Node<K, V> Node;
+            internal Node<K, V> Node;
             public VersionHandle Version;
             #endregion
 
@@ -214,7 +214,7 @@ namespace PersistentWAVL
             #region Pointers
             public NodeAccessor Left
             {
-                get => new NodeAccessor(Version, Node._left.GetNodeForVersion(Version));
+                get => Node._left == null ? null : new NodeAccessor(Version, Node._left.GetNodeForVersion(Version));
                 set
                 {
                     if (MustCopy) Node.CopyForVersion(Version);
@@ -225,7 +225,7 @@ namespace PersistentWAVL
                         // If nothing to set, end.
                         if (inverseNode._parent != Node.FatNode)
                         {
-                            if (inverseNode.Version == Version)
+                            if (inverseNode.Version != Version)
                             {
                                 inverseNode.CopyForVersion(Version);
                             }
@@ -238,7 +238,7 @@ namespace PersistentWAVL
 
             public NodeAccessor Right
             {
-                get => new NodeAccessor(Version, Node._right.GetNodeForVersion(Version));
+                get => Node._right == null ? null : new NodeAccessor(Version, Node._right.GetNodeForVersion(Version));
                 set
                 {
                     if (MustCopy) Node.CopyForVersion(Version);
@@ -249,7 +249,7 @@ namespace PersistentWAVL
                         // If nothing to set, end.
                         if (inverseNode._parent != Node.FatNode)
                         {
-                            if (inverseNode.Version == Version)
+                            if (inverseNode.Version != Version)
                             {
                                 inverseNode.CopyForVersion(Version);
                             }
@@ -260,10 +260,10 @@ namespace PersistentWAVL
                 }
             }
 
-            public NodeAccessor Top => new NodeAccessor(Version, Node._parent.GetNodeForVersion(Version));
+            public NodeAccessor Top => Node._parent is null ? null : new NodeAccessor(Version, Node._parent.GetNodeForVersion(Version));
             #endregion
 
-            private bool MustCopy => this.Version == Node.Version;
+            private bool MustCopy => this.Version != Node.Version;
             
             #region Operators
             public static bool operator <(NodeAccessor a, NodeAccessor b) => a.Node.CompareTo(b.Node) < 0;
@@ -278,9 +278,14 @@ namespace PersistentWAVL
 
             public static bool operator >(K a, NodeAccessor b) => a.CompareTo(b.Node.Key) > 0;
 
-            public static bool operator ==(NodeAccessor a, K b) => !(a < b || a > b);
+            public static bool operator ==(NodeAccessor a, K b) 
+            { 
+                if (a is null && b is null) return true;
+                if ((a is null) && !(b is null)) return false;
+                if (!(a is null) && (b is null)) return false;
+                return !(a < b || a > b); }
 
-            public static bool operator !=(NodeAccessor a, K b) => a < b || a > b;
+            public static bool operator !=(NodeAccessor a, K b) => !(a == b);
 
             public static bool operator !=(K a, NodeAccessor b) => a < b || a > b;
 

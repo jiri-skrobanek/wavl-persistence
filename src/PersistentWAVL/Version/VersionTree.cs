@@ -6,9 +6,13 @@ using System.Text;
 
 namespace PersistentWAVL.Version
 {
+    /// <summary>
+    /// Represents a node of a weight-balanced binary search tree
+    /// </summary>
     [DebuggerDisplay("VersionNode depth = {depth} key = {key>>63-depth}")]
     internal class VersionNode : IComparable<VersionNode>
     {
+        // Parameters for balancing invariants
         private const ulong alpha1 = 3, alpha2 = 2;
 
         VersionNode Left;
@@ -21,6 +25,13 @@ namespace PersistentWAVL.Version
         internal VersionNode()
         { }
 
+        /// <summary>
+        /// Creates a subtree for a given vertex.
+        /// </summary>
+        /// <param name="parent">Parent of constructed subtree</param>
+        /// <param name="list">List of versions to be included in the subtree</param>
+        /// <param name="right">Bit indicating whether this is left subtree or right subtree.</param>
+        /// <returns>Root of the subtree</returns>
         internal static VersionNode FromList(VersionNode parent, ReadOnlySpan<VersionNode> list, ulong right)
         {
             if (list.Length == 0)
@@ -44,6 +55,9 @@ namespace PersistentWAVL.Version
             return middle;
         }
 
+        /// <summary>
+        /// Function to reconstruct subtree which violates the weight-balanced invariant.
+        /// </summary>
         private void rebuildAt(VersionNode treeNode)
         {
             var parent = treeNode.Parent;
@@ -73,6 +87,9 @@ namespace PersistentWAVL.Version
             }
         }
 
+        /// <summary>
+        /// Inserts a new version into the tree, just after this version.
+        /// </summary>
         internal VersionNode GetSuccessor() => insert(this, this.key);
 
         internal VersionNode insert(VersionNode treeNode, ulong key)
@@ -108,7 +125,7 @@ namespace PersistentWAVL.Version
                     target = current.Right = new VersionNode()
                     {
                         size = 1,
-                        key = current.key + (1UL << 63 - current.depth),
+                        key = current.key + (1UL << 62 - current.depth),
                         depth = current.depth + 1,
                         Parent = current,
                     };

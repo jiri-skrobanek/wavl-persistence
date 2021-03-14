@@ -2,6 +2,9 @@
 
 namespace PersistentWAVL
 {
+    /// <summary>
+    /// Temporary record used during one operation to hold computed values about an instance of <see cref="Node{K, V}"/>.
+    /// </summary>
     public class FullNode<K, V> : IComparable<FullNode<K, V>> where K : class, IComparable<K>
     {
         public FullNode(Node<K, V>.NodeAccessor @base)
@@ -12,7 +15,7 @@ namespace PersistentWAVL
         public Node<K, V>.NodeAccessor Base;
 
         /// <summary>
-        /// THe number of demotion paths this vertex is on
+        /// The number of demotion paths this vertex is on
         /// </summary>
         public int Demoted = 0;
 

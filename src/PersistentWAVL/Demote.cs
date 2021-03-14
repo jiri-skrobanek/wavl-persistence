@@ -19,7 +19,7 @@ namespace PersistentWAVL
         {
             var removed = path[index];
             var modpathend = removed.PathStart.Base.ModPathEnd;
-            K modpathend2 = default;
+            K modpathend2 = null;
             if (removed.Demoted == 2) { modpathend2 = removed.PathStart2.Base.DemotionStart2 ? removed.PathStart2.Base.ModPathEnd2 : removed.PathStart2.Base.ModPathEnd; }
 
             // The length of demotion path

@@ -393,7 +393,9 @@ namespace WAVL
                 }
             }
 
-            throw new ArgumentException("Empty path");
+            // Finish promotion at root
+            FinishPromotionPath(path, path.Count - 1);
+            return path.Last().Base;
 
             void PromoteAt(int index)
             {
