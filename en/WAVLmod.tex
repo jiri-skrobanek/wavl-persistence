@@ -1,6 +1,6 @@
 \section{Alternative WAVL Tree Balancing Algorithm}
 
-For the purposes of full persistence, standard algorithm for working with WAVL trees cannot be used. It is guaranteed that no more than one rotation occurs during insert or delete. Nonetheless, the number of rank changes can be up to $O(\log n)$. 
+For the purposes of full persistence, standard algorithm for working with WAVL trees cannot be used. It is guaranteed that no more than one rotation occurs during insert or delete. Nonetheless, the number of rank changes can be up to \bigO{\log n}. 
 
 Fortunately, the algorithm can be modified in such a way that no operation requires more than $O(1)$ changes to be written. Ranks of vertices will be calculated from the actual rank field, but offset by a certain amount determined from different fields. 
 

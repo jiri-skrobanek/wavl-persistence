@@ -160,7 +160,7 @@ With the ordering defined, we still need a way to efficiently represent it in me
 
 To preserve the speed of semi-persistence, \texttt{Compare} must be \bigO{1} and \texttt{InsertSuccessor} \bigO{\log n} at least amortized. Weight-balanced trees that were introduced in the previous chapter are ideally suited for this purpose.
 
-For every vertex in the weight-balanced tree, we will store encoding of the path from root to it in form of sequence of 0s and 1s. 1 for right child, 0 for left child. We know that depth of the tree must be logarithmic. (Here we tacitly assume that arithmetic with numbers of size on the order of number of versions can be done in constant time.) So comparing version is efficient. Inserting a successor version is also straight-forward. Rebuilding of some subtree will not change order of versions as all path encodings will recalculated.
+For every vertex in the weight-balanced tree, we will store encoding of the path from root to it in form of sequence of 0s and 1s. 1 for right child, 0 for left child. We know that depth of the tree must be logarithmic. (Here we tacitly assume that arithmetic with numbers of size on the order of number of versions can be done in constant time.) So comparing version is efficient. Inserting a successor version is also straight-forward. Rebuilding of some subtree will not change order of versions as all path encodings will be recalculated.
 
 \section{Fully-Persistent Trees}
 
@@ -191,7 +191,7 @@ One slight problem is that the interval might overlap with version from both $f$
 Now it is in order to show that $l$ will eventually become empty and what the time complexity is.
 
 \begin{prop}
-Starting with an initially empty fully-persistent binary search tree data structure, a sequence of $n$ updates produces a data structure taking \bigO{n} space while taking \bigO{n} time.
+Starting with an initially empty fully-persistent binary search tree data structure (as described above), a sequence of $n$ updates produces a data structure taking \bigO{n} space while taking \bigO{n \log n} time.
 \end{prop}
 
 \begin{proof}

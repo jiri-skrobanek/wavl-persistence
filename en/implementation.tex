@@ -1,12 +1,25 @@
+Going from theory to practice, additional considerations need to be made, these are subject of this short chapter.
+
+\section{Separating Persistence from Other Logic}
+
+Having to consider persistence while implementing every function or method of the data structure may prove very difficult and error-sprone.
+
+For this reason it may be useful to create a layer of persistence and isolate it from the remainder of binary search tree logic. This way tree operations will appear almost as if the tree structure were not persistent.
+
+One possibility is to introduce a wrapper around node which would hold pointer to the actual instance. This wrapper will be referred to as \emph{node accessor} and will provide functions to retrieve records for pointer fields in the correct version from the fat node pointer stored in the node. Similarly another set of functions will be dedicated to setting these pointers based on a given node accessor.
+This division is depicted in figure \ref{fig-layers}.
+
+\input{figures/layers}
+
+\section{Author's Implementation}
+
 To state the algorithms described in more exact manner the author implemented alternative balancing for WAVL-trees and persistent WAVL-trees as an attachment to this thesis. The format chosen was C\# libraries for .NET Standard platform.
 
 %TODO: Lincense
 
-The goal of the implementation is solely to provide additional clarity into the algorithms. No special optimization has been carried out as this would likely only hinder understanding. It is not intended that someone would include the library in own project, nonetheless that is also possible.
+The goal of the implementation is solely to provide additional clarity into the algorithms. No special optimization has been carried out as this would likely only hinder understanding. It is not meant to be included into other projects as a library, rather to inspire possible re-implementation with an application to a specific problem in mind.
 
-%TODO: Mention wrapper around persistence
-
-\subsection*{Size of fat vertices}
+\section{Size of fat vertices}
 
 In the previous chapter we have derived minimum size of fat vertices which guarantees logarithmic asymptotic complexity per operation and constant space per operation. It may be beneficial however to increase the size further.
 
