@@ -14,6 +14,11 @@ namespace PersistentWAVL.Demo
         public bool Equals([AllowNull] IntClass other) => val == other?.val;
 
         public static implicit operator IntClass(int val) => new IntClass { val = val };
+
+        public override int GetHashCode()
+        {
+            return val;
+        }
     }
 
     class Program

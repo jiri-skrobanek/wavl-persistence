@@ -14,7 +14,7 @@ namespace PersistentWAVL
     {
         public VersionHandle Version { get; private set; }
 
-        internal Node<K, V>.NodeAccessor Root { get; private set; }
+        internal Node.NodeAccessor Root { get; private set; }
 
         private Tree()
         {
@@ -25,7 +25,7 @@ namespace PersistentWAVL
 
         public V Find(K Key) => _find(Key).Value;
 
-        private Node<K, V>.NodeAccessor _find(K Key)
+        private Node.NodeAccessor _find(K Key)
         {
             var current = Root;
 
@@ -46,7 +46,7 @@ namespace PersistentWAVL
             var newVersion = Version.GetSuccessor();
             // Key must not be present in tree!
 
-            var n = new Node<K, V>(Key, Value, newVersion).GetTemporaryAccessorForVersion(newVersion);
+            var n = new Node(Key, Value, newVersion).GetTemporaryAccessorForVersion(newVersion);
 
             if (Root is null) return new Tree<K, V> { Root = n, Version = newVersion };
 
@@ -63,7 +63,7 @@ namespace PersistentWAVL
 
             var top = BalancePath(path).GetPermanentAccessor();
 
-            Node<K,V>.RemoveListOfAccessors();
+            Node.RemoveListOfAccessors();
 
             return new Tree<K, V> { Root = top, Version = newVersion };
         }
@@ -83,7 +83,7 @@ namespace PersistentWAVL
 
             var newVersion = Version.GetSuccessor();
 
-            Node<K, V>.NodeAccessor prev = null;
+            Node.NodeAccessor prev = null;
             var current = Root;
 
             while (!current.Key.Equals(Key))
@@ -94,7 +94,7 @@ namespace PersistentWAVL
             }
 
             var sub = current;
-            Node<K, V>.NodeAccessor top;
+            Node.NodeAccessor top;
 
             if (current.Left == null && current.Right == null)
             {
@@ -177,14 +177,14 @@ namespace PersistentWAVL
 
             var newRoot = top.GetPermanentAccessor();
 
-            Node<K, V>.RemoveListOfAccessors();
+            Node.RemoveListOfAccessors();
 
             return new Tree<K, V> { Root = newRoot, Version = newVersion };
 
             // Update the Key in all pmodifying paths that end with the vertex subject to key change.
             void SwapModPathEnds(K first, K second)
             {
-                List<Node<K, V>.NodeAccessor> nodes = new List<Node<K, V>.NodeAccessor>(2);
+                List<Node.NodeAccessor> nodes = new List<Node.NodeAccessor>(2);
 
                 var c1 = Root;
                 while (c1 != null)
@@ -219,20 +219,20 @@ namespace PersistentWAVL
         /// Must be used with direct successor version of root.
         /// </summary>
         /// <returns>List of vertices on the path</returns>
-        public List<FullNode<K, V>> GetPath(K Key, VersionHandle forVersion)
+        public List<FullNode> GetPath(K Key, VersionHandle forVersion)
         {
-            List<FullNode<K, V>> nodes = new List<FullNode<K, V>>();
-            var current = new Node<K, V>.NodeAccessor(forVersion, Root.Node);
+            List<FullNode> nodes = new List<FullNode>();
+            var current = new Node.NodeAccessor(forVersion, Root.Node);
             Root.Node.GetTemporaryAccessorForVersion(forVersion);
             int demoting = 0;
             bool promoting = false;
-            Node<K, V>.NodeAccessor bottom = null, bottom2 = null;
-            FullNode<K, V> top = null, top2 = null;
+            Node.NodeAccessor bottom = null, bottom2 = null;
+            FullNode top = null, top2 = null;
             bool demotechild = false;
 
             while (current != null)
             {
-                var v = new FullNode<K, V>(current);
+                var v = new FullNode(current);
                 nodes.Add(v);
 
                 if (current.PromotionStart)
@@ -341,7 +341,7 @@ namespace PersistentWAVL
         /// </summary>
         /// <param name="path">Path beginning at a parent of deleted/inserted vertex</param>
         /// <returns>new root of tree</returns>
-        internal Node<K, V>.NodeAccessor BalancePath(List<FullNode<K, V>> path)
+        internal Node.NodeAccessor BalancePath(List<FullNode> path)
         {
             path.Reverse();
 

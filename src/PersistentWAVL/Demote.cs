@@ -15,7 +15,7 @@ namespace PersistentWAVL
         /// </summary>
         /// <param name="path"></param>
         /// <param name="index"></param>
-        private void DeleteFromDemotionPath(List<FullNode<K, V>> path, int index)
+        private void DeleteFromDemotionPath(List<FullNode> path, int index)
         {
             var removed = path[index];
             var modpathend = removed.PathStart.Base.ModPathEnd;
@@ -418,7 +418,7 @@ namespace PersistentWAVL
                 path[pos].Base.ModPathEnd = default;
             }
 
-            Node<K, V>.NodeAccessor GetDemotionContinuation(FullNode<K, V> node)
+            Node.NodeAccessor GetDemotionContinuation(FullNode node)
             {
                 if (node.Base == path[index].PathStart.Base.ModPathEnd)
                 {
@@ -428,7 +428,7 @@ namespace PersistentWAVL
                 node.Right : node.Left;
             }
 
-            Node<K, V>.NodeAccessor GetDemotionContinuation2(FullNode<K, V> node)
+            Node.NodeAccessor GetDemotionContinuation2(FullNode node)
             {
                 if (node.Base == path[index].PathStart.Base.ModPathEnd2)
                 {
@@ -460,7 +460,7 @@ namespace PersistentWAVL
         /// Creates a demotion path from a chain of demotions done at path
         /// </summary>
         /// <returns>New root of the tree</returns>
-        private Node<K, V>.NodeAccessor MoveDemotionUp(List<FullNode<K, V>> path)
+        private Node.NodeAccessor MoveDemotionUp(List<FullNode> path)
         {
             // Value of previous node after demotion
             var lastrank = -1;
@@ -612,9 +612,9 @@ namespace PersistentWAVL
             FinishDemotionPath(path.Count - 1);
             return path.Last().Base;
 
-            (int r, int l) GetTypeOf1ChildVertex(Node<K, V>.NodeAccessor node)
+            (int r, int l) GetTypeOf1ChildVertex(Node.NodeAccessor node)
             {
-                Node<K, V>.NodeAccessor onechild = null;
+                Node.NodeAccessor onechild = null;
                 if (node.Left != null && node.Left.RankWithOwnOffset > lastrank)
                     onechild = node.Left;
                 else onechild = node.Right;
@@ -654,8 +654,8 @@ namespace PersistentWAVL
             void DemoteWithChild(int index)
             {
                 if (index < 0) return;
-                FullNode<K, V> node = path[index];
-                Node<K, V>.NodeAccessor onechild = null;
+                FullNode node = path[index];
+                Node.NodeAccessor onechild = null;
                 if (node.Demoted == 1)
                 {
                     // Demoted == 1
@@ -723,7 +723,7 @@ namespace PersistentWAVL
         /// This vertex or its 3-son must not be part of any path
         /// </summary>
         /// <returns>New top of the tree</returns>
-        private Node<K, V>.NodeAccessor PickRotationDemote(List<FullNode<K, V>> path, int i)
+        private Node.NodeAccessor PickRotationDemote(List<FullNode> path, int i)
         {
             var z = path[i].Base;
 
@@ -812,7 +812,7 @@ namespace PersistentWAVL
                 return ReturnUpper(v);
             }
 
-            Node<K, V>.NodeAccessor ReturnUpper(Node<K, V>.NodeAccessor u)
+            Node.NodeAccessor ReturnUpper(Node.NodeAccessor u)
             {
                 if (path.Count == i + 1)
                 {
