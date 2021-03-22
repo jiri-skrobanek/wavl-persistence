@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace PersistentWAVL
@@ -21,6 +22,7 @@ namespace PersistentWAVL
                 TemporaryAccessors.Clear();
             }
 
+            [DebuggerDisplay("Key = { Node?.Key?.ToString() ?? string.Empty }, Value = { Node?.Value?.ToString() ?? string.Empty }")]
             internal class NodeAccessor
             {
                 #region Proper fields

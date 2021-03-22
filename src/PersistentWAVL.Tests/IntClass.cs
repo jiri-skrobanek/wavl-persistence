@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PersistentWAVL.Demo
+namespace PersistentWAVL.Tests
 {
     [DebuggerDisplay("{val}")]
     class IntClass : IComparable<IntClass>, IEquatable<IntClass>
@@ -21,21 +21,5 @@ namespace PersistentWAVL.Demo
         }
 
         public override string ToString() => val.ToString();
-    }
-
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            var t0 = Tree<IntClass, int>.GetNew;
-            var t1 = t0.Insert(100, 100);
-            var t2 = t1.Insert(200, 200);
-            var t3 = t2.Insert(0, 0);
-            var t1point5 = t1.Insert(0, -1);
-
-            var right1 = t1.Root.Right;
-
-            Console.WriteLine("Hello World!");
-        }
     }
 }

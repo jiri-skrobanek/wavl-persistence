@@ -48,7 +48,12 @@ namespace PersistentWAVL
 
             var n = new Node(Key, Value, newVersion).GetTemporaryAccessorForVersion(newVersion);
 
-            if (Root is null) return new Tree<K, V> { Root = n, Version = newVersion };
+            if (Root is null) 
+            {
+                var newRoot = n.GetPermanentAccessor();
+                Node.RemoveListOfAccessors();
+                return new Tree<K, V> { Root = newRoot, Version = newVersion }; 
+            }
 
             var path = GetPath(Key, newVersion);
 
