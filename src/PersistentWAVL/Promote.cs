@@ -8,7 +8,7 @@ namespace PersistentWAVL
     public partial class Tree<K, V> where K : class, IComparable<K>, IEquatable<K>
     {
 
-        private void DeleteFromPromotionPath(List<FullNode<K, V>> path, int index)
+        private void DeleteFromPromotionPath(List<FullNode> path, int index)
         {
             var removed = path[index];
             var end = removed.PathStart.Base.ModPathEnd;
@@ -17,7 +17,8 @@ namespace PersistentWAVL
 
             for (int i = index; i > 0; i--)
             {
-                if (GetPromotionContinuation(path[i]) == path[i - 1].Base) lowerlen++; else break;
+                if (GetPromotionContinuation(path[i]) == path[i - 1].Base) lowerlen++; 
+                else break;
             }
 
             // Now decide if the length of the new path will be at least two.
@@ -92,7 +93,7 @@ namespace PersistentWAVL
                 path[pos].Base.PromotionStart = false;
             }
 
-            Node<K, V>.NodeAccessor GetPromotionContinuation(FullNode<K, V> node)
+            Node.NodeAccessor GetPromotionContinuation(FullNode node)
             {
                 if (node.Base == node.PathStart.Base.ModPathEnd)
                 {
@@ -109,7 +110,7 @@ namespace PersistentWAVL
         /// <param name="path"></param>
         /// <param name="i"></param>
         /// <returns></returns>
-        Node<K, V>.NodeAccessor PickRotationPromote(List<FullNode<K, V>> path, int i)
+        Node.NodeAccessor PickRotationPromote(List<FullNode> path, int i)
         {
             var z = path[i].Base;
             var x = path[i - 1].Base;
@@ -249,7 +250,7 @@ namespace PersistentWAVL
                 }
             }
 
-            Node<K, V>.NodeAccessor ReturnUpper(Node<K, V>.NodeAccessor u)
+            Node.NodeAccessor ReturnUpper(Node.NodeAccessor u)
             {
                 if (path.Count == i + 1)
                 {
@@ -275,7 +276,7 @@ namespace PersistentWAVL
         /// Promote the first vertex and continue upwards.
         /// </summary>
         /// <param name="path"></param>
-        private Node<K, V>.NodeAccessor MovePromotionUp(List<FullNode<K, V>> path)
+        private Node.NodeAccessor MovePromotionUp(List<FullNode> path)
         {
             var lastrank = 0;
             if (path[0].Left != null) lastrank = Math.Max(lastrank, path[0].Left.rank);
@@ -394,7 +395,9 @@ namespace PersistentWAVL
                 }
             }
 
-            throw new ArgumentException("Empty path");
+            // Finish promotion at root
+            FinishPromotionPath(path, path.Count - 1);
+            return path.Last().Base;
 
             void PromoteAt(int index)
             {
@@ -403,7 +406,7 @@ namespace PersistentWAVL
             }
         }
 
-        private void FinishPromotionPath(List<FullNode<K, V>> path, int index)
+        private void FinishPromotionPath(List<FullNode> path, int index)
         {
             if (index < 0) return;
             if (index == 0)
