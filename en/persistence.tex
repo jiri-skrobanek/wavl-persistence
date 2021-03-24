@@ -1,11 +1,24 @@
-First of all we introduce the hierarchy of data structures with respect to persistence.
+In this chapter we finally arrive to our main interest. First of all we introduce the hierarchy of data structures with respect to persistence.
 
 \begin{itemize}
-\item {\bfseries Ephemeral data structures} Past states are destroyed by new changes and irretrievably lost.
-\item {\bfseries Semi-persistent data structures} (Sometimes partially persistent) Past states are stored and can be accessed for reading, modifying operations are only allowed on the most recent version. Operations produce return a new version handle. Historical versions form a linear order.
-\item {\bfseries (Fully-)persistent data structures} Versions form a rooted tree, additional changes can be made to any existing version, creating a new version as a child vertex.
-\item {\bfseries Functional data structures} No changes are permitted to written data.
-\end{itemize}
+\item {\bfseries Ephemeral data structures} are the most widespread. 
+Past states are destroyed by "destructive" updates and irretrievably lost.
+\item {\bfseries Semi-persistent data structures} (sometimes partially persistent) 
+still support modifying operations only on the most recent version. 
+Updates produce a new version of the structure. 
+Historical versions form a linear order. 
+Past states can be reconstructed efficiently for reading.
+\item {\bfseries (Fully-)persistent data structures} directly extend their semi-persistent counterparts. 
+An update can be done on any version of the structure, resulting in a rooted tree of versions. 
+An update corresponds to adding a new child vertex to an existing vertex in the tree.
+\item {\bfseries Functional data structures} permit no changes to data once written. 
+Naturally, persistence is guaranteed under such an assumption, 
+as all versions appear as if just created by the last update.
+This enforced immutability completely freezes past version in time.
+This concept is intrinsic to functional languages such as Haskell, 
+but proves to be useful even in imperative programming. 
+Multi-threading is easier when there is confidence that existing objects will not be modified.
+\end{itemize}.
 
 This division is by no means universally adopted, but provides an interesting perspective regardless.
 
