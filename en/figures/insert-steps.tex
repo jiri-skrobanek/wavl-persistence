@@ -2,7 +2,7 @@
 \begin{center}
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
-[ \edge node[auto=right]{1 or 2}; [.y
+[ \edge node[auto=right]{1 or 2}; [.$y$
     \edge node[auto=right] {0};
     \node[draw,triangle]{~};
     \edge node[auto=left] {1};
@@ -12,7 +12,7 @@
 \qquad
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
-[ \edge node[auto=right]{0 or 1}; [.y
+[ \edge node[auto=right]{0 or 1}; [.$y$
     \edge node[auto=right] {1};
     \node[draw,triangle]{~};
     \edge node[auto=left] {2};
@@ -20,7 +20,7 @@
 ] ]
 \end{tikzpicture}
 \end{center}
-{\small Situation on the left displays is prior to the step and situation on the right after the step. Edges are annotated by rank differences between the endpoint. This convention is followed for depictions of all steps in this section.}
+{\small Situation displayed on the left depicts the structure prior to the step and situation on the right after the step. Edges are annotated by rank differences between the endpoint vertices. This convention is followed for depictions of all steps in this section.}
 \caption{Promote step}
 \end{figure}
 
@@ -28,9 +28,9 @@
 \begin{center}
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
-[ \edge node[auto=right]{1 or 2}; [.y
+[ \edge node[auto=right]{1 or 2}; [.$y$
     \edge node[auto=right] {0};
-    [   .x 
+    [   .$x$ 
         \edge node[auto=right] {1}; 
         \node[draw,triangle]{A}; 
         \edge node[auto=left] {2};
@@ -42,11 +42,11 @@
 \qquad
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
-[ \edge node[auto=right]{1 or 2}; [.x
+[ \edge node[auto=right]{1 or 2}; [.$x$
     \edge node[auto=right] {1};
     \node[draw,triangle]{A};
     \edge node[auto=left] {1};
-    [   .y 
+    [   .$y$ 
         \edge node[auto=right] {1}; 
         \node[draw,triangle]{B}; 
         \edge node[auto=left] {1}; 
@@ -64,15 +64,15 @@
 [ 
     \edge node[auto=right]{1 or 2}; 
     [
-        .y
+        .$y$
         \edge node[auto=right] {0};
         [   
-            .x 
+            .$x$ 
             \edge node[auto=right] {2}; 
             \node[draw,triangle]{A}; 
             \edge node[auto=left] {1};
             [
-                .w
+                .$w$
                 \node[draw,triangle]{B};
                 \node[draw,triangle]{C}; 
             ]
@@ -88,13 +88,13 @@
 [ \edge node[auto=right]{1 or 2}; [.w
     \edge node[auto=right] {1};
     [ 
-        .x
+        .$x$
         \edge node[auto=right] {1};
         \node[draw,triangle]{A};
         \node[draw,triangle]{B};
     ]
     \edge node[auto=left] {1};
-    [   .y 
+    [   .$y$ 
         \node[draw,triangle]{C}; 
         \edge node[auto=left] {1}; 
         \node[draw,triangle]{D}; ]

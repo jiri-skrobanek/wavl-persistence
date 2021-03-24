@@ -1,8 +1,14 @@
-For the purposes of this thesis, binary search tree will be a data structure composed of internal vertices (or nodes). Every internal vertex carries a key. Keys are members of a set of linearly ordered items and naturally extend this ordering to vertices. In addition, internal vertices are allowed to carry constant amount of information in fields (for example about tree structure) and to have constant number of pointers to other vertices. An internal node has two pointers to child vertices -- left and right. Any of the two can be an external vertex. External vertices are not represented in memory, all pointers (null-pointers) to external vertices are equal and must not be dereferenced. For the specific application, it can be beneficial to assume external vertices have some default values of their fields. An internal left child must precede its parent in the linear order, conversely an internal right child must come after its parent in the linear order.
+In this chapter basic terminology concerning trees will be established. Then a quick review of Weak-AVL (WAVL) trees is given. Next, our modified balancing algorithm is introduced. Finally, weight-balanced trees are defined since these will be needed as an auxiliary structure in persistent BSTs.
 
-Binary search trees naturally represent finite ordered trees where every vertex has degree at most three and the root has degree at most two.
+\section{Terminology}
 
-When we work with binary search trees, we typically use a specific algorithm that only accepts specific subclass of BSTs on input. (Think for example 2-3 trees.) Should it modify the BST, the resulting tree will still belong to the same class. Standard operations with BSTs are:
+For the purposes of this thesis, \emph{binary search tree} (BST) will be a data structure composed of internal vertices (or nodes). Every internal vertex carries a key. Keys are members of a set of linearly ordered items and naturally extend this ordering to vertices. In addition, internal vertices are allowed to carry constant amount of information in fields (for example about tree structure) and to have constant number of pointers to other vertices. An internal node has two pointers to child vertices -- left and right. Any of the pointers can target an external vertex. 
+
+External vertices are not represented in memory, all pointers (null-pointers) to external vertices are equal and must not be dereferenced. For the specific application, it can be beneficial to assume external vertices have some default values of their fields. An internal left child must precede its parent in the linear order, conversely an internal right child must come after its parent in the linear order.
+
+Binary search trees naturally represent finite rooted ordered (i.e. order of children is also relevant) trees where every vertex has degree at most three and the root has degree at most two.
+
+When we work with binary search trees, we typically use a specific algorithm that only accepts a specific subclass of BSTs on input. (Think for example 2-3 trees.) Should it modify the BST, the resulting tree will still belong to the same class. Standard operations with BSTs are:
 
 \begin{itemize}
 	\item \texttt{Find(Tree, Key)} tries to locate a vertex with the specified \texttt{Key} in \texttt{Tree} and returns its value. 
@@ -14,13 +20,13 @@ When we work with binary search trees, we typically use a specific algorithm tha
 	\item \texttt{Successor(Tree, Key)} returns the minimum key among vertices of \texttt{Tree} greater than \texttt{Key}.
 \end{itemize}
 
-If none of the latter four that is required, it is usually better to resort to hashing.
+If none of the latter four operations is required, it is usually advantageous to use hashing rather then BSTs.
 
-Of the operations described here, typically only \texttt{Insert} and \texttt{Delete} alter the BST. (Notable exception to this are splay trees.) We will call operations that modify the BST {\em altering}, remaining operations {\em non-altering}.
+Of the operations described here, typically only \texttt{Insert} and \texttt{Delete} alter the BST. (Notable exception to this are splay trees.) We will call operations that modify the BST {\em updates} or {\em altering} and remaining operations {\em non-altering}.
 
-\subsection{Standard implementations}
+\subsection{Standard Implementations}
 
-We will mention here a basic implementation for three of those operations. Is is expected that the reader is familiar with these operations already.
+We will mention here a basic implementation for some of those operations. This will also be the implementation used by modified WAVL-trees, which will be defined later. The reader is expected to be mostly familiar with these operations already.
 
 \subsubsection*{Find}
 Search for a key $k$ begins by assigning the root to a variable current vertex $v$. If $v$ has the searched key, the vertex is found. Otherwise if $k$ is greater than the key of $v$. We try to move the right child of $v$, otherwise to the left child. If such child we want to move to is external, we end unsuccessfully. 
@@ -90,5 +96,3 @@ For a vertex $y$ with parent $p$ and left child $x$ and right subtree $C$ where 
 For symmetry, rotating along $xy$ again from the resulting state, we would get the original tree before any rotations.
 
 \input{figures/rotate}
-
-In the rest of this chapter, we will discuss some variants of binary search trees useful for persistence.
