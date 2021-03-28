@@ -101,11 +101,11 @@ Insertion and deletion on a Weak AVL tree $T$ have time complexity $\Theta(\log 
 It is time to list additional properties of WAVL trees, which will be useful later. The proofs are beyond the scope of this thesis and can be found in an article by Haeupler, Sen, and Tarjan \cite{rank-balanced-trees}. These results are obtained by cleverly defining a potential function on vertices of the BST.
 
 \begin{thm}
-In a WAVL tree with bottom-up rebalancing, there are \bigO{d} demote steps over all deletions, where $d$ denotes the total number of deletions. (With the tree initially empty.)
+In a WAVL tree with bottom-up rebalancing, there are \bigO{d} demote steps over all operations, where $d$ denotes the total number of deletions. (With the tree initially empty.)
 \end{thm}
 
 \begin{thm}
-In a WAVL tree with bottom-up rebalancing, there are \bigO{m} promote steps over all insertions, where $m$ denoted the total number of insertions. (With the tree initially empty.)
+In a WAVL tree with bottom-up rebalancing, there are \bigO{m} promote steps over all operations, where $m$ denoted the total number of insertions. (With the tree initially empty.)
 \end{thm}
 
 WAVL trees have good properties when we consider the amortized number of promote, demote, or rotate steps -- all average to a constant. The number of rotations is constant even in the worst case. Unfortunately, we will need constant number of modifications per update even in the worst-case.
