@@ -1,3 +1,12 @@
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 
+Speaking in general terms, persistent data structures maintain their previous versions when modified. Use of term "persistent" was introduced by Driscoll, Sarnak, Sleator, and Tarjan in their joint 1986 article \emph{Making data structures persistent}\cite{persistence-DSST}. In this article a general scheme for converting regular pointer-based data structures into persistent ones is given. Persistent binary search tree was constructed from adapted Red-Black trees.
+
+Haeupler, Sen, and Tarjan \cite{weight-balanced} introduced Weak-AVL (WAVL) trees as part of a framework of rank balanced trees in 2015. WAVL trees were named after AVL trees which form a subset of them.
+
+The algorithms for WAVL operations given by Haeupler at al. cannot be directly plugged into the persistence scheme by Driscoll at al. Modifications will be needed alike those done to red-black trees during their conversion into persistent binary search trees. This thesis aims to construct a persistent version of Weak-AVL trees.
+
+We begin the thesis by swiftly establishing fundamentals of binary search trees.  These topics are covered in Chapter 1. Several approaches to persistence of binary search trees are described in Chapter 2. A structure for handling versions as elements of an ordering is also covered. Persistent data structures were motivated by many direct and obscured applications, we mention some of them in Chapter 3. Implementation of persistent WAVL trees is the focus of Chapter 4.
+
+% Since the original publication on persistence great number of other works addressing this topic appeared.
