@@ -1,14 +1,14 @@
-\section{Alternative WAVL Tree Balancing Algorithm}
+\chapter{Alternative WAVL Tree Balancing Algorithm}
 
 For the purposes of full persistence, standard algorithm for working with WAVL trees cannot be used. It is guaranteed that no more than one rotation occurs during insert or delete. Nonetheless, the number of rank changes can be up to \bigO{\log n}. 
 
-Fortunately, the algorithm can be modified in such a way that no operation requires more than $O(1)$ changes to be written. Ranks of vertices will be calculated from the actual rank field, but offset by a certain amount determined from different fields. 
+Fortunately, the algorithm can be modified in such a way that no operation requires more than \bigO{1} changes to be written. Ranks of vertices will be calculated from the actual rank field, but offset by a certain amount determined from different fields. 
 
 This will come with the price of substantially more complicated rules for balancing though. Given that WAVL trees compared to AVL trees already have noticeably more complicated implementation, this makes the structure ill suited for the use as general-purpose binary search tree. 
 
 The problems in WAVL trees arose from promote and demote operations which can propagate along a path from the inserted (respectively deleted) vertex all the way to the root. Fortunately, there is a remedy for this. 
 
-\subsection{Modifying paths}
+\section{Modifying paths}
 
 Let us refer to a path where for every vertex on the path the next vertex is its child as a {\em vertical path}.
 We will call the vertical path of vertices that had their ranks increased by promote during one insertion by the WAVL bottom-up rebalancing a {\em promotion path}. 
@@ -22,7 +22,7 @@ Our modified algorithm will try to handle as many changes with the help of modif
 
 Let us not worry about representation for a moment, while we introduce rules for working with modifying paths.
 
-\subsection{Modifying path creation and modification rules}
+\section{Modifying path creation and modification rules}
 
 When a vertex is a part of modifying path, its children's ranks must not change (or even their children in case of demotion that also changes rank of one children). 
 

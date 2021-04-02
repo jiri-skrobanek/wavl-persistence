@@ -349,5 +349,4 @@ healthchecksdb
 *.out
 *.bbl
 *.xmpi
-*.xmpdata
 *.fdb_latexmk
