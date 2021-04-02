@@ -1,13 +1,13 @@
-\section{Weight-Balanced Tree}
+\section{Weight-Balanced Trees}
 
-In our algorithm for persistent binary tree, we will also need weight-balanced (originally BB[$\alpha$]) trees. This kind of data structure was invented by J. Nievergelt and E. M. Reingold\cite{weight-balanced}. Here we describe their properties.
+In our algorithm for persistent binary tree, we will also need weight-balanced (originally BB[$\alpha$]) trees. This kind of data structure was invented by J. Nievergelt and E. M. Reingold \cite{weight-balanced}. Here we describe their properties.
 
-Weight-balanced trees form a class of binary search trees. The strategy of maintaining balance in weigh-balanced trees uses a different approach from that of rank-balanced trees.
+Weight-balanced trees form a class of binary search trees. The strategy of maintaining balance in weigh-balanced trees uses a different approach from that of rank-balanced trees. The idea stands as follows: When \emph{weight} is the same for left and right subtree, then it decreases exponentially along vertical paths, guaranteeing logarithmic depth.
 
 A vertex of a weight-balanced tree has the following entries stored (in addition to key and value): {\em size} of subtree rooted at that vertex and pointers to {\em left} and {\em right} child. By definition the size of external vertex is 0. {\em Weight} of a vertex is then defined as size + 1.
 
 \begin{defn}
-Let $\alpha \in (0,1/2)$ be constant. We call a binary search $T$ an {\em $\alpha$-weight-balanced tree} if it holds for every vertex $v$ of T that $weight(left(v)) \geq \alpha \cdot weight(v)$ \& $weight(right(v)) \geq \alpha \cdot weight(v) $.
+Let $\alpha \in (0,1/2)$ be constant. We call a binary search $T$ an {\em $\alpha$-weight-balanced tree} if it holds for every vertex $v$ of T that $weight(left(v)) \geq \alpha \cdot weight(v) \wedge weight(right(v)) \geq \alpha \cdot weight(v) $.
 \end{defn}
 
 \begin{prop}
@@ -30,7 +30,24 @@ Now we turn to the algorithm for insertion. (Deletion is similar and will not be
 It can be proven that the asymptotic cost of this insert is logarithmic.
 
 \begin{prop}
-Any $n$ consecutive operations performed on initially empty weight-balance tree have total complexity $\mathcal{O}(n \log n)$. 
+Any $n$ consecutive operations performed on initially empty weight-balanced tree have total complexity \bigO{n \log n}. 
 \end{prop}
 
-%TODO: Proof?
+\begin{myproof}
+We define potential of each vertex $v$ to be $c \cdot |size(left(v)) - size(right(v))|$ for suitable constant $c$ dependent on $\alpha$ and computational model. (Naturally external vertices have size equal to 0.) Sum of potentials over the whole tree is initially 0 and may never become negative.
+
+One insert may increase potential of all vertices on the path connecting it to root vertex. This is bounded by a constant multiple of size of the tree by previous proposition.
+
+The initial insertion phase before rebalancing takes \bigO{n \log n} time. We will also charge the insert with increase in potential caused by it. Rebalancing at vertex $x$ will be paid from the decrease of potential of $x$ by rebalancing. 
+
+It remains to show that the saved potential at $v$ is sufficient to pay for rebalancing at $v$. This is easily seen. 
+
+Without loss of generality
+$$ size(left(v)) + 1 < \alpha ( size(left(v)) + size(right(v)) + 1 ) $$
+holds before rebalancing, which yields
+$$ (size(left(v)) + 1)(1 - \alpha) < \alpha size(right(v)), $$
+giving
+$$ { size(left(v)) + 1 \over size(right(v)) } < { \alpha \over 1 - \alpha }. $$
+
+From the fact that weight invariant did not hold for $v$ we can deduce, that either the subtree has size limited by a constant or its potential must be on the order of $\Theta(size(v))$, which is sufficient to pay for the reconstruction of this subtree in \bigO{size(v)}. 
+\end{myproof}
