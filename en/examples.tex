@@ -43,13 +43,13 @@ Assume we have a rooted tree $T$, totally ordered set $S$ and a function $f: V(T
 
 We would like to quickly answer large number of queries of the following kind: For given $s \in S$ locate an ancestor $w$ of a vertex $v$ such that $f(w) \leq s$ and for every ancestor $u$ of $w$ it holds that $f(u) > s$. (There is obviously at most one suitable vertex $w$.)
 
-We will build a data structure based on semi-persistent binary search tree which will enable answering this kind of queries in \bigO{\log n} where $n$ denotes the number of vertices of $T$.
+We will build a data structure based on semi-persistent binary search tree which will enable answering this kind of queries in \bigO{\log n} where $n$ denotes the number of vertices of $T$. The first step is numbering vertices of $T$ by in-order traversal. 
 
-The first step is numbering vertices of $T$ by in-order traversal. Next, we construct a structure to answer LCA queries on the tree. %reference?
+We will need to efficiently answer queries for the lowest common ancestor (LCA) of two vertices. LCA of $v, w$ is such a vertex that the subtree rooted at the LCA contains both $v$ and $w$, but no of its subtrees does. LCA is thus well-defined for all pairs of vertices in rooted trees. The next step of creating the data structure is to construct a structure to answer LCA queries on the tree efficiently. This can be done efficiently in \bigO{n} via an approach described by Bender and Farach-Colton \cite{lca}, queries will use constant time.
 
 Now we will finally start building the semi-persistent tree. We add numbers assign to the vertices of $T$ in order of decreasing value of $f$. This involves sorting the vertices by value of $f$ and we store this sorted array for future use. Vertices in the semi-persistent tree are ordered by the assigned numbers. This is the entire preparation phase which takes \bigO{n \log n} time. The structure requires only \bigO{n} memory to store.
 
-In order to locate vertex $w$ for given $v$ and $s$, we locate the version of the semi-persistent tree with all vertices that have value of $f$ grater than $s$. This is done by binary search in the sorted array of vertices. Once the correct version is found we find lower bound and upper bound of $v$. One of these vertices must an ancestor of $v$. This can be verified with the help of LCA structure. If both of those vertices are ancestors of $v$, we take the one further from root. 
+In order to locate vertex $w$ for given $v$ and $s$, we locate the version of the semi-persistent tree with all vertices that have value of $f$ grater than $s$. This is done by binary search in the sorted array of vertices. Once the correct version is found we find lower bound and upper bound of $v$. One of these vertices must be an ancestor of $v$. This can be verified with the help of LCA structure. If both of those vertices are ancestors of $v$, we take the one further from root. 
 
 We have now located the last ancestor of $v$ with value of $f$ greater than $s$. One of its children must be the queried vertex.
 
