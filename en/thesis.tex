@@ -60,10 +60,10 @@
 \usetikzlibrary{positioning}
 \tikzset{every tree node/.style={minimum size=7mm,draw,circle},
          blank/.style={draw=none},
-         edge from parent/.style=
-         {draw,edge from parent path={(\tikzparentnode) -- (\tikzchildnode.north)}},
+         edge from parent path={(\tikzparentnode)--(\tikzchildnode)},
          level distance=1.2cm,
-         triangle/.style={regular polygon, regular polygon sides=3}
+         triangle/.style={regular polygon, regular polygon sides=3},
+         tosubtree/.style={edge from parent path={(\tikzparentnode)--(\tikzchildnode.north)}},
          }
 
 
@@ -155,6 +155,7 @@ Abstract.
 
 %%% Bibliography
 \include{bibliography}
+
 
 
 %%% Attachments to the bachelor thesis, if any. Each attachment must be

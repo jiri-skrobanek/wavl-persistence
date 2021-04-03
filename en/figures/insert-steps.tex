@@ -3,9 +3,9 @@
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
 [ \edge node[auto=right]{1 or 2}; [.$y$
-    \edge node[auto=right] {0};
+    \edge[tosubtree] node[auto=right] {0};
     \node[draw,triangle]{~};
-    \edge node[auto=left] {1};
+    \edge[tosubtree] node[auto=left] {1};
     \node[draw,triangle]{~};
 ] ]
 \end{tikzpicture}
@@ -13,9 +13,9 @@
 \begin{tikzpicture}[sibling distance=32pt]
 \Tree
 [ \edge node[auto=right]{0 or 1}; [.$y$
-    \edge node[auto=right] {1};
+    \edge[tosubtree] node[auto=right] {1};
     \node[draw,triangle]{~};
-    \edge node[auto=left] {2};
+    \edge[tosubtree] node[auto=left] {2};
     \node[draw,triangle]{~};
 ] ]
 \end{tikzpicture}
@@ -26,30 +26,32 @@
 
 \begin{figure}
 \begin{center}
-\begin{tikzpicture}[sibling distance=32pt]
+\begin{tikzpicture}[sibling distance=32pt, 
+	frontier/.style={distance from root=4cm}]
 \Tree
 [ \edge node[auto=right]{1 or 2}; [.$y$
     \edge node[auto=right] {0};
     [   .$x$ 
-        \edge node[auto=right] {1}; 
+        \edge[tosubtree] node[auto=right] {1}; 
         \node[draw,triangle]{A}; 
-        \edge node[auto=left] {2};
+        \edge[tosubtree] node[auto=left] {2};
         \node[draw,triangle]{B}; ]
-    \edge node[auto=left] {2};
+    \edge[tosubtree] node[auto=left] {2};
     \node[draw,triangle]{C};
 ] ]
 \end{tikzpicture}
 \qquad
-\begin{tikzpicture}[sibling distance=32pt]
+\begin{tikzpicture}[sibling distance=32pt, 
+	frontier/.style={distance from root=4cm}]
 \Tree
 [ \edge node[auto=right]{1 or 2}; [.$x$
-    \edge node[auto=right] {1};
+    \edge[tosubtree] node[auto=right] {1};
     \node[draw,triangle]{A};
     \edge node[auto=left] {1};
     [   .$y$ 
-        \edge node[auto=right] {1}; 
+        \edge[tosubtree] node[auto=right] {1}; 
         \node[draw,triangle]{B}; 
-        \edge node[auto=left] {1}; 
+        \edge[tosubtree] node[auto=left] {1}; 
         \node[draw,triangle]{C}; ]
 ] ]
 \end{tikzpicture}
@@ -57,9 +59,9 @@
 \caption{Insert rotation step}
 \end{figure}
 
-\begin{figure}
+\begin{figure}.
 \begin{center}
-\begin{tikzpicture}[sibling distance=8pt]
+\begin{tikzpicture}[sibling distance=8pt, frontier/.style={distance from root=5.25cm}]
 \Tree
 [ 
     \edge node[auto=right]{1 or 2}; 
@@ -68,35 +70,39 @@
         \edge node[auto=right] {0};
         [   
             .$x$ 
-            \edge node[auto=right] {2}; 
+            \edge[tosubtree] node[auto=right] {2}; 
             \node[draw,triangle]{A}; 
             \edge node[auto=left] {1};
             [
                 .$w$
+                \edge[tosubtree]; 
                 \node[draw,triangle]{B};
+                \edge[tosubtree]; 
                 \node[draw,triangle]{C}; 
             ]
         ]
-        \edge node[auto=left] {2};
+        \edge[tosubtree] node[auto=left] {2};
         \node[draw,triangle]{D};
     ] 
 ]
 \end{tikzpicture}
 \qquad
-\begin{tikzpicture}[sibling distance=8pt]
+\begin{tikzpicture}[sibling distance=8pt, frontier/.style={distance from root=4cm}]
 \Tree
 [ \edge node[auto=right]{1 or 2}; [.w
     \edge node[auto=right] {1};
     [ 
         .$x$
-        \edge node[auto=right] {1};
+        \edge[tosubtree] node[auto=right] {1};
         \node[draw,triangle]{A};
+        \edge[tosubtree];
         \node[draw,triangle]{B};
     ]
     \edge node[auto=left] {1};
     [   .$y$ 
+    	\edge[tosubtree];
         \node[draw,triangle]{C}; 
-        \edge node[auto=left] {1}; 
+        \edge[tosubtree] node[auto=left] {1}; 
         \node[draw,triangle]{D}; ]
 ] ]
 \end{tikzpicture}
