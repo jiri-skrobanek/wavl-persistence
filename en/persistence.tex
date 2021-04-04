@@ -200,22 +200,30 @@ Otherwise, an entirely new data structure may be built from the latest versions 
 
 \section{List Ordering}
 
-Moving from semi-persistence to full-persistence we encounter an obstacle -- versions no longer form implicit linear order. Nonetheless, to work with fat vertices, we need to be able to determine slots that carry values correct for current version. To achieve this, we need to identify an interval of versions the current vesion would fall into. For this we will try to introduce an ordering to versions of the persistent data structure.
+Moving from semi-persistence to full-persistence we encounter an obstacle -- versions no longer form implicit linear order. (By versions we mean states of the tree in between updates. We will also use some auxiliary versions not directly mappable to any such state.) Nonetheless, to work with fat vertices, we need to be able to determine slots that carry values correct for current version. To achieve this, we need to identify an interval of versions the current vesion would fall into. For this purpose we will try to introduce an ordering to versions of the persistent data structure.
 
-Version do form a rooted tree with the original version in the root. We can also order children of every vertex by the order of their creation. (the latest creation first) We then define the desired ordering as the order of vertices corresponding to versions as they are visited by an in-order traversal.
+Version do form a rooted tree with the original version in the root. We can also order children of every vertex by the order of their creation (latest creation first). We then define the desired ordering as the order of vertices corresponding to versions as they are visited by an in-order traversal. %TODO: Reformulate in-order.
 
 In reality, we will also insert other elements into the ordering that will be helper version and will not be used to represent the state of the entire structure after a sequence of operations. This can be disregarded for now.
 
-With the ordering defined, we still need a way to efficiently represent it in memory. The operations we really need are
+With the ordering defined, we still need a way to efficiently represent it in memory. The operations we really need are two:
 
 \begin{itemize}
-	\item \texttt{InsertSuccessor(Version)},
-	\item \texttt{Compare(VersionA, VersionB)}.
+	\item \texttt{InsertSuccessor(Version)} -- this operation will insert a new version between \texttt{Version} and its successor (if any). The newly created version is returned.
+	\item \texttt{Compare(VersionA, VersionB)} -- returns 1, $-1$, or 0 indicating whether \texttt{VersionA} precedes, succeeds, or equals \texttt{VersionB}.
 \end{itemize}
+
+We will strive to find a way to assign an integer to each version, these integers will be comparable in constant time. This assignment problem is called \emph{list-labeling} and there are several options to tackling it.
+
+The straight-forward idea would be to assign 0 to the first version and $2^m$ to an artificial upper bound. All newer versions will be assigned the arithmetic average of its successor and predecessor. Now, we see that if $v = (p + s)/2$ and $ 2^k \mid p, s$, then $2^{k-1} \mid v$. The first two integers are divisible by $2^m$ guaranteeing capacity $\Omega(m)$. 
+
+Let us denote the total number of updates to the persistent tree as $n$. It would be reasonable to  assume that arithmetic operations on non-negative integers less than or equal to $n$ can be done in constant time. We are therefore permitted to create only \bigO{\log n} versions using the straight-forward idea if constant time per operation is needed. This is not sufficient.
 
 To preserve the speed of semi-persistence, \texttt{Compare} must be \bigO{1} and \texttt{InsertSuccessor} \bigO{\log n} at least amortized. Weight-balanced trees that were introduced in the previous chapter are ideally suited for this purpose.
 
-For every vertex in the weight-balanced tree, we will store encoding of the path from root to it in form of sequence of 0s and 1s. 1 for right child, 0 for left child. We know that depth of the tree must be logarithmic. (Here we tacitly assume that arithmetic with numbers of size on the order of number of versions can be done in constant time.) So comparing version is efficient. Inserting a successor version is also straight-forward. Rebuilding of some subtree will not change order of versions as all path encodings will be recalculated.
+For every vertex in the weight-balanced tree, we will store encoding of the path from root to it in form of sequence of 0s and 1s. 1 for right child, 0 for left child. We know that depth of the tree must be logarithmic, compared integers are composed of \bigO{\log n} bits, so comparison of versions is efficient. Inserting a successor version is also simple. Rebuilding of some subtree will not change order of versions as all path encodings will be recalculated.
+
+Before moving to the next section, we remark that it is possible to get \bigO{1} amortized complexity for insert and delete with weight-balanced trees via indirection as described by Tsakalidis \cite{list-ordering}.
 
 \section{Fully-Persistent Trees}
 
