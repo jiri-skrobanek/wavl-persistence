@@ -21,11 +21,11 @@ namespace PersistentWAVL
             public K Key { get; set; }
 
             public V Value { get; set; }
+
+            private K _modPathEnd = null, _modPathEnd2 = null;
             #endregion
 
             #region Pointers
-            private K _modPathEnd = null, _modPathEnd2 = null;
-
             internal FatNode _parent, _left, _right;
             #endregion
 

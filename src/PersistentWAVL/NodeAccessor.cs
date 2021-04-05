@@ -162,21 +162,53 @@ namespace PersistentWAVL
                     set
                     {
                         if (MustCopy) Node.CopyForVersion(Version);
-                        Node._left = null;
-                        if (value != null)
+                        if (!(Node._left is null))
+                        {
+                            // Unset parent for current right.
+                            var right = Node._left;
+                            Node._left = null;
+                            var inverseNode = right.GetNodeForVersion(Version);
+                            if (inverseNode.Version != Version)
+                            {
+                                inverseNode.CopyForVersion(Version);
+                            }
+                            inverseNode._parent = null;
+                        }
+
+                        if (value is null)
+                        {
+                            Node._left = null;
+                        }
+                        else
                         {
                             var inverseNode = value.Node.FatNode.GetNodeForVersion(Version);
-                            // If nothing to set, end.
-                            if (inverseNode._parent != Node.FatNode)
+                            if (inverseNode.Version != Version)
                             {
-                                if (inverseNode.Version != Version)
-                                {
-                                    inverseNode.CopyForVersion(Version);
-                                }
-                                inverseNode._parent = Node.FatNode;
+                                inverseNode.CopyForVersion(Version);
                             }
+
+                            if (!(inverseNode._parent is null) && inverseNode._parent != Node.FatNode)
+                            {
+                                // Unset child for parent of new right
+                                var oldparent = inverseNode._parent.GetNodeForVersion(Version);
+                                if (oldparent.Version != Version)
+                                {
+                                    oldparent.CopyForVersion(Version);
+                                }
+                                if (oldparent._left == inverseNode.FatNode)
+                                {
+                                    oldparent._left = null;
+                                }
+                                if (oldparent._right == inverseNode.FatNode)
+                                {
+                                    oldparent._right = null;
+                                }
+                            }
+
+                            inverseNode._parent = Node.FatNode;
+
+                            Node._left = value.Node.FatNode;
                         }
-                        Node._left = value.Node.FatNode;
                     }
                 }
 
@@ -186,21 +218,53 @@ namespace PersistentWAVL
                     set
                     {
                         if (MustCopy) Node.CopyForVersion(Version);
-                        Node._right = null;
-                        if (value != null)
+                        if (!(Node._right is null))
+                        {
+                            // Unset parent for current right.
+                            var right = Node._right;
+                            Node._right = null;
+                            var inverseNode = right.GetNodeForVersion(Version);
+                            if (inverseNode.Version != Version)
+                            {
+                                inverseNode.CopyForVersion(Version);
+                            }
+                            inverseNode._parent = null;
+                        }
+
+                        if (value is null)
+                        {
+                            Node._right = null;
+                        }
+                        else
                         {
                             var inverseNode = value.Node.FatNode.GetNodeForVersion(Version);
-                            // If nothing to set, end.
-                            if (inverseNode._parent != Node.FatNode)
+                            if (inverseNode.Version != Version)
                             {
-                                if (inverseNode.Version != Version)
-                                {
-                                    inverseNode.CopyForVersion(Version);
-                                }
-                                inverseNode._parent = Node.FatNode;
+                                inverseNode.CopyForVersion(Version);
                             }
+
+                            if (!(inverseNode._parent is null) && inverseNode._parent != Node.FatNode)
+                            {
+                                // Unset child for parent of new right
+                                var oldparent = inverseNode._parent.GetNodeForVersion(Version);
+                                if (oldparent.Version != Version)
+                                {
+                                    oldparent.CopyForVersion(Version);
+                                }
+                                if(oldparent._left == inverseNode.FatNode)
+                                {
+                                    oldparent._left = null;
+                                }
+                                if (oldparent._right == inverseNode.FatNode)
+                                {
+                                    oldparent._right = null;
+                                }
+                            }
+
+                            inverseNode._parent = Node.FatNode;
+                            
+                            Node._right = value.Node.FatNode;
                         }
-                        Node._right = value.Node.FatNode;
                     }
                 }
 
