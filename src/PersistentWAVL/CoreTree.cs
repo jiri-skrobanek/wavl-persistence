@@ -115,10 +115,13 @@ namespace PersistentWAVL
                 top = BalancePath(GetPath(prev.Key, root));
             }
 
+            // Switch key and value with a leaf vertex
+
             else if (current.Left == null)
             {
                 SwapModPathEnds(current.Key, current.Right.Key);
                 current.Key = current.Right.Key;
+                current.Value = current.Right.Value;
                 current.Right = null;
 
                 top = BalancePath(GetPath(current.Key, root));
@@ -128,6 +131,7 @@ namespace PersistentWAVL
             {
                 SwapModPathEnds(current.Key, current.Left.Key);
                 current.Key = current.Left.Key;
+                current.Value = current.Left.Value;
                 current.Left = null;
 
                 top = BalancePath(GetPath(current.Key, root));
@@ -141,6 +145,7 @@ namespace PersistentWAVL
 
                 SwapModPathEnds(Key, current.Key);
                 sub.Key = current.Key;
+                sub.Value = current.Value;
 
                 if (current.Left == null)
                 {
@@ -151,6 +156,7 @@ namespace PersistentWAVL
                 {
                     SwapModPathEnds(Key, current.Left.Key);
                     current.Key = current.Left.Key;
+                    current.Value = current.Left.Value;
                     current.Left = null;
                     top = BalancePath(GetPath(current.Key, root));
                 }
@@ -163,6 +169,7 @@ namespace PersistentWAVL
 
                 SwapModPathEnds(Key, current.Key);
                 sub.Key = current.Key;
+                sub.Value = current.Value;
 
                 if (current.Right == null)
                 {
@@ -173,6 +180,7 @@ namespace PersistentWAVL
                 {
                     SwapModPathEnds(Key, current.Right.Key);
                     current.Key = current.Right.Key;
+                    current.Value = current.Right.Value;
                     current.Right = null;
                     top = BalancePath(GetPath(current.Key, root));
                 }
