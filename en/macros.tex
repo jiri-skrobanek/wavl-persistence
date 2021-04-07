@@ -33,13 +33,23 @@
 
 %%% Macros for definitions, theorems, claims, examples, ... (requires amsthm package)
 
-\theoremstyle{plain}
+\newtheoremstyle{mytheoremstyle} % name
+{\topsep}                    % Space above
+{\topsep}                    % Space below
+{\slshape}                   % Body font
+{}                           % Indent amount
+{\bfseries}                   % Theorem head font
+{.}                          % Punctuation after theorem head
+{.5em}                       % Space after theorem head
+{}  % Theorem head spec (can be left empty, meaning ‘normal’)
+
+\theoremstyle{mytheoremstyle}
 \newtheorem{thm}{Theorem}
 \newtheorem{lemma}[thm]{Lemma}
 \newtheorem{claim}[thm]{Claim}
 \newtheorem{prop}[thm]{Proposition}
 
-\theoremstyle{plain}
+\theoremstyle{mytheoremstyle}
 \newtheorem{defn}{Definition}
 
 \theoremstyle{remark}
@@ -100,3 +110,10 @@
 }
 
 %https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
+
+% Mathmode slanted:
+
+\def\leftit{\text{\it left}}
+\def\rightit{\text{\it right}}
+\def\sizeit{\text{\it size}}
+\def\weightit{\text{\it weight}}

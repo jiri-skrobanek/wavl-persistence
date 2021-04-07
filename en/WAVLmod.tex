@@ -238,7 +238,7 @@ WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the
 [ 
     .~
     \edge node[auto=right] {1};
-    [  .~ \edge node[auto=right] {1}; [.~ \edge node[auto=right] {0}; X \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {1}; ~ ]
+    [  .~ \edge node[auto=right] {1}; [.~ \edge node[auto=right] {0}; $x$ \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {1}; ~ ]
     \edge node[auto=left] {1};
     [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
 ] 
@@ -256,12 +256,12 @@ WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the
 \begin{tikzpicture}[sibling distance=8pt]
 \Tree
 [
-.\node[red]{~};
-\edge[red] node[auto=right] {1};
+.\node[thick]{~};
+\edge[thick] node[auto=right] {1};
 [ 
-    .\node[red]{~};
-    \edge[red] node[auto=right] {1};
-    [  .\node[red]{~}; \edge[red] node[auto=right] {1}; [.\node[red]{~}; \edge node[auto=right] {1}; X \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {2}; ~ ]
+    .\node[thick]{~};
+    \edge[thick] node[auto=right] {1};
+    [  .\node[thick]{~}; \edge[thick] node[auto=right] {1}; [.\node[thick]{~}; \edge node[auto=right] {1}; $x$ \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {2}; ~ ]
     \edge node[auto=left] {2};
     [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
 ] 
@@ -277,13 +277,14 @@ WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the
 \end{tikzpicture}
 \end{center}
 \caption{Exemplar promotion path creation}
+Vertex $x$ has just been inserted into the upper tree. Promotion path (thick) has created during rebalancing in the lower tree.
 \end{figure}
 
 \begin{figure}
 \begin{center}
 \begin{tikzpicture}[sibling distance=8pt]
 \Tree
-[ \edge node[auto=right]{2}; [.Y
+[ \edge node[auto=right]{2}; [.$y$
     \edge node[auto=right] {3};
     \node[draw,triangle]{~};
     \edge node[auto=left] {2};
@@ -293,7 +294,7 @@ WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the
 \qquad
 \begin{tikzpicture}[sibling distance=8pt]
 \Tree
-[ \edge node[auto=right]{2}; [.Y
+[ \edge node[auto=right]{2}; [.$y$
     \edge node[auto=right] {2};
     \node[draw,triangle]{~};
     \edge node[auto=left] {1};
@@ -303,7 +304,7 @@ WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the
 \qquad
 \begin{tikzpicture}[sibling distance=8pt]
 \Tree
-[ \edge node[auto=right]{2}; [.Y
+[ \edge node[auto=right]{2}; [.$y$
     \edge node[auto=right] {3};
     \node[draw,triangle]{~};
     \edge node[auto=left] {1};
@@ -313,7 +314,7 @@ WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the
 \qquad
 \begin{tikzpicture}[sibling distance=8pt]
 \Tree
-[ \edge node[auto=right]{2}; [.Y
+[ \edge node[auto=right]{2}; [.$y$
     \edge node[auto=right] {2};
     \node[draw,triangle]{~};
     \edge node[auto=left] {1};
