@@ -1,21 +1,27 @@
 \begin{figure}
 \begin{center}
-\begin{tikzpicture}[sibling distance=32pt]
+\begin{tikzpicture}[sibling distance=32pt, frontier/.style={distance from root=4cm}]
 \Tree
 [ [.y
     [   .x 
+    	\edge[tosubtree];
         \node[draw,triangle]{A};
+        \edge[tosubtree];
         \node[draw,triangle]{B}; ]
+    \edge[tosubtree];
     \node[draw,triangle]{C};
 ] ]
 \end{tikzpicture}
 \qquad
-\begin{tikzpicture}[sibling distance=32pt]
+\begin{tikzpicture}[sibling distance=32pt, frontier/.style={distance from root=4cm}]
 \Tree
 [ [.x
+	\edge[tosubtree];
     \node[draw,triangle]{A};
     [   .y 
+    	\edge[tosubtree];
         \node[draw,triangle]{B}; 
+        \edge[tosubtree];
         \node[draw,triangle]{C}; ]
 ] ]
 \end{tikzpicture}

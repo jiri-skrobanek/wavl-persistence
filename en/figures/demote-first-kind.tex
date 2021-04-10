@@ -1,21 +1,21 @@
 \begin{figure}
 	\begin{center}
-		\begin{tikzpicture}[sibling distance=32pt]
+		\begin{tikzpicture}[sibling distance=32pt, frontier/.style={distance from root=2cm}]
 		\Tree
-		[ \edge node[auto=right]{1 or 2}; [.y
-		\edge node[auto=right] {3};
+		[ \edge node[auto=right]{1 or 2}; [.$y$
+		\edge[tosubtree] node[auto=right] {3};
 		\node[draw,triangle]{~};
-		\edge node[auto=left] {2};
+		\edge[tosubtree] node[auto=left] {2};
 		\node[draw,triangle]{~};
 		] ]
 		\end{tikzpicture}
 		\qquad
-		\begin{tikzpicture}[sibling distance=32pt]
+		\begin{tikzpicture}[sibling distance=32pt, frontier/.style={distance from root=2cm}]
 		\Tree
-		[ \edge node[auto=right]{2 or 3}; [.y
-		\edge node[auto=right] {2};
+		[ \edge node[auto=right]{2 or 3}; [.$y$
+		\edge[tosubtree] node[auto=right] {2};
 		\node[draw,triangle]{~};
-		\edge node[auto=left] {1};
+		\edge[tosubtree] node[auto=left] {1};
 		\node[draw,triangle]{~};
 		] ]
 		\end{tikzpicture}
