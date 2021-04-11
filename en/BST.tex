@@ -26,66 +26,18 @@ Of the operations described here, typically only \texttt{Insert} and \texttt{Del
 
 \subsection{Standard Implementations}
 
-We will mention here a basic implementation for some of those operations. This will also be the implementation used by modified WAVL-trees, which will be defined later. The reader is expected to be mostly familiar with these operations already.
+We will mention here a basic implementation for some of those operations. This will also be the implementation used by modified WAVL-trees, which will be defined later. The reader is expected to be mostly familiar with these operations already. Detailed description are attached in an appendix for reference.
 
 \subsubsection*{Find}
 Search for a key $k$ begins by assigning the root to a variable current vertex $v$. If $v$ has the searched key, the vertex is found. Otherwise if $k$ is greater than the key of $v$. We try to move the right child of $v$, otherwise to the left child. If such child we want to move to is external, we end unsuccessfully. 
-
-\begin{algorithm}
-	\small
-	\SetAlgoLined
-	\KwResult{$v$}
-	$v \gets $ root of Tree\;
-	\While{$v \neq \Lambda$ }{
-		\If{Key = $k(v)$}{
-			\textbf{halt}\;
-		}
-		\eIf{Key $> k(v)$}{
-			$v \gets r(v)$\;
-		}{
-			$v \gets l(v)$\;
-		}
-	}
-	\caption{Find(Tree, Key)}
-\end{algorithm}
-
 
 \subsubsection*{Insert}
 The place where a vertex should be inserted is the same as for most BSTs. Descending from the root going to left child if the key being inserted is lower than the key of current vertex, to right child otherwise. This is repeated until a null-pointer is reached -- which will replaced by pointer to the new vertex. 
 
 After the change a process of \textit{rebalancing} will typically follow, goal of this process is to perform checking and modify the tree to belong to the correct class of BSTs.
 
-\begin{algorithm}
-	\small
-	\SetAlgoLined
-	$v \gets $ root of Tree\;
-	$w \gets \Lambda$\;
-	\If{$v = \Lambda$}{
-		Create new vertex with Key and Value and set is as root of Tree\;
-		halt\;
-	}
-	\While{$v \neq \Lambda$ }{
-		$w \gets v$\;
-		\eIf{Key $> k(v)$}{
-			$v \gets r(v)$\;
-		}{
-			$v \gets l(v)$\;
-		}
-	}
-	$u \gets $ new vertex with Key and Value\;
-	\eIf{Key $> k(w)$}{	
-		$r(w) \gets u$\;
-	}{
-		$l(v) \gets u$\;
-	}
-	Rebalance Tree according to according to chosen algorithm.
-	\caption{Insert(Tree, Key, Value)}
-\end{algorithm}
-
 \subsubsection*{Delete}
-For deletion, the vertex $v$ subject to deletion is located first using find. If it is a leaf, it is then deleted. If it has only one child, it is deleted and its only child becomes child of the parent of $v$ directly. Otherwise successor to $v$ is found, it cannot have two children, so it is possible to swap Key and Value between those vertices and then run the deletion again, this time certainly removing a vertex. After a vertex is deleted, rebalancing follows.
-
-%TODO: Delete?
+For deletion, the vertex $v$ subject to deletion is located first using find. If it is a leaf, it is then deleted. If it has only one child, it is deleted and its only child becomes child of the parent of $v$ directly. Otherwise predecessor of $v$ is found, it cannot have two children, so it is possible to swap Key and Value between those vertices and then run the deletion again, this time certainly removing a vertex. After a vertex is deleted, rebalancing follows.
 
 We will also describe here one common rebalancing step which is rotate.
 
