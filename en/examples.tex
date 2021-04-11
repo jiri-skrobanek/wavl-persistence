@@ -1,5 +1,9 @@
 Some of the examples may have more elegant solutions using a different approach. Here the goal is to present the kind of problems where persistence may prove useful and help develop reasoning needed to see other applications should they be encountered by the reader.
 
+\section{Version Control Systems}
+
+Imagine a version control system is used in a repository with branching history. Each version is stored as a patch to another parent version. Naturally, one would expect to use persistent data structures for varying tasks in this scenario. Now persistent binary tree could be used for example for queries of files by the last time of modification in history of that particular version.
+
 \section{Point localization in a plane}
 
 Given a bounded connected subset of a plane partitioned into a finite set of faces, the goal is to respond to queries asking to which face a point $P$ belongs. We limit ourselves to polygonal faces.
@@ -29,11 +33,6 @@ The first step in building data structure for these queries is to sort given poi
 With efficient implementation (as discussed in previous chapters), we get \bigO{n \log n} time to prepare the data structure, \bigO{\log n + f} time to answer a query where $f$ points are reported, and asymptotically linear memory consumption. The space requirement is an improvement over range trees\cite{range-trees}.
 
 This data structure can be used as an interval tree by looking at the difference between queries for two different $\bar x$ with the same range for $y$. %TODO: Make more efficient.
-
-
-\section{???}
-
-Imagine a version control system is used in a repository with branching history. Each version is stored as a patch to another parent version. Now persistent binary tree could be used for queries of files by the last time of modification in history of that particular version.
 
 \section{Binary search in a tree}
 
@@ -69,7 +68,14 @@ A query with $s \in S$ and $v \in V(T)$ is simply answered by a search in $P$ in
 
 Deleting leaves is easy -- no actual procedure is needed. Support for deletion of non-leaf vertices $z$ from $T$ can also be added. Precisely that means that all children of $z$ become children of parent of $z$. (For simplicity we will assume that root will never be deleted, which is a reasonable assumption as an extra root can be added.) 
 
-Vertices are placed into a disjoint-find-union data structure. When a vertex is deleted, it is united with its parent in this data structure. It can be seen that every component in the DFU has a unique root. When searching through $P$ instead of using values of vertices directly, we search the DFU and use vertex found as root of component in the DFU.
+Vertices are placed into a disjoint-find-union data structure (DFU) \cite{dfu} as singletons. DFU stores a system of disjoint sets and allows the following operations:
+
+\begin{itemize}
+\item {\tt Find(Vertex)} locates a representative of the set containing {\tt Vertex}.
+\item {\tt Union(VertexA, VertexB)} removes sets containing {\tt VertexA} and {\tt VertexB} and adds their union to the data structure.
+\end{itemize}
+
+When a vertex is deleted, it is united with its parent in this DFU data structure. It can be seen that every component in the DFU has a unique root. When searching through $P$ instead of using values of vertices directly, we search the DFU and use vertex found as root of component in the DFU.
 
 This clearly does not break the ordering of vertices in $P$, as there are no possible keys between those of a vertex and its parent for every version. 
  
