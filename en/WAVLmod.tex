@@ -77,7 +77,7 @@ If $v$ is on a demotion path, $v$ is a $(1,2)$-vertex.
 \end{obs}
 
 \begin{obs}
-If $v$ is on two demotion paths, $v$ has a 1-child that is a $(1-1)$ vertex.
+If $v$ is on two demotion paths, $v$ has a 1-child that is a $(1,1)$-vertex.
 \end{obs}
 
 \begin{prop}
@@ -192,6 +192,8 @@ We see that this procedure will update at most constant number of vertices in th
 
 Let us give an example for better understanding. If we had a walking path $r,v_1,v_2,v_3,v_4,v_5,v_6,...,v_n$ with demotion paths $p_1 = v_1,v_2,v_3,v_4,v_5,v_6$ and $p_2 = v_2,v_3,v_4$, removing $v_3$ would destroy $p_2$ completely as its remaining parts are too short. This would force the upper part of $p_1$, that is $v_1,v_2$ to be removed also. Similarly $v_4$ would have to be removed from the lower part $v_4,v_5,v_6$ which would still contain at least 2 vertices and would be preserved.
 
+This procedure is implicitly used by other procedures when removal from demotion path is needed.
+
 %From the structure of overlapping demotion paths, it can be seen that 
 
 \subsection{Remove from promotion path}
@@ -199,6 +201,14 @@ Let us give an example for better understanding. If we had a walking path $r,v_1
 Very analogous to previous procedure with rank increments in place of decrements. Overlapping of paths need not be addressed in this case making this procedure much simpler.
 
 We see that this procedure will also update at most constant number of vertices in the tree.
+
+This procedure is implicitly used by other procedures when removal from promotion path is needed.
+
+\subsection{Make modifying path}
+
+This procedure is given a vertex $v$ on a walking path. If there is at least one other vertex below $v$ on the modifying path, $v$ is marked as top of new path. Otherwise, rank field of $v$ is adjusted. 
+
+This procedure is implicitly used by other procedures when new modifying path needs to be marked.
 
 \subsection{Rotate promotion}
 
@@ -221,37 +231,37 @@ It suffices to write all changes to the original ranked tree since balancing wil
 
 \subsection{Pass promotion up}
 
-A walking path is passed as argument, the bottom vertex needs to be promoted. The promotion is propagated above the path while needed. One of the following actions is taken at each vertex $V$ based on its relation to modifying paths.
+A walking path from leaf to root is passed as an argument to this procedure, the bottom vertex needs to be promoted. The promotion is propagated above along the walking path while needed. One of the following actions is taken at each vertex $v$ based on its relation to modifying paths.
 
 \begin{itemize}
 
-\item {\bfseries $V$ is not part of any path} First we check whether promote or rotation will be needed. If rotation is needed, perform it. If promote is needed, the process proceeds to parent vertex.
+\item {\bfseries Vertex $v$ is not part of any path} First we check whether promote or rotation will be needed. If rotation is needed, perform it (perform rotate promotion). If promote is needed, this process continues to parent vertex.
 
-\item {\bfseries $V$ has its rank demoted by parent} Parent must be removed from all paths it is on. If the rank is decreased by two, rotation will be required. Top of promotion path is marked.
+\item {\bfseries Vertex $v$ has its rank demoted by parent} Parent must be removed from all paths it is on. If the rank is decreased by two, rotation will be required. Top of promotion path is marked.
 
-\item {\bfseries $V$ is part of a promotion path} If $V$ is a $(1,1)$-vertex, mark its child as top of promotion path, remove $V$ from promotion path. Otherwise mark $V$'s child's child as top of promotion path, write $V$'s child's promotion directly, remove $V$ from promotion path and proceed with promote rotation. 
+\item {\bfseries Vertex $v$ is part of a promotion path} If $v$ is a $(1,1)$-vertex, mark its child as top of promotion path, remove $v$ from promotion path. Otherwise mark $v$'s child's child as top of promotion path, write $v$'s child's promotion directly, remove $v$ from promotion path and proceed with promote rotation. 
 
-\item {\bfseries $V$ is part of one demotion path} If $V$ is a $(1,1)$-vertex, mark its child as top of demotion path, remove $V$ from demotion path. Otherwise mark $V$'s child's child as top of demotion path, write $V$'s child's demotion directly, remove $V$ from promotion path and proceed with promote rotation.
+\item {\bfseries Vertex $v$ is part of one demotion path} If $v$ is a $(1,1)$-vertex, mark its child as top of demotion path, remove $V$ from demotion path. Otherwise mark $v$'s child's child as top of demotion path, write $v$'s child's demotion directly, remove $v$ from promotion path and proceed with promote rotation.
 
-\item {\bfseries $V$ is part of two demotion paths} This vertex is removed from both demotion paths and its child becomes the top of new promotion path.
+\item {\bfseries Vertex $v$ is part of two demotion paths} This vertex is removed from both demotion paths and its child becomes the top of new promotion path.
 
 \end{itemize}
 
 \subsection{Pass demotion up}
 
-A walking path is passed as argument, the bottom vertex is not a leaf and needs to be demoted. The demotion is propagated above the path while needed. One of the following actions is taken at each vertex $V$ based on its relation to modifying paths.
+A walking path is passed as an argument, the bottom vertex is not a leaf and needs to be demoted. The demotion is propagated above the path while needed. One of the following actions is taken at each vertex $v$ based on its relation to modifying paths.
 
 \begin{itemize}
 
-\item {\bfseries $V$ is not part of any path} If $V$ does not have a 3-child, mark the predecessor as top of demotion path. If the last vertex is reached, mark it as top of demotion path.  Otherwise inspect ranks of children and determine whether rotation or demotion is needed. In case of demotion, continue to next vertex. In case of rotation, write demote of $V$'s child, mark $V$'s child's child as top of demotion path, proceed with demote rotation.
+\item {\bfseries Vertex $v$ is not part of any path} If $v$ does not have a 3-child, mark the predecessor as top of demotion path. If the last vertex is reached, mark it as top of demotion path.  Otherwise inspect ranks of children and determine whether rotation or demotion is needed. In case of demotion, continue to next vertex. In case of rotation, write demote of $v$'s child, mark $v$'s child's child as top of demotion path, proceed with demote rotation.
 
-\item {\bfseries $V$ has its rank demoted by parent} Remove $V$'s parent from all demotion paths. Mark either this vertex or its child as a top of new demotion path.
+\item {\bfseries Vertex $v$ has its rank demoted by parent} Remove $v$'s parent from all demotion paths. Mark either this vertex or its child as a top of new demotion path.
 
-\item {\bfseries $V$ is part of a promotion path} If $V$ is a $(2,2)$-vertex, mark its child as top of demotion path, remove $V$ from promotion path. Otherwise mark $V$'s child's child as top of demotion path, write $V$'s child's demotion directly, remove $V$ from promotion path and proceed with demote rotation. 
+\item {\bfseries Vertex $v$ is part of a promotion path} If $v$ is a $(2,2)$-vertex, mark its child as top of demotion path, remove $v$ from promotion path. Otherwise $v$ is a $(3,1)$-vertex with the 1-child $(2,1)$ or $(1,1)$, mark $v$'s child's child as top of demotion path, write $v$'s child's demotion directly, remove $v$ from promotion path and proceed with demote rotation. Alternatively, if $v$ is the bottom of the promotion path, it may have a 1-child which is $(2,2)$, in which case it is removed from the promotion path and marked as top of a demotion path.
 
-\item {\bfseries $V$ is part of one demotion path} If $V$ is a $(2,2)$-vertex, mark its child as top of demotion path, remove $V$ from demotion path. If second demote is required, continue to parent. Otherwise mark $V$'s child's child as top of demotion path, write $V$'s child's demotion directly, remove $V$ from promotion path and proceed with demote rotation. 
+\item {\bfseries Vertex $v$ is part of one demotion path} If $v$ is a $(2,2)$-vertex, mark its child as top of demotion path, remove $v$ from demotion path. If second demote is required, continue to parent. Otherwise mark $v$'s child's child as top of demotion path, write $v$'s child's demotion directly, remove $v$ from demotion path and proceed with demote rotation. 
 
-\item {\bfseries $V$ is part of two demotion paths} A rotation is required, remove $V$ from both demotion paths. Otherwise mark $V$'s child's child as top of demotion path, write $V$'s child's demotion directly, remove $V$ from promotion path and proceed with demote rotation.
+\item {\bfseries Vertex $v$ is part of two demotion paths} In this case $v$ must be $(3,1)$-vertex with the 1-child $(1,1)$. Mark $v$'s 3-child's as top of demotion path. A rotation is required, remove $v$ from both demotion paths and rotate.
 
 \end{itemize}
 
@@ -261,7 +271,7 @@ In fact, should the path be too short (1 vertex), instead of marking it, it is p
 
 We start ascension from the bottom of the walking back to the root. We use the walking path to be aware of true ranks. If promotion or demotion is needed, it is passed up. If rotation is needed, it is performed. New top of the tree is returned. 
 
-The following operations form the interface of the WAVL tree.
+This is the last supportive procedure. The following operations form the interface of the WAVL tree.
 
 \subsection{Find, Predecessor \& Successor}
 
@@ -269,11 +279,11 @@ Since promote and demote steps do not change the structure of the tree (they onl
 
 \subsection{Insert}
 
-A new vertex is inserted in the standard place in the tree. A walking path is obtained to the parent and balanced subsequently.
+A new vertex is inserted in the standard place in the tree. A walking path is obtained to the parent (by walk to key) and balanced subsequently.
 
 \subsection{Delete}
 
-The process is very similar to insert. First, if the vertex cannot be deleted directly, the vertex bearing the next lower/higher key must be identified and the keys \& values exchanged. Then search for the key about to be deleted (which is now in a vertex with only one child) starts from the root. If the vertex found is a leaf, walking path is obtained to the parent of it and balanced. Otherwise its child is deleted and walking path to it is balanced.
+The process is very similar to insert. First, if the vertex cannot be deleted directly, the vertex bearing the next lower/higher key must be identified and the keys \& values exchanged. Then search for the key about to be deleted (which is now in a vertex with only one child) starts from the root. If the vertex found is a leaf, walking path is obtained to the parent of it (by walk to key) and balanced. Otherwise its child is deleted and walking path to it is balanced.
 
 The proposition below follows from this algorithm.
 
@@ -330,57 +340,62 @@ WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the
 \end{tikzpicture}
 \end{center}
 \caption{Exemplar promotion path creation}
-Vertex $x$ has just been inserted into the upper tree. Promotion path (thick) has created during rebalancing in the lower tree.
+Vertex $x$ has just been inserted into the upper tree. Promotion path (thick) has created during rebalancing in the lower tree. We see that this pattern can be extended to make promotion path arbitrarily long.
 \end{figure}
 
 \begin{figure}
 \begin{center}
-\begin{tikzpicture}[sibling distance=8pt]
+\begin{tikzpicture}[sibling distance=8pt, 
+	frontier/.style={distance from root=3.75cm}]
 \Tree
 [ \edge node[auto=right]{2}; [.$y$
-    \edge node[auto=right] {3};
+    \edge[tosubtree] node[auto=right] {3};
     \node[draw,triangle]{~};
     \edge node[auto=left] {2};
-    [.~ \edge node[auto=right] {2}; \node[draw,triangle]{~}; \edge node[auto=left] {2}; \node[draw,triangle]{~};]
+    [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
 ] ]
 \end{tikzpicture}
 \qquad
-\begin{tikzpicture}[sibling distance=8pt]
+\begin{tikzpicture}[sibling distance=8pt, 
+	frontier/.style={distance from root=3.75cm}]
 \Tree
 [ \edge node[auto=right]{2}; [.$y$
-    \edge node[auto=right] {2};
+    \edge[tosubtree] node[auto=right] {2};
     \node[draw,triangle]{~};
     \edge node[auto=left] {1};
-    [.~ \edge node[auto=right] {2}; \node[draw,triangle]{~}; \edge node[auto=left] {2}; \node[draw,triangle]{~};]
+    [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
 ] ]
 \end{tikzpicture}
 \qquad
-\begin{tikzpicture}[sibling distance=8pt]
+\begin{tikzpicture}[sibling distance=8pt, 
+	frontier/.style={distance from root=3.75cm}]
 \Tree
 [ \edge node[auto=right]{2}; [.$y$
-    \edge node[auto=right] {3};
+    \edge[tosubtree] node[auto=right] {3};
     \node[draw,triangle]{~};
     \edge node[auto=left] {1};
-    [.~ \edge node[auto=right] {2}; \node[draw,triangle]{~}; \edge node[auto=left] {2}; \node[draw,triangle]{~};]
+    [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
 ] ]
 \end{tikzpicture}
 \qquad
-\begin{tikzpicture}[sibling distance=8pt]
+\begin{tikzpicture}[sibling distance=8pt, 
+	frontier/.style={distance from root=3.75cm}]
 \Tree
 [ \edge node[auto=right]{2}; [.$y$
-    \edge node[auto=right] {2};
+    \edge[tosubtree] node[auto=right] {2};
     \node[draw,triangle]{~};
     \edge node[auto=left] {1};
-    [.~ \edge node[auto=right] {1}; \node[draw,triangle]{~}; \edge node[auto=left] {1}; \node[draw,triangle]{~};]
+    [.~ \edge[tosubtree] node[auto=right] {1}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {1}; \node[draw,triangle]{~};]
 ] ]
 \end{tikzpicture}
 \end{center}
 \caption{The only case where double demotion can arise}
+The node $y$ is demoted once and put onto a demotion path. Since its 1-child outside the path cannot change ranks while $y$ is on the demotion path, the 1-child cannot change ranks. The second demote on $y$ must then be of the second kind.
 \end{figure}
 
 \subsection{Keys in place of pointers for path ends}
 
-Layout of vertex can be modified slightly. It is possible to store key of the vertex where modifying path ends instead of pointer to it.
+Layout of a vertex can be modified slightly. In a vertex that is the top of a modifying path, it is possible to store key of the vertex where modifying path ends instead of pointer to it.
 
 The drawback is that whenever a key is changed, path to the root must be checked for vertices referring the old key as a path end. Fortunately, this seldom happens. Prior to performing most operations, vertices are excluded from any modifying paths. In fact, only delete procedure must be changed to explicitly check for references. (That is due to swapping keys.)
 
