@@ -227,29 +227,37 @@ Before moving to the next section, we remark that it is possible to get \bigO{1}
 
 \section{Fully-Persistent Trees}
 
-Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing this operation on this version, thus consuming super-linear amount of space.
+Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing the operation on that version, thus consuming super-linear amount of space, (Potentially even time complexity may increase.)
 
-For achieving full persistence, we will build upon the technique of fat vertices. Now however, simply allocating new vertex when we run out of empty slots in the old one will not do. It remains crucial that occupied slots of one fat vertex form an interval of existing versions. In particular, It will be needed to insert between existing versions.
+To achieve full persistence, we will build upon the technique of fat vertices from previous sections. Now however, simply allocating new vertex when we run out of empty slots in the old one will not do. It remains crucial that occupied slots of one fat vertex form an interval of existing versions. In particular, It will be needed to insert between existing versions.
 
 A new maximum size $m$ of fat vertices will have to be set. If $p$ is the number of pointer fields in original vertices and $k$ the number of required inverse pointers, we set $m = 4(p+k+1)$.
 When searching a fat vertex, the slot that applies has the greatest version not exceeding the version that is currently being searched for.
 
+A process modifying the BST data structure may be broken down into a series of updates that only change one vertex or insert a new one. A deleted vertex is not reachable from the root, but technically still exists.
+Every such update of the data structure will produce a new version (more than one actually). Since were are only interested in the versions that are associated with the modification that completed an operation on the data structure, existence of other versions can be safely ignored. The total number of versions created will still be in linear with the number of total operations, preserving time complexity.
 
-A process modifying the BST data structure may be broken down into a series of updates that only change one vertex. (Or insert a new one.)
-Every such update of the data structure will produce a new version (more than one actually). since were are only interested in the versions that are associated with the modification that completed an operation on the data structure, existence of other versions can be safely ignored. The total number of versions created will still be in $O(\# operations)$, preserving time complexity.
+The process of performing one update involves first of all locating the slot that will be updated. If there exists a slot with the exact same version $v$, it will be updated. Otherwise the slot $s$ corresponding to $v$ is located and copied twice, creating slots $s'$ and $s''$. Slot $s'$ is given the version $v$ and $s''$ a newly created version that succeeds $v$. Then values in $s'$ are updated.
+If the update is insert, a new fat vertex with one slot is created instead and its field and pointer values are initialized.
 
-The process of performing one update involves first of all locating the slot that will be updated. If there exists a slot with the exact same version $v$, it will be updated. Otherwise the slot $s$ corresponding to $v$ is located and copied twice, creating $s'$ and $s''$. $s'$ is given the version $v$ and $s''$ a newly created version that succeeds $v$. Then values in $s'$ are updated.
-If the update is insert a new fat vertex with one slot is created instead and its field and pointer values are initialized.
 If the current fat vertex has exceeded the number of permitted slots, we add it to a list $l$.
-Now inverse pointers must be set in other fat vertices. Similarly, if a slot matching the version is already present there modifications are applied to that slot. Otherwise two other slots are inserted just as already described. In addition, we add any of the fat vertices where inverse-pointers were updated and slot-capacity exceeded to $l$.
+Now inverse pointers must be set in other fat vertices. Similarly, if a slot matching the version is already present in other fat vertex, modifications are applied to that slot. Otherwise two other slots are inserted just as already described. In addition, we add any of the fat vertices where inverse-pointers were updated and slot-capacity exceeded to the list $l$.
 
-During the update, we must make sure that the number of slots in one fat vertex does not exceed $m$ by too many. We assure this by processing the fat vertex with the most slots filled next. Since we have placed a limit on the number of new slots added by one node-splitting and it cannot add more than one slot to a vertex, we can limit the highest obtainable amount of slots in one vertex by a constant multiple of $m$.
+The phase of invariant maintenance follows. While $l$ is nonempty, we take a fat vertex $f$ with the highest size from it, check that the number of slots it contains exceeds the limit and then split the node in two. This involves allocating a new fat vertex $f'$ and placing half of the slots with higher half of versions in it. After this split, another pointer check is needed. For versions in the higher half of slots (now slots of $f$), regular and inverse pointers must be checked. For every slot in other fat vertex corresponding to a version belonging to $f'$  that has pointers to $f$, these must be changed to $f'$. 
 
-We therefore maintain $l$ as an array of linked lists indexed by sizes of those fat vertices. When we add to $l$, we append to the linked list with the adequate size. When the size changes, the outdated records remain in the linked-lists. Therefore, when extracting from $l$ we must first check that the size is still valid, if another extract is performed until a valid item is found or all lists are empty. As we add only constant amount of items to $l$ per node-splitting, the overall time spent extracting next vertex from $l$ is linear with the amount of node-splittings and need not be analysed further.
+One slight problem with this splitting is that an interval of versions in some other vertex might intersect a version from both $f$ and $f'$. We know however, that this overlapping can only happen for vertices pointed to by both the slot with greatest version in $f$ and lowest version in $f'$. To remedy this, an extra slot must be inserted to $f'$ bearing a version $h'$ created as successor of $h$ maximum version in $f$. The slot for $h'$ must have fields and pointers initialized with values valid for $h$.
 
-Now while $l$ is nonempty we take a fat vertex $f$ with the highest size from it, check that the number of slots contains was exceeds the limit and then split the node in two. This means allocating a new fat vertex $f'$ and placing half of the slots with higher versions in it. After this split, another pointer check is needed. For versions in the higher half of slots (now slots of $f$), regular and inverse pointers must be checked. For every slot in other fat vertex corresponding to a version belonging to $f'$  that has pointers to $f$, these must be changed to $f'$. 
+Naturally, creation of this extra slot must be reflected in fat vertices that pointed to $f$ and have an interval now containing $h'$ -- a slot with version $h'$ must be inserted and point to $f'$ instead. Insertion of these extra slots may cause the permitted number of slots to be exceeded in additional vertices and if that is the case, these must be appended to $l$.
 
-One slight problem is that the interval might overlap with version from both $f$ and $f'$, in that case a slot with lowest version belonging to $f'$ must be inserted, copying the preceding slot in fields and pointers not to $f$. We know however, that this overlapping can only happen for vertices pointed to by both the slot with greatest version in $f$ and lowest version in $f'$. This insert may cause the permitted number of slots to be exceeded and if that is the case, this fat vertex must be appended to $l$.
+It can be clearly seen that this splitting process takes only constant amount of time. When one splitting is complete, another fat node is taken from $l$ and split until it becomes empty.
+
+Avid reader may have noticed a crucial presupposition in this splitting procedure. When a fat vertex is split, its slots must fit into the fat vertices created by that splitting. This is indeed true.
+
+Consider a vertex is split at least twice during one update procedure. Let us take first such a vertex $u$. Before the update started, the number of slots in $u$ definitely had not exceeded capacity. We now try to find an upper bound on the number of new slots inserted into $u$ or its two parts after the first splitting.
+
+Two slots might be inserted due to the actual changes. One slot may be needed for splitting of $u$.
+Every other splitting of a fat vertex pointing to $u$ or one of its halves may create up to two new slots (either no slot, a slot in $u$, a slot in one of $u$'s parts, or one slot in both parts). 
+Either way, the number of inserted slots is not high enough to trigger another splitting. We therefore reach a contradiction -- no fat vertex can be split more then once. Hence capacity may only be exceeded by a constant amount small enough that after splitting, size invariant holds for the two halves.
 
 Now it is in order to show that $l$ will eventually become empty and what the time complexity is.
 
@@ -278,6 +286,17 @@ We should note that the size of vertices is so large, because we did not place a
 %\begin{prop}
 %Suppose any order of splitting fat vertices with the number of slots exceeding the set limit $l$ %during an operation on a tree $T$. Regardless of the way for choosing the next node to be split, %number of occupied slots in all nodes will remain under .
 %\end{prop}
+
+\section{Alternative Constructions}
+
+In the previous section, we described fat nodes, where every slot bears all information about the tree vertex. There are other possibilities.
+
+As was already mentioned, we may choose to have a set of default values for all fields and pointers.
+These would be initialized to the first version in that fat vertex. Changes would then be stored in form of ordered triples. First would come version, second field or pointer identifier, and last the actual new value. Changing some information by adding a version thus means identifying what are the relevant values first and then inserting update triples.
+
+Yet another option is similar to the last one with the difference that only updates of pointers are allowed. If field needs to be changed, new fat vertex must be allocated.
+
+It is difficult to decide which of these constructions is superior. Complexity will vary for each data structure, ratios between different operations, and other factors.
 
 Finally, let us conclude this chapter with a remark that this approach may be generalized further beyond binary search trees to other pointer-based data structures provided that the constraint on number of pointers targeting one node simultaneously applies to them.
 We do not give more attention to such structures in this thesis.
