@@ -1,0 +1,84 @@
+\begin{algorithm}
+	\small
+	\SetAlgoLined
+	\KwResult{$v$}
+	$v \gets $ root of Tree\;
+	\While{$v \neq \Lambda$ }{
+		\If{Key = $\keyit(v)$}{
+			\textbf{halt}\;
+		}
+		\eIf{Key $> \keyit(v)$}{
+			$v \gets \rightit(v)$\;
+		}{
+			$v \gets \leftit(v)$\;
+		}
+	}
+	\caption{Find(Tree, Key)}
+\end{algorithm}
+
+\begin{algorithm}
+	\small
+	\SetAlgoLined
+	$v \gets $ root of Tree\;
+	$w \gets \Lambda$\;
+	\If{$v = \Lambda$}{
+		Create new vertex with Key and Value and set it as root of Tree\;
+		{\bf halt}
+	}
+	\While{$v \neq \Lambda$ }{
+		$w \gets v$\;
+		\eIf{Key $> \keyit(v)$}{
+			$v \gets \rightit(v)$\;
+		}{
+			$v \gets \leftit(v)$\;
+		}
+	}
+	$u \gets $ new vertex with Key and Value\;
+	\eIf{Key $> \keyit(w)$}{	
+		$\rightit(w) \gets u$\;
+	}{
+		$\leftit(v) \gets u$\;
+	}
+	Rebalance Tree according to chosen algorithm.
+	\caption{Insert(Tree, Key, Value)}
+\end{algorithm}
+
+
+\begin{algorithm}
+	\small
+	\SetAlgoLined$v \gets $ root of Tree\;
+	$w \gets \Lambda$\;
+	\While{Key $\neq \keyit(v)$ }{
+		$w \gets v$\;
+		\eIf{Key $> \keyit(v)$}{
+			$v \gets \rightit(v)$\;
+		}{
+			$v \gets \leftit(v)$\;
+		}
+	}
+	\If{$\rightit(v) = \Lambda$}{
+		Replace $v$ by $\leftit(v)$ as child of $w$ (if $w$ is internal vertex)\;
+		Delete $v$\;
+		{\bf go to} 34
+	}
+	\If{$\leftit(v) = \Lambda$}{
+		Replace $v$ by $\rightit(v)$ as child of $w$ (if $w$ is internal vertex)\;
+		Delete $v$\;
+		{\bf go to} 34
+	}
+	$x \gets \leftit(v)$\;
+	\If{$\rightit(x) = \Lambda$}{
+		$ \leftit(v) \gets \leftit(x) $\;
+		{\bf go to} 32
+	}
+	$y \gets \Lambda$\;
+	\While{$x \neq \Lambda$}{
+		$y \gets x$\;
+		$x \gets \rightit(x)$\;	
+	}
+	$\rightit(y) \gets \Lambda$\;
+	Swap keys and values of $v$ and $x$\;
+	Delete $x$\;
+	Rebalance Tree according to chosen algorithm.
+	\caption{Delete(Tree, Key)}
+\end{algorithm}
