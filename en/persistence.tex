@@ -231,7 +231,7 @@ Before delving into the details of modified fat vertices for full-persistence, w
 
 To achieve full persistence, we will build upon the technique of fat vertices from previous sections. All pointers and fields will need to be versioned this time. Now however, simply allocating new vertex when we run out of empty slots in the old one will not do. It remains crucial that occupied slots of one fat vertex form an interval of existing versions. In particular, It will be needed to insert between existing versions.
 
-Fat nodes of one vertex in the tree will be linked into a list in the order of increasing version-intervals that those fat nodes represent. A new maximum size $m$ of fat vertices will have to be set. If $p$ is the number of pointer fields in original vertices and $k$ the number of required inverse pointers, we set $m = 4(p+k+1)$.
+Fat nodes of one vertex in the tree will be linked into a list in the order of increasing version-intervals that those fat nodes represent. A new maximum size $m$ of fat vertices will have to be set. If $p$ is the number of pointer fields in original vertices and $k$ the number of required inverse pointers, we set $m = 2(p+k+1)$.
 When searching a fat vertex, the slot that applies has the greatest version not exceeding the version that is currently being searched for.
 
 A process modifying the BST data structure may be broken down into a series of updates that only change one vertex or insert a new one. A deleted vertex is not reachable from the root, but technically still exists.
@@ -244,7 +244,7 @@ All inverse pointers must be updates accordingly. Either directly if version of 
 
 We now need a process to somehow split the fat nodes which are over their capacity. Intuitively, for every fat node $f$ in excess of its capacity we would like to create a new fat node $f'$ and insert it after $f$ into the list of fat nodes for the same vertex. Then it would be possible to redistribute slots in $f$ between $f$ and $f'$ equally while preserving the invariant that fat nodes correspond to an interval of versions. Of course, when we do the splitting, we need to update pointers to $f$ in other vertices if they fall into the interval covered by $f'$.
 
-This is roughly what the process will be. Unfortunately, when we split a fat node, some slots in other vertices may suddenly correspond to versions in both $f$ and $f'$. Pointer $p$ in a slot $s$ is called \emph{overlapping} if $s$ represents more versions than the fat node pointed to by $p$.
+This is roughly what the process will be. Unfortunately, when we split a fat node, some slots in other vertices may suddenly correspond to versions in both $f$ and $f'$. Pointer $t$ in a slot $s$ is called \emph{overlapping} if $s$ represents more versions than the fat node pointed to by $t$.
 From the interval property of slots, this may happen for at most one slot $o$ in a vertex. We can solve this by inserting a new slot after $o$ with version of $f'$ and values equal to those of $o$ except the one problematic overlapping pointer which will point to $f'$.
 
 Naturally, this insertion of slots may cause other fat nodes to exceed their capacity. What is worse, when fat nodes grow beyond constant size, complexity will suffer. There seems to be no clever method of selecting the next node to be split without the potential of some fat nodes growing beyond \bigO{1} before coming to be split. We therefore choose to delay the insertion of slots that correct overlapping pointers.
@@ -252,11 +252,11 @@ Naturally, this insertion of slots may cause other fat nodes to exceed their cap
 The full process for invariant maintenance follows. (The reader may see some similarities with the concept of fractional cascading.) We maintain a list $l$ of fat nodes, all vertices modified in this update are added to it. Until $l$ is not empty, we extract a vertex $w$ from $l$ and do the following steps with it:
 
 \begin{itemize}
-\item {\bf Removal of overlapping pointers.} Going from the slot with the lowest version to the highest, we identify overlapping pointers. From the logic of this algorithm, overlapping pointer $p$ always point to the first fat node representing versions contained in the slot of $p$. 
+\item {\bf Removal of overlapping pointers.} Going from the slot with the lowest version to the highest, we identify overlapping pointers. From the logic of this algorithm, overlapping pointer $r$ always point to the first fat node representing versions contained in the slot of $r$. 
 
 When an overlapping pointer $q$ is found, we schedule an addition of a slot. This new slot should be inserted when we reach the place inside the list of slots where $q$'s fat node's interval of versions ends. This new slots takes the rest of pointers and fields from its predecessor. (We can have an insertion scheduled for all types of pointers at the same time.) If there are still some versions remaining to be covered from $q$'s original interval, another addition of a slot is scheduled.
 
-\item {\bf Allocation of new nodes.} If capacity of $w$ is not exceeded, continue with processing the next vertex in $l$. Otherwise, We set $x$ equal to the number of slots in $w$ divided by $2m+2$ rounded up. Then we distribute slots evenly between $w$ and $(x-1)$ new fat vertices which are linked after $w$ into the list of fat nodes for this vertex.
+\item {\bf Allocation of new nodes.} If capacity of $w$ is not exceeded, continue with processing the next vertex in $l$. Otherwise, We set $x$ equal to the number of slots in $w$ divided by $m$ rounded down. Then we distribute slots evenly between $w$ and $(x-1)$ new fat vertices which are linked after $w$ into the list of fat nodes for this vertex.
 
 \item {\bf Identification of overlapping pointers.} We now inspect all fat nodes pointed to by newly created fat nodes in previous step. We look at the pointers to those new vertices, we correct those pointers to point to the first fat node $t$ in the with $w$ such that there is an intersection of the versions represented by $t$ and the slot containing this pointer.
 
@@ -274,13 +274,23 @@ Starting with an initially empty fully-persistent binary search tree data struct
 \begin{proof}
 First of all we observe that the invariant restoring process of one vertex takes time linear with the amount of newly created fat nodes plus one and as such can be ignored.
 	
-Let us define a potential function for a persistent BST as the sum over all fat vertices of that structure of the number of occupied slots above $3m/4$. Initially the potential is zero and may never be negative. One unit of potential can be used to allocate one fat node. Every update will be charged $m/2 \in \mathcal{O}(1)$ units of energy (a constant).
+Let us define a potential function for a persistent BST as the sum of potential energy stored in all of its fat nodes. 
+Every fat node must always store at least as many units of potential as many slots it contains minus $m$. 
+Initially (for empty tree) the potential is zero and may never be negative. One unit of potential can be used to allocate one fat node and execute constant number of other computation steps.
 
-During the first phase, i.e. writing actual changes in the tree nodes, at most constant number of extra slots become occupied, these are charged on the update.
+During the first phase, i.e. writing actual changes in the tree nodes, at most constant number of extra slots become occupied, the increase in potential from these insertions is charged on the update.
 
-%TODO: Finish
+We also must analyze processing of fat nodes in $l$ during the second phase. Let us denote by $d$ the fat node that is being processed. 
+During removal of overlapping pointers we add some slots, this must be covered in advance by transfer of potential from other vertices when these are split. 
+If the node does not need to be split, constant amount of work was carried out. 
+No additional pointers become overlapping, so no transfers of potential are required.
 
-From this argument we also see that the number of node-splitting occurring during one update is limited by the amount of potential available at the start of that update, so it must come to an end.
+Otherwise for each newly created fat node overall potential of $d$ and its new successors is allowed to decrease by $m$.
+This free potential is used to pay for allocation of new vertices (1 unit per new node). 
+On top of that, some pointers may become overlapping. It can be seen that it suffices to transfer 1 unit to fat nodes which are pointed to by the first slot in a new fat node. Up to additional $p+k$ units are transferred to vertices which are pointed to by first slots in new fat nodes.
+Identification of overlapping pointers is linear with number of new vertices linked after $d$.
+
+From this argument we also see that the number of node-splitting occurring during one update is limited by the amount of potential available at the start of that update, so it must come to an end. Moreover constant amount is added to potential by updates in each operation, therefore space complexity is linear.
 
 Every action is now accounted for and the proof is complete.
 \end{proof}
@@ -294,10 +304,6 @@ We should note that the size of vertices is so large, because we did not place a
 One last thing we have not yet considered are pointers to the data structure from outside it. Surely, we need to store root for the tree in every version. For this purpose, we create a record with a pointer to a fat node together with the required version. Of course this by itself does not work, notably it does prevent the correct slot from leaving that fat node. 
 
 This can be repaired by adding a special kind of pointer to slots indicating that there is a record  connected to this version of this vertex. When the fat node is then split, the record is updated with correct fat node. (This forces us to insert a slot to the root for each update though.) Pointers to other vertices can be achieved similarly.
-
-%\begin{prop}
-%Suppose any order of splitting fat vertices with the number of slots exceeding the set limit $l$ %during an operation on a tree $T$. Regardless of the way for choosing the next node to be split, %number of occupied slots in all nodes will remain under .
-%\end{prop}
 
 \section{Alternative Constructions}
 
