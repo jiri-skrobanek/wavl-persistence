@@ -1,8 +1,8 @@
 \begin{figure}
 \def\miny{-2}
 \def\maxy{5}
-\def\swp #1 {\draw[dashed] (#1,\miny) -- (#1,\maxy);}
-\centering
+\def\swp #1 {\draw[loosely dashed] (#1,\miny) -- (#1,\maxy);}
+\begin{center}
 \begin{tikzpicture}[
 point/.style={circle, fill=black, inner sep=0pt, minimum width=2mm},
 ]
@@ -44,6 +44,12 @@ point/.style={circle, fill=black, inner sep=0pt, minimum width=2mm},
 \swp{6}
 \swp{9}
 
+% Cross:
+\draw (3.9,1.9) -- (4.1,2.1);
+\draw (4.1,1.9) -- (3.9,2.1);
+{\draw[dotted] (4,\miny) -- (4,\maxy);}
 \end{tikzpicture}
-\caption{Positions of sweeping line during the run of point-localization algorithm}
+\end{center}
+Positions of sweeping line during the run of point-localization algorithm are depicted as dashed lines. Queried point is denoted as a cross. Edges intersecting the dotted line are in the version of $S$ that will be queried.
+\caption{Localization of a point}
 \end{figure}
