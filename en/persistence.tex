@@ -117,7 +117,7 @@ Furthermore, we need a limit on the number of pointers that can target one verte
 Suppose any binary search tree balancing algorithm satisfying the following properties:
 \begin{itemize}
 \item 
-There is a constant $k$ such that for any $n$ successive operations on initially empty tree, the number of vertex changes made to the tree is at most $kn$. 
+There is a constant $d$ such that for any $n$ successive operations on initially empty tree, the number of vertex changes made to the tree is at most $dn$. 
 \item 
 There is a constant bound on the number of pointers to any one vertex at any time.
 \end{itemize}
@@ -125,12 +125,37 @@ Then this algorithm with the addition of fat vertices for semi-persistence, cons
 \end{prop}
 
 \begin{myproof}
-We denote the number of pointer fields per vertex as $p$ and maximum number of vertices pointing to one vertex at a time as $x$. We then define the number of slots in fat vertex as $s = p + x + 1$. (Higher value is also possible)\\
-We define the potential of the structure as the total number of occupied slots in all fat vertices that are the last in their doubly-linked list. (Thus initially zero.) Allocation of a new fat vertex will cost one unit of energy. This cost can be charged from the potential or the operation. We will show that the operation needs to be charged only a constant amount of energy per one vertex modification by the original algorithm (to compensate increase in potential or pay for allocations), from which the proposition follows.\\
-For insert, a new vertex is created (which increases potential by a constant). During rebalancing of the tree, $r$ vertices are to be modified. Let us consider this sequence of modifications one by one. We send one floating unit of energy to each of the $r$ vertices.\\
-If a modification of $v$ is second or later modification of $v$ during this operation, changes are simply written to the slot for this version.\\
-Otherwise, number of used slots is checked. If there is one or more empty available, new slot is used, taking default values of fields from preceding slot. This increases potential by one, which is covered by the floating unit of energy.\\
-If no slots are available, new fat vertex $v'$ is allocated and one of its slots is used. This step triggers a decrease in the potential by $p+x$. The floating unit of energy is used to pay for allocation of the new vertex. Next, fat vertices to corresponding current version interval of vertices having pointers to $v$ need to have this reflected. Additionally inverse pointers to $v'$ need to be set. These are at most $p+x$ changes to other vertices that may use their new empty slots. The decrease in potential is used to send one unit of energy to every such vertex that need an update. Changes are executed recursively and will not require extra energy to be charged on this modification.
+We denote the number of pointer fields per vertex as $p$ and maximum number of vertices pointing to one vertex at a time as $k$. 
+We then define the number of slots in fat node as $s = p + k + 1$.
+
+We define the potential of the structure as the total number of occupied slots in all fat vertices that are the last in their doubly-linked list. 
+(Thus initially zero.) 
+Allocation of a new fat vertex will cost one unit of energy. 
+This cost can be paid from the potential or the operation. 
+We will show that the operation needs to be charged only a constant amount of energy per one vertex modification by the original algorithm (to compensate increase in potential or pay for allocations), from which the proposition follows.
+
+For insert, a new fat node is created with one occupied slot (which increases potential by a constant). 
+This increase is paid for by the operation. During rebalancing of the tree, $r$ vertices are to be modified. 
+Let us consider this sequence of modifications one by one. 
+The Operation sends one floating unit of energy to each of the $r$ vertices.
+
+If a modification of $v$ is second or later modification of $v$ during this operation, changes are simply written to the slot for this version. 
+Otherwise, number of used slots is checked. 
+If there is one or more empty available, new slot is used. 
+New slot takes values of unchanged fields and pointers from the preceding slot. 
+This increases potential by one, which is covered by the floating unit of energy.
+
+If no slots are available, new fat vertex $v'$ is allocated and one of its slots is used. 
+This step triggers a decrease in the potential by $p+k$. 
+The floating unit of energy is used to pay for allocation of the new vertex. 
+Next, fat vertices to corresponding current version interval of vertices having pointers to $v$ need to have this reflected. 
+Additionally inverse pointers to $v'$ need to be set. 
+These are at most $p+k$ changes to other vertices that may use their new empty slots. 
+The decrease in potential is used to send one unit of energy to every such vertex that need an update. 
+Changes are executed recursively and will not require extra energy to be charged on this modification.
+
+Operation is charged only constant amount of work for every change it does.
+Space complexity consumed is bounded by the number changes done by update operations. Thus space complexity is \bigO{n}. 
 \end{myproof}
 
 Regarding the time complexity, searching the correct slot in a fat vertex produces only constant overhead. Realizing that every operation can be charged on a memory allocation of a fat vertex such that there is a constant $c$ depending only on the balancing algorithm such that for every allocated fat vertex the number of operations charged on it is at most $c$.
