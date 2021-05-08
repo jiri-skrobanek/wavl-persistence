@@ -49,7 +49,7 @@ namespace PersistentWAVL
                 this.Key = Key;
                 this.Value = Value;
                 this.Version = Version;
-                this.FatNode = new FatNode(Version, this);
+                this.FatNode = new FatNode(this);
             }
 
             public Node(K Key, V Value, VersionHandle Version, FatNode FatNode)
@@ -60,57 +60,38 @@ namespace PersistentWAVL
                 this.FatNode = FatNode;
             }
 
-            /// <summary>
-            /// Copy constructor, adds to the fat vertex
-            /// </summary>
-            public Node(VersionHandle Version, Node node)
-            {
-                node.FatNode.Slots.Add(Version, this);
-
-                DemotionStart = node.DemotionStart;
-                DemotionStart2 = node.DemotionStart2;
-                FatNode = node.FatNode;
-                Key = node.Key;
-                PromotionStart = node.PromotionStart;
-                rank = node.rank;
-                Value = node.Value;
-                this.Version = Version;
-                _left = node._left;
-                _modPathEnd = node._modPathEnd;
-                _modPathEnd2 = node._modPathEnd2;
-                _parent = node._parent;
-                _right = node._right;
-            }
-
             public override string ToString() => $"<{Key.ToString()}:{Value.ToString()}>";
 
             public int CompareTo(Node other) => Key.CompareTo(other.Key);
 
             public void CopyForVersion(VersionHandle newversion)
             {
-                // We assume that permanent accessor for newly created version is not set yet.
+                var me = FatNode.Slots.Find(this);
+
                 var old = (Node)MemberwiseClone();
-                FatNode.Slots[Version] = old;
                 old.TemporaryAccessor = null;
                 if (!(PermanentAccessor is null))
                 {
+                    // We assume that permanent accessor for newly created version is not set yet.
                     PermanentAccessor.Node = old;
                     PermanentAccessor = null;
                 }
+                FatNode.Slots.AddBefore(me, old);
 
-
-                Version = newversion.GetSuccessor();
                 var undo = (Node)MemberwiseClone();
-                FatNode.Slots[Version] = undo;
+                undo.Version = newversion.GetSuccessor();
                 undo.TemporaryAccessor = null;
-
+                FatNode.Slots.AddAfter(me, undo);
 
                 Version = newversion;
-                FatNode.Slots[Version] = this;
+            }
 
-                // It should not make any difference if this is checked before or after 
-                // we write changes differentiating the new slot from the old one.
-                FatNode.CheckInvariant();
+            internal Node DuplicateSlot()
+            {
+                var dup = (Node)MemberwiseClone();
+                dup.PermanentAccessor = null;
+                dup.TemporaryAccessor = null;
+                return dup;
             }
 
             internal NodeAccessor GetTemporaryAccessorForVersion(VersionHandle version)

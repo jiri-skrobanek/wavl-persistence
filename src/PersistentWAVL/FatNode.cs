@@ -13,105 +13,343 @@ namespace PersistentWAVL
         {
             public const int SizeLimit = 11;
 
-            public SortedDictionary<VersionHandle, Node> Slots = new SortedDictionary<VersionHandle, Node>();
+            public LinkedList<Node> Slots = new LinkedList<Node>();
 
-            public FatNode(VersionHandle version, Node node)
+            public FatNode Previous;
+            public FatNode Next;
+
+            public static ISet<FatNode> CheckScheduled = new HashSet<FatNode>();
+
+            internal static int VertexIdCounter = 0;
+
+            internal int VertexId;
+
+            public FatNode(Node node)
             {
-                Slots[version] = node;
+                VertexId = VertexIdCounter++;
+                Slots.AddFirst(node);
             }
 
-            private FatNode()
-            { }
+            private FatNode(FatNode previous)
+            {
+                Previous = previous;
+                Next = previous.Next;
+                previous.Next = this;
+                if (!(Next is null)) Next.Previous = this;
+
+                VertexId = previous.VertexId;
+            }
 
             public Node GetNodeForVersion(VersionHandle version)
             {
                 // We consider that fields apply to own version and some later. 
-
-                var max = Slots.Where(x => x.Key <= version).Max(x => x.Key);
-                return Slots[max];
+                return Slots.Last(x => x.Version <= version);
             }
 
             /// <summary>
-            /// Validates that size of this fat node does not exceed given limit. 
-            /// Potentially splits this fat node.
+            /// Restore invariants of all fat nodes.
             /// </summary>
-            public void CheckInvariant()
+            public static void FinishUpdate()
             {
-                if (Slots.Count <= SizeLimit) return;
-
-                var queue = new LinkedList<FatNode>();
-
-                queue.AddLast(this);
-
-                // The order is irrelevant as the node cannot become more than 
-                // twice the size limit before being split at least once
-                while (queue.Any())
+                while (CheckScheduled.Any())
                 {
-                    var first = queue.First();
-                    queue.RemoveFirst();
+                    var n = CheckScheduled.First();
+                    CheckScheduled.Remove(n);
 
-                    foreach (var fn in _checkInvariant(first))
-                        queue.AddLast(fn);
+                    CheckOne(n);
                 }
+
             }
 
-            private IEnumerable<FatNode> _checkInvariant(FatNode first)
+            private static void CheckOne(FatNode n)
             {
-                if (Slots.Count <= SizeLimit) yield break;
+                VersionHandle leftHandle = null;
+                Node overlappingLeft = null;
 
-                var slotArray = first.Slots.ToArray();
-                var middle = slotArray[(first.Slots.Count + 1) / 2];
+                // Split overlapping slots
 
-                var splittingVersion = middle.Key.GetSuccessor();
+                var current = n.Slots.First;
 
-                var newNode = new FatNode();
-
-                // List of nodes that might need to updated.
-                var refs = new HashSet<FatNode>();
-
-                foreach (var slot in Slots)
+                while (!(current is null))
                 {
-                    refs.Add(slot.Value._left);
-                    refs.Add(slot.Value._right);
-                    refs.Add(slot.Value._parent);
+                    var next = current.Next.Value?.Version;
+                    if (next is null && !(n.Next is null))
+                    {
+                        next = n.Next.Slots.First.Value.Version;
+                    }
+
+                    var cn = current.Value;
+                    var nextVersion = current.Next.Value.Version;
+
+                    var llow = cn._left?.Slots.First.Value;
+                    var lnext = cn._left?.Next?.Slots.First.Value;
+
+                    var rlow = cn._right?.Slots.First.Value;
+                    var rnext = cn._right?.Next?.Slots.First.Value;
+
+                    var plow = cn._parent?.Slots.First.Value;
+                    var pnext = cn._parent?.Next?.Slots.First.Value;
+
+                    if (!(next is null)
+                        && (lnext is null || lnext.Version > next)
+                        && (rnext is null || rnext.Version > next)
+                        && (pnext is null || pnext.Version > next))
+                    {
+                        // No overlapping detected for this slot.
+                        current = current.Next;
+                    }
+
+                    Node changeLeft()
+                    {
+                        var nn = cn.DuplicateSlot();
+                        nn.Version = lnext.Version;
+                        nn._left = lnext.FatNode;
+                        n.Slots.AddAfter(current, nn);
+                        return nn;
+                    }
+
+                    Node changeRight()
+                    {
+                        var nn = cn.DuplicateSlot();
+                        nn.Version = rnext.Version;
+                        nn._right = rnext.FatNode;
+                        n.Slots.AddAfter(current, nn);
+                        return nn;
+                    }
+
+                    Node changeParent()
+                    {
+                        var nn = cn.DuplicateSlot();
+                        nn.Version = pnext.Version;
+                        nn._parent = pnext.FatNode;
+                        n.Slots.AddAfter(current, nn);
+                        return nn;
+                    }
+
+
+                    if ((lnext is null) && (rnext is null) && (pnext is null))
+                        // Every pointer is nonoverlapping
+                        ;
+
+                    // Some duplication of this slot is needed.
+                    else if (!(lnext is null) && (rnext is null) && (pnext is null))
+                    {
+                        changeLeft();
+                    }
+                    else if ((lnext is null) && !(rnext is null) && (pnext is null))
+                    {
+                        changeRight();
+                    }
+                    else if ((lnext is null) && (rnext is null) && !(pnext is null))
+                    {
+                        var nn = cn.DuplicateSlot();
+                        nn.Version = pnext.Version;
+                        nn._parent = pnext.FatNode;
+                        n.Slots.AddAfter(current, nn);
+                    }
+                    else if (!(lnext is null) && !(rnext is null) && (pnext is null))
+                    {
+                        if (lnext.Version < rnext.Version)
+                        {
+                            changeLeft();
+                        }
+                        else if (lnext.Version > rnext.Version)
+                        {
+                            changeRight();
+                        }
+                        else
+                        {
+                            var nn = changeLeft();
+                            nn._right = rnext.FatNode;
+                        }
+                    }
+                    else if (!(lnext is null) && (rnext is null) && !(pnext is null))
+                    {
+                        if (lnext.Version < pnext.Version)
+                        {
+                            changeLeft();
+                        }
+                        else if (lnext.Version > pnext.Version)
+                        {
+                            changeParent();
+                        }
+                        else
+                        {
+                            var nn = changeLeft();
+                            nn._parent = pnext.FatNode;
+                        }
+                    }
+                    else if ((lnext is null) && !(rnext is null) && !(pnext is null))
+                    {
+                        if (lnext.Version < pnext.Version)
+                        {
+                            changeRight();
+                        }
+                        else if (lnext.Version > pnext.Version)
+                        {
+                            changeParent();
+                        }
+                        else
+                        {
+                            var nn = changeRight();
+                            nn._right = pnext.FatNode;
+                        }
+                    }
+                    else // if (!(lnext is null) && !(rnext is null) && !(pnext is null))
+                    {
+                        if (lnext.Version == pnext.Version && lnext.Version == rnext.Version)
+                        {
+                            var nn = changeLeft();
+                            nn._right = rnext.FatNode;
+                            nn._parent = pnext.FatNode;
+                        }
+                        else if (lnext.Version < pnext.Version && lnext.Version < rnext.Version)
+                        {
+                            changeLeft();
+                        }
+                        else if (rnext.Version < lnext.Version && rnext.Version < pnext.Version)
+                        {
+                            changeRight();
+                        }
+                        else if (pnext.Version < lnext.Version && pnext.Version < rnext.Version)
+                        {
+                            changeParent();
+                        }
+                        else if (lnext.Version > pnext.Version && lnext.Version > rnext.Version)
+                        {
+                            var nn = changeRight();
+                            nn._right = pnext.FatNode;
+                        }
+                        else if (rnext.Version > lnext.Version && rnext.Version > pnext.Version)
+                        {
+                            var nn = changeLeft();
+                            nn._parent = pnext.FatNode;
+                        }
+                        else if (pnext.Version > lnext.Version && pnext.Version > rnext.Version)
+                        {
+                            var nn = changeLeft();
+                            nn._right = rnext.FatNode;
+                        }
+                    }
+
+                    current = current.Next;
                 }
 
-                foreach (var slot in Slots.Where(x => !(x.Key <= splittingVersion)))
-                    newNode.Slots.Add(slot.Key, slot.Value);
+                // Make new fat nodes
 
-                foreach (var slot in newNode.Slots)
-                    Slots.Remove(slot.Key);
+                if (n.Slots.Count <= SizeLimit)
+                    // Nothing more to be done.
+                    return;
 
-                foreach (var r in refs.Where(x => x != null))
+                var count = 1 + 2 * (n.Slots.Count / SizeLimit);
+                var equalSplit = n.Slots.Count / count;
+                var extras = n.Slots.Count % count;
+
+                var slotList = n.Slots;
+                n.Slots = new LinkedList<Node>();
+                var fn = n;
+
+                var currentSlot = slotList.First;
+
+                var size = equalSplit + (extras-- > 0 ? 1 : 0);
+
+                for (int j = 0; j < size; j++)
                 {
-                    var prior = r.GetNodeForVersion(splittingVersion);
-                    var splittingNode = new Node(splittingVersion, prior);
+                    fn.Slots.AddLast(currentSlot);
+                    currentSlot = currentSlot.Next;
+                }
 
-                    foreach (var slot in r.Slots)
+                for (int i = 1; i < count; i++)
+                {
+                    fn = new FatNode(fn);
+
+                    size = equalSplit + (extras-- > 0 ? 1 : 0);
+
+                    for (int j = 0; j < size; j++)
                     {
-                        var val = slot.Value;
-                        if (slot.Key > splittingVersion)
-                        {
-                            if (val._left == this)
-                            {
-                                val._left = newNode;
-                            }
-
-                            if (val._right == this)
-                            {
-                                val._right = newNode;
-                            }
-
-                            if (val._parent == this)
-                            {
-                                val._parent = newNode;
-                            }
-                        }
+                        fn.Slots.AddLast(currentSlot);
+                        currentSlot.Value.FatNode = fn;
+                        currentSlot = currentSlot.Next;
                     }
                 }
 
-                foreach (var r in refs.Where(x => x != null))
-                    if (r.Slots.Count > SizeLimit) yield return r;
+                // Make pointers proper
+
+                var currentFN = n.Next;
+                for (int i = 1; i < count; i++)
+                {
+                    var firstVersion = currentFN.Slots.First.Value.Version;
+
+                    foreach (var s in currentFN.Slots)
+                    {
+                        if (!(s._left is null))
+                        {
+                            foreach (var u in s._left.Slots)
+                            {
+                                if (u._parent is null) continue;
+                                if (u._parent.VertexId == n.VertexId)
+                                {
+                                    // See if it points to improper version of this vertex.
+                                    var higherVersion = u._parent.Next?.Slots.First.Value.Version;
+                                    if (!(higherVersion is null) && higherVersion <= u.Version)
+                                    {
+                                        u._parent = currentFN;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!(s._right is null))
+                        {
+                            foreach (var u in s._right.Slots)
+                            {
+                                if (u._parent is null) continue;
+                                if (u._parent.VertexId == n.VertexId)
+                                {
+                                    // See if it points to improper version of this vertex.
+                                    var higherVersion = u._parent.Next?.Slots.First.Value.Version;
+                                    if (!(higherVersion is null) && higherVersion <= u.Version)
+                                    {
+                                        u._parent = currentFN;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!(s._parent is null))
+                        {
+                            foreach (var u in s._parent.Slots)
+                            {
+                                if (u._left is null) continue;
+                                if (u._left.VertexId == n.VertexId)
+                                {
+                                    // See if it points to improper version of this vertex.
+                                    var higherVersion = u._left.Next?.Slots.First.Value.Version;
+                                    if (!(higherVersion is null) && higherVersion <= u.Version)
+                                    {
+                                        u._left = currentFN;
+                                    }
+                                }
+                            }
+
+                            foreach (var u in s._parent.Slots)
+                            {
+                                if (u._right is null) continue;
+                                if (u._right.VertexId == n.VertexId)
+                                {
+                                    // See if it points to improper version of this vertex.
+                                    var higherVersion = u._right.Next?.Slots.First.Value.Version;
+                                    if (!(higherVersion is null) && higherVersion <= u.Version)
+                                    {
+                                        u._right = currentFN;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    currentFN = currentFN.Next;
+                }
             }
         }
     }

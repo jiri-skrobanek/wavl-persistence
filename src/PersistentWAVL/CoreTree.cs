@@ -72,6 +72,8 @@ namespace PersistentWAVL
 
             Node.RemoveListOfAccessors();
 
+            FatNode.FinishUpdate();
+
             return new Tree<K, V> { Root = top, Version = newVersion };
         }
 
@@ -189,6 +191,8 @@ namespace PersistentWAVL
             var newRoot = top.GetPermanentAccessor();
 
             Node.RemoveListOfAccessors();
+
+            FatNode.FinishUpdate();
 
             return new Tree<K, V> { Root = newRoot, Version = newVersion };
 

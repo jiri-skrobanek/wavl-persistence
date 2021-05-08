@@ -161,20 +161,36 @@ namespace PersistentWAVL
                     get => Node._left?.GetNodeForVersion(Version).GetTemporaryAccessorForVersion(Version);
                     set
                     {
-                        if (MustCopy) Node.CopyForVersion(Version);
-                        if (!(Node._left is null))
+                        // Is any work needed?
+                        if (Node._left is null && value is null)
+                            return;
+
+                        if (!(Node._left is null) && !(value is null) && Node._left.GetNodeForVersion(Version) == value.Node)
+                            return;
+
+                        // Insert slots if needed
+                        if (MustCopy)
                         {
-                            // Unset parent for current right.
-                            var right = Node._left;
-                            Node._left = null;
-                            var inverseNode = right.GetNodeForVersion(Version);
+                            Node.CopyForVersion(Version);
+                            FatNode.CheckScheduled.Add(Node.FatNode);
+                        }
+
+                        // Remove old inverse pointer
+                        if (!(Node._left is null)
+                            && Node._left.GetNodeForVersion(Version)._parent == Node.FatNode
+                            && Node._left.GetNodeForVersion(Version) != value.Node)
+                        {
+                            var left = Node._left;
+                            var inverseNode = left.GetNodeForVersion(Version);
                             if (inverseNode.Version != Version)
                             {
                                 inverseNode.CopyForVersion(Version);
+                                FatNode.CheckScheduled.Add(inverseNode.FatNode);
                             }
                             inverseNode._parent = null;
                         }
 
+                        // Set new value
                         if (value is null)
                         {
                             Node._left = null;
@@ -185,15 +201,17 @@ namespace PersistentWAVL
                             if (inverseNode.Version != Version)
                             {
                                 inverseNode.CopyForVersion(Version);
+                                FatNode.CheckScheduled.Add(inverseNode.FatNode);
                             }
 
+                            // Remove old parent of new child
                             if (!(inverseNode._parent is null) && inverseNode._parent != Node.FatNode)
                             {
-                                // Unset child for parent of new right
                                 var oldparent = inverseNode._parent.GetNodeForVersion(Version);
                                 if (oldparent.Version != Version)
                                 {
                                     oldparent.CopyForVersion(Version);
+                                    FatNode.CheckScheduled.Add(oldparent.FatNode);
                                 }
                                 if (oldparent._left == inverseNode.FatNode)
                                 {
@@ -217,20 +235,36 @@ namespace PersistentWAVL
                     get => Node._right?.GetNodeForVersion(Version).GetTemporaryAccessorForVersion(Version);
                     set
                     {
-                        if (MustCopy) Node.CopyForVersion(Version);
-                        if (!(Node._right is null))
+                        // Is any work needed?
+                        if (Node._right is null && value is null)
+                            return;
+
+                        if (!(Node._right is null) && !(value is null) && Node._right.GetNodeForVersion(Version) == value.Node)
+                            return;
+
+                        // Insert slots if needed
+                        if (MustCopy)
                         {
-                            // Unset parent for current right.
+                            Node.CopyForVersion(Version);
+                            FatNode.CheckScheduled.Add(Node.FatNode);
+                        }
+
+                        // Remove old inverse pointer
+                        if (!(Node._right is null) 
+                            && Node._right.GetNodeForVersion(Version)._parent == Node.FatNode 
+                            && Node._right.GetNodeForVersion(Version) != value.Node)
+                        {
                             var right = Node._right;
-                            Node._right = null;
                             var inverseNode = right.GetNodeForVersion(Version);
                             if (inverseNode.Version != Version)
                             {
                                 inverseNode.CopyForVersion(Version);
+                                FatNode.CheckScheduled.Add(inverseNode.FatNode);
                             }
                             inverseNode._parent = null;
                         }
 
+                        // Set new value
                         if (value is null)
                         {
                             Node._right = null;
@@ -241,15 +275,17 @@ namespace PersistentWAVL
                             if (inverseNode.Version != Version)
                             {
                                 inverseNode.CopyForVersion(Version);
+                                FatNode.CheckScheduled.Add(inverseNode.FatNode);
                             }
 
+                            // Remove old parent of new child
                             if (!(inverseNode._parent is null) && inverseNode._parent != Node.FatNode)
                             {
-                                // Unset child for parent of new right
                                 var oldparent = inverseNode._parent.GetNodeForVersion(Version);
                                 if (oldparent.Version != Version)
                                 {
                                     oldparent.CopyForVersion(Version);
+                                    FatNode.CheckScheduled.Add(oldparent.FatNode);
                                 }
                                 if(oldparent._left == inverseNode.FatNode)
                                 {
