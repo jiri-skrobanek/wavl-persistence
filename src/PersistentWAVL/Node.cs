@@ -84,6 +84,9 @@ namespace PersistentWAVL
                 FatNode.Slots.AddAfter(me, undo);
 
                 Version = newversion;
+
+                // Schedule to check invariant.
+                FatNode.CheckScheduled.Add(FatNode);
             }
 
             internal Node DuplicateSlot()

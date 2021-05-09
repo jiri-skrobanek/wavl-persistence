@@ -61,6 +61,11 @@ namespace PersistentWAVL
 
             }
 
+            /// <summary>
+            /// Ensure that all pointers in given fat node are non-overlapping.
+            /// Split the node if it exceeeds capacity.
+            /// Schedule chaking of fat nodes that may have invariant violated by splitting of this vertex.
+            /// </summary>
             private static void CheckOne(FatNode n)
             {
                 VersionHandle leftHandle = null;
@@ -284,6 +289,8 @@ namespace PersistentWAVL
                     {
                         if (!(s._left is null))
                         {
+                            CheckScheduled.Add(s._left);
+
                             foreach (var u in s._left.Slots)
                             {
                                 if (u._parent is null) continue;
@@ -301,6 +308,8 @@ namespace PersistentWAVL
 
                         if (!(s._right is null))
                         {
+                            CheckScheduled.Add(s._right);
+
                             foreach (var u in s._right.Slots)
                             {
                                 if (u._parent is null) continue;
@@ -318,6 +327,8 @@ namespace PersistentWAVL
 
                         if (!(s._parent is null))
                         {
+                            CheckScheduled.Add(s._parent);
+
                             foreach (var u in s._parent.Slots)
                             {
                                 if (u._left is null) continue;
