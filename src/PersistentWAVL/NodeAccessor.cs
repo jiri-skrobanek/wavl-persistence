@@ -161,22 +161,72 @@ namespace PersistentWAVL
                     get => Node._left?.GetNodeForVersion(Version).GetTemporaryAccessorForVersion(Version);
                     set
                     {
-                        if (MustCopy) Node.CopyForVersion(Version);
-                        Node._left = null;
-                        if (value != null)
+                        // Is any work needed?
+                        if (Node._left is null && value is null)
+                            return;
+
+                        if (!(Node._left is null) && !(value is null) && Node._left.GetNodeForVersion(Version) == value.Node)
+                            return;
+
+                        // Insert slots if needed
+                        if (MustCopy)
+                        {
+                            Node.CopyForVersion(Version);
+                            FatNode.CheckScheduled.Add(Node.FatNode);
+                        }
+
+                        // Remove old inverse pointer
+                        if (!(Node._left is null)
+                            && Node._left.GetNodeForVersion(Version)._parent == Node.FatNode
+                            && Node._left.GetNodeForVersion(Version) != value.Node)
+                        {
+                            var left = Node._left;
+                            var inverseNode = left.GetNodeForVersion(Version);
+                            if (inverseNode.Version != Version)
+                            {
+                                inverseNode.CopyForVersion(Version);
+                                FatNode.CheckScheduled.Add(inverseNode.FatNode);
+                            }
+                            inverseNode._parent = null;
+                        }
+
+                        // Set new value
+                        if (value is null)
+                        {
+                            Node._left = null;
+                        }
+                        else
                         {
                             var inverseNode = value.Node.FatNode.GetNodeForVersion(Version);
-                            // If nothing to set, end.
-                            if (inverseNode._parent != Node.FatNode)
+                            if (inverseNode.Version != Version)
                             {
-                                if (inverseNode.Version != Version)
-                                {
-                                    inverseNode.CopyForVersion(Version);
-                                }
-                                inverseNode._parent = Node.FatNode;
+                                inverseNode.CopyForVersion(Version);
+                                FatNode.CheckScheduled.Add(inverseNode.FatNode);
                             }
+
+                            // Remove old parent of new child
+                            if (!(inverseNode._parent is null) && inverseNode._parent != Node.FatNode)
+                            {
+                                var oldparent = inverseNode._parent.GetNodeForVersion(Version);
+                                if (oldparent.Version != Version)
+                                {
+                                    oldparent.CopyForVersion(Version);
+                                    FatNode.CheckScheduled.Add(oldparent.FatNode);
+                                }
+                                if (oldparent._left == inverseNode.FatNode)
+                                {
+                                    oldparent._left = null;
+                                }
+                                if (oldparent._right == inverseNode.FatNode)
+                                {
+                                    oldparent._right = null;
+                                }
+                            }
+
+                            inverseNode._parent = Node.FatNode;
+
+                            Node._left = value.Node.FatNode;
                         }
-                        Node._left = value.Node.FatNode;
                     }
                 }
 
@@ -185,22 +235,72 @@ namespace PersistentWAVL
                     get => Node._right?.GetNodeForVersion(Version).GetTemporaryAccessorForVersion(Version);
                     set
                     {
-                        if (MustCopy) Node.CopyForVersion(Version);
-                        Node._right = null;
-                        if (value != null)
+                        // Is any work needed?
+                        if (Node._right is null && value is null)
+                            return;
+
+                        if (!(Node._right is null) && !(value is null) && Node._right.GetNodeForVersion(Version) == value.Node)
+                            return;
+
+                        // Insert slots if needed
+                        if (MustCopy)
+                        {
+                            Node.CopyForVersion(Version);
+                            FatNode.CheckScheduled.Add(Node.FatNode);
+                        }
+
+                        // Remove old inverse pointer
+                        if (!(Node._right is null) 
+                            && Node._right.GetNodeForVersion(Version)._parent == Node.FatNode 
+                            && Node._right.GetNodeForVersion(Version) != value.Node)
+                        {
+                            var right = Node._right;
+                            var inverseNode = right.GetNodeForVersion(Version);
+                            if (inverseNode.Version != Version)
+                            {
+                                inverseNode.CopyForVersion(Version);
+                                FatNode.CheckScheduled.Add(inverseNode.FatNode);
+                            }
+                            inverseNode._parent = null;
+                        }
+
+                        // Set new value
+                        if (value is null)
+                        {
+                            Node._right = null;
+                        }
+                        else
                         {
                             var inverseNode = value.Node.FatNode.GetNodeForVersion(Version);
-                            // If nothing to set, end.
-                            if (inverseNode._parent != Node.FatNode)
+                            if (inverseNode.Version != Version)
                             {
-                                if (inverseNode.Version != Version)
-                                {
-                                    inverseNode.CopyForVersion(Version);
-                                }
-                                inverseNode._parent = Node.FatNode;
+                                inverseNode.CopyForVersion(Version);
+                                FatNode.CheckScheduled.Add(inverseNode.FatNode);
                             }
+
+                            // Remove old parent of new child
+                            if (!(inverseNode._parent is null) && inverseNode._parent != Node.FatNode)
+                            {
+                                var oldparent = inverseNode._parent.GetNodeForVersion(Version);
+                                if (oldparent.Version != Version)
+                                {
+                                    oldparent.CopyForVersion(Version);
+                                    FatNode.CheckScheduled.Add(oldparent.FatNode);
+                                }
+                                if(oldparent._left == inverseNode.FatNode)
+                                {
+                                    oldparent._left = null;
+                                }
+                                if (oldparent._right == inverseNode.FatNode)
+                                {
+                                    oldparent._right = null;
+                                }
+                            }
+
+                            inverseNode._parent = Node.FatNode;
+                            
+                            Node._right = value.Node.FatNode;
                         }
-                        Node._right = value.Node.FatNode;
                     }
                 }
 
