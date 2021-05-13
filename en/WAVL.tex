@@ -3,85 +3,98 @@
 \section{Original Weak-AVL Tree}
 
 \begin{defn}
-A binary tree is said to be {\em ranked binary tree} if all vertices have non-negative integer ranks assigned. External vertices are by convention given rank $-1$. We denote $r(V)$ the rank of vertex $V$.
+A binary tree is said to be a {\em ranked binary tree} if all vertices have non-negative integer ranks assigned. External vertices are by convention given rank $-1$. We denote the rank of vertex $v$ by $\rank(v)$.
 \end{defn}
 
 \begin{defn}
-Vertex $V$ having left child $L$ and right child $R$ (both of which may be external) in ranked binary tree may be said to be either $(a,b)$-vertex or $(b,a)$-vertex if $r(V) - r(L) = a$ and $r(V) - r(R) = b$. $L$ and $R$ are called $a$-child and $b$-child.
+Vertex $v$ having left child $l$ and right child $r$ (both of which may be external) in a ranked binary tree is said to be either $(a,b)$-vertex or $(b,a)$-vertex if $\rank(v) - \rank(l) = a$ and $\rank(v) - \rank(r) = b$. $L$ and $R$ are called an $a$-child and a $b$-child of $v$.
 \end{defn}
 
 \begin{prop}
-Let $S$ be a finite subset of ${(\mathbb{Z} _ +)}^2$ and $T$ a ranked tree with $n$ vertices. If it holds that for every $(i,j)$-vertex in $T$ that $(i,j) \in S$, then the height of $T$ is $\Theta(\log n)$.
+Let $S$ be a finite subset of ${(\mathbb{Z} _ +)}^2$ and $T$ a ranked tree with $n$ vertices. If for every $(i,j)$-vertex in $T$ we have $(i,j) \in S$, then the height of $T$ is $\Theta(\log n)$.
 \label{thm-rbt-depth}
 \end{prop}
 
 \begin{myproof}
-Let us denote $m$ the maximum allowed rank difference by $S$.
-We prove this by induction on the rank of the root vertex. We establish a lower bound on the number of vertices in a tree with root of rank $r$. 
-We suppose that it holds for every lower rank $q$, that the number of vertices in a tree with root of rank $q$ is at least $\exp(qc)$ for some positive constant $c$. 
-Then to continue the induction we need the following: $$ 1 + 2\exp((r-m)c) \geq \exp(rc) $$ $$ \log 2 + (r-m)c \geq rc $$ $$ \log 2 \geq cm $$
-We see that setting $c$ will be always possible.
-The base case of rank zero: The inequality obviously holds for leaves (only possible vertices with rank zero).\\
-Then $n \geq \exp(qc)$, if $q$ is the rank of root of $T$. The height of $T$ is in turn at most $ \log(n)/c $. 
-The other inclusion applies to all kinds of binary search trees.
+Let us denote $m$ the maximum allowed rank difference in $S$.
+We prove by induction on the rank of the root vertex an exponential lower bound on size of $T$. We establish a lower bound on the number of vertices in a tree with a root of rank $r$. 
+
+Suppose that it holds for every rank $q$ lower than $r$, that the number of vertices in a tree with root of rank $q$ is at least $\exp(qc)$ for some positive constant $c$. We set this constant to $\log(2)/m$.
+We now derive the minimum size of tree with root of rank $r$, for $r>m$:
+\begin{align*}
+	\log 2            & \geq cm       \\
+	\log 2 + (r-m)c   & \geq rc       \\
+	2\exp((r-m)c) & \geq \exp(rc) \\
+	1 + 2\exp((r-m)c) & \geq \exp(rc)
+\end{align*}
+The expression on the left-hand side of the final inequality is precisely lower bound on the size of a tree of rank $r$, the vertex itself and the size of two trees having the root of rank at least $r-m$.
+
+For $r \leq m$ the expression $\exp(rc)$ is less then 1, so the condition is met trivially. Therefore the induction holds also for $r$.
+
+The base case of rank zero: The inequality obviously holds for leaves (only possible vertices with rank zero).
+
+
+With the induction complete, it follows that $n \geq \exp(qc)$, if $q$ is the rank of root of $T$. The height of $T$ is in turn at most $ \log(n)/c $. 
+
+Since all BSTs have at least logarithmic height, we have proven the proposition.
 \end{myproof}
 
-The theory of ranked trees permits a nice definition of AVL trees\cite{avl}.
+The theory of ranked trees permits a nice definition of AVL trees \cite{avl}.
 
 \begin{defn}
-A ranked tree is said to be {\em AVL tree} if all its every vertex is either $(1,1), (1,2)$ or $(2,1)$  and all leaves are of rank $0$.
+A ranked tree is said to be an {\em AVL tree} if its every vertex is either $(1,1)$, $(1,2)$, or $(2,1)$ and all leaves are of rank $0$.
 \end{defn}
 
 The conditions on rank differences are referred to as rank invariants.
 
 \begin{defn}
-A ranked tree is said to be {\em Weak-AVL tree} if all its vertices are either $(1,1), (1,2), (2,1)$ or $(2,2)$ and all leaves are of rank $0$.
+A ranked tree is said to be a {\em weak-AVL tree} if all its vertices are either $(1,1), (1,2), (2,1)$, or $(2,2)$ and all leaves are of rank $0$.
 \end{defn}
 
-WAVL trees use a relaxation of the balancing rules of AVL trees, this implies that all Weak-AVL trees form a proper subset AVL trees.
+WAVL trees use a relaxation of the balancing rules of AVL trees, this implies that all weak-AVL trees form a proper subset AVL trees.
 
-From now on, we will ignore symmetric situations. Only one from the pair of $(a,b)$- $(b,a)$- vertices will be considered.
+From now on, we will not discern symmetric situations. Only one from the pair of $(a,b)$-/$(b,a)$- vertices will be considered.
 
 \subsection{Bottom-up rebalancing}
 
-By default WAVL trees use the set of standard set of operations as outlined earlier with rebalancing that is described in this section. A series of steps is taken until the rank invariants are restored.
+By default, WAVL trees use the set of standard operations as outlined earlier with rebalancing that is described in this section. A series of steps is taken until the rank invariants are restored.
 
 % Rebalancing consists of checking rank invariant for vertices on the path from the changed vertex back to the root one by one, while performing balancing steps where needed. 
 
 \subsubsection*{Rebalancing after Insert}
 
-Inserting a new leaf $l$ itself may only introduce one type of violation, making the parent of $l$ into a $(0,1)$- or a $(0,2)$-vertex. It will become apparent that the existence of one $(0,1)$- or $(0,2)$-vertex in the tree is the only violation that may happen during this rebalancing. 
+Inserting a new leaf $\ell$ itself may only introduce one type of violation, making the parent of $\ell$ into a $(0,1)$- or a $(0,2)$-vertex. It will become apparent that the existence of one $(0,1)$- or $(0,2)$-vertex in the tree is the only violation that may happen during this rebalancing. 
 
-Rebalancing after inserts consists of repeatedly checking the rank invariant for vertex $y$. Where $y$ changes during the rebalancing and takes values from the vertices in the BST. Initially $y$ is the parent of the inserted vertex. 
+Rebalancing after inserts consists of repeatedly checking the rank invariant for a vertex $y$. This $y$ changes during the rebalancing and takes values from the vertices in the BST. Initially, $y$ is the parent of the inserted vertex. 
 
-Once the whole subtree of $y$ respects the rank rules, rebalancing proceeds by setting $y$ to be the parent of current $y$. All descendants of $y$ obviously adhere to rank invariant. Either it was not violated by this operation or it has just been amended. 
+Once the whole subtree of $y$ respects the rank rules, rebalancing proceeds by setting $y$ to be the parent of the current $y$. All descendants of $y$ obviously adhere to the rank invariant. Either it was not violated by this operation or it has just been restored. 
 
-There are three balancing steps to rectify rank violation at $y$ after insert. (See figures for better illustration.) If rank invariant does not hold for $y$, one of the following steps is chosen, there are symmetric variants for all of these steps. 
+There are three balancing steps to rectify rank violation at $y$ after insert. (See figures for better illustration.) If rank invariant does not hold for $y$, one of the following steps is chosen. There are also symmetric variants for all of these steps. 
 
 \begin{itemize}
-	\item \textbf{Promote} If $y$ is a $(0,1)$-vertex, rank of $y$ is increased by 1. This may make the parent of $y$ a $(0,1)$- or $(0,2)$-vertex. Rebalancing thus continues with the parent of $y$ taking role of $y$. (Unless $y$ is the root, then no additional rebalancing is needed.)
-	\item \textbf{Rotate} If $y$ is a (0,2)-vertex and the 0-child $x$ is a (1,1)-vertex, we rotate along the edge $xy$. The rank of $y$ is decremented by 1. Rebalancing ends.
-	\item \textbf{Double Rotate} If $y$ is a (0,2)-vertex and the 0-child $x$ is a (2,1)-vertex with the 1-child being $w$, we rotate along the edge $xy$ and then along the edge $xw$. Rebalancing ends.
+	\item \textbf{Promote step.} If $y$ is a $(0,1)$-vertex, the rank of $y$ is increased by 1. This may make the parent of $y$ a $(0,1)$- or $(0,2)$-vertex. Rebalancing thus continues with the parent of $y$ taking role of $y$. (Unless $y$ is the root, no additional rebalancing is needed in that case.)
+	\item \textbf{Rotate step.} If $y$ is a $(0,2)$-vertex and the 0-child $x$ is a (1,1)-vertex, we rotate the edge $xy$. The rank of $y$ is decremented by 1. Rebalancing ends.
+	\item \textbf{Double rotate step.} If $y$ is a $(0,2)$-vertex and the 0-child $x$ is a $(2,1)$-vertex with the 1-child being $w$, we rotate the edge $xy$ and then the edge $xw$. Rebalancing ends.
 \end{itemize}
 
 One can easily verify that every case is covered by the outlined steps. Most importantly, if rebalancing continues beyond the first vertex, one child of $y$ must be a $(2,1)$-vertex as one of the children must have been promoted and as such it is a $(2,1)$-vertex. This implies existence of an applicable step. 
 
-At the first checked vertex $v$, one of its children has just been inserted. If $v$ was a leaf, promote can be used. If $v$ had one children prior to this insert, it must have rank 1 and insert may be applied. 
+At the first checked vertex $v$, one of its children has just been inserted. If $v$ was a leaf, promote can be used. If $v$ had one child prior to this insert, it must have rank 1 and there also exists an applicable step. 
 
 \input{figures/insert-steps}
 
 \subsubsection*{Rebalancing after Delete}
 
-This process is analogous to reblancing after insert in many ways. Deleting a leaf may cause its former parent to become either a $(3,1)$-vertex, a $(3,2)$-vertex, a $(2,2)$-vertex that is a leaf, or a $(2,1)$-vertex. This is easily seen from examining all possibilities. 
+This process is analogous to reblancing after insert in many ways. Deleting a leaf may cause its former parent to become either a~$(3,1)$-vertex, a~$(3,2)$-vertex, a~$(2,2)$-vertex that is a leaf, or a~$(2,1)$-vertex. This is easily seen from examining all possibilities. 
 
-Starting from the parent of the deleted vertex, going towards the root, the rank invariant is checked for every vertex $y$ on that path.  During the rebalancing only one vertex may violate the rank invariant at a time and if so, it must either $(3,1)$ or $(3,2)$, (with the exception of the initial $(2,2)$-leaf).
+Starting from the parent of the deleted vertex, going towards the root, the rank invariant is checked for every vertex $y$ on that path.  During the rebalancing only one vertex may violate the rank invariant at a time and if so, it must be either $(3,1)$ or $(3,2)$, with the exception of the initial $(2,2)$-leaf.
 
-There are four different balancing steps, one of which is applied if the rank invariant does not hold at $y$. (Again, these are illustrated in figures.)
+There are four different balancing steps, one of which is applied if the rank invariant does not hold at $y$. (Again, these are illustrated by figures.)
 \begin{itemize}
-	\item \textbf{Demote} If $y$ is a $(3,2)$-vertex or a $(2,2)$-leaf, the rank of $y$ is decremented by 1 and rebalancing continues with the parent of $y$ taking the role of $y$. (If $y$ is the root, rebalancing ends.)
-	\item \textbf{Demote of the Second Kind} If $y$ is a $(3,1)$-vertex and its 1-child is a $(2,2)$-vertex, the rank of $y$ and its 1-child is decremented by 1 and rebalancing continues with the parent of $y$ taking the role of $y$. (If $y$ is the root, rebalancing ends.)
-	\item \textbf{Rotate} If $y$ is a $(3,1)$-vertex, the 1-child $x$ is the right child and its right child is 1-child, we rotate along $xy$, decrementing rank of $y$ by 1 and incrementing the rank of $x$. Rebalancing ends. Of course, in the symmetric case when the 1-child is the left child, symmetric changes must be applied.
-	\item \textbf{Double Rotate} If $y$ is a $(3,1)$-vertex, the 1-child $x$ is the right child and a $(2,1)$-vertex and also the 2-child $w$ of $x$ is its left child, we rotate along $xy$ and then along $wy$, decrementing rank of $y$ by 2, of $x$ by 1 and incrementing the rank of $w$ by 2. Rebalancing ends. Of course, in the symmetric case when the 1-child is the left child, symmetric changes must be applied.
+	\item \textbf{Demote step of the first kind.} If $y$ is a~$(3,2)$-vertex or a $(2,2)$-leaf, the rank of $y$ is decremented by 1 and rebalancing continues with the parent of $y$ taking the role of $y$. (If $y$ is the root, rebalancing ends.)
+	\item \textbf{Demote step of the second kind.} If $y$ is a~$(3,1)$-vertex and its 1-child is a $(2,2)$-vertex, the rank of $y$ and its 1-child is decremented by 1 and rebalancing continues with the parent of $y$ taking the role of $y$. (If $y$ is the root, rebalancing ends.)
+	\item \textbf{Rotate step.} If $y$ is a $(3,1)$-vertex, the 1-child $x$ is the right child and its right child is 1-child, we rotate $xy$, decrementing rank of $y$ by 1 and incrementing the rank of $x$. Rebalancing ends. Of course, in the symmetric case when the 1-child is the left child, symmetric changes must be applied.
+	\item \textbf{Double rotate step.} If $y$ is a $(3,1)$-vertex, the 1-child $x$ is the right child and a~$(2,1)$-vertex and also the 2-child $w$ of $x$ is its left child, we rotate $xy$ and then $wy$, decrementing rank of $y$ by 2, of $x$ by 1 and incrementing the rank of $w$ by 2. Rebalancing ends. Of course, in the symmetric case when the 1-child is the left child, symmetric changes must be applied.
 \end{itemize}
 
 \input{figures/demote-first-kind}
@@ -92,13 +105,13 @@ There are four different balancing steps, one of which is applied if the rank in
 
 \input{figures/delete-double-rotate}
 
-With the rebalancing processes described, we get the following as a corollary of theorem \ref{thm-rbt-depth}.
+With the rebalancing processes described, we get the following as a corollary of Proposition \ref{thm-rbt-depth}.
 
 \begin{prop}
-Insertion and deletion on a Weak AVL tree $T$ have time complexity $\Theta(\log n)$ and require at most one rotation. Here $n$ denotes the number of vertices in $T$.
+Insertion and deletion on a Weak AVL tree $T$ have time complexity $\Theta(\log n)$ and require at most one rotation, one double rotation respectively. Here $n$ denotes the number of vertices in $T$.
 \end{prop}
 
-It is time to list additional properties of WAVL trees, which will be useful later. The proofs are beyond the scope of this thesis and can be found in an article by Haeupler, Sen, and Tarjan \cite{rank-balanced-trees}. These results are obtained by cleverly defining a potential function on vertices of the BST.
+It is time to list additional properties of WAVL trees, which will be useful later. The proofs are beyond the scope of this thesis and should the reader be curious, they can be found in the original paper by Haeupler, Sen, and Tarjan \cite{rank-balanced-trees}. These results are obtained by cleverly defining a potential function on vertices of the BST.
 
 \begin{thm}
 In a WAVL tree with bottom-up rebalancing, there are \bigO{d} demote steps over all operations, where $d$ denotes the total number of deletions. (With the tree initially empty.)
@@ -108,20 +121,20 @@ In a WAVL tree with bottom-up rebalancing, there are \bigO{d} demote steps over 
 In a WAVL tree with bottom-up rebalancing, there are \bigO{m} promote steps over all operations, where $m$ denoted the total number of insertions. (With the tree initially empty.)
 \end{thm}
 
-WAVL trees have good properties when we consider the amortized number of promote, demote, or rotate steps -- all average to a constant. The number of rotations is constant even in the worst case. Unfortunately, we will need constant number of modifications per update even in the worst-case.
+WAVL trees have good properties when we consider the amortized number of promote, demote, or rotate steps -- all average to a constant. The number of rotations is constant even in the worst case. Unfortunately, persistence requires constant number of modifications per update even in the worst case.
 
 \subsection{Top-down rebalancing}
 
-There is an alternative set of procedures for performing insert and delete in WAVL tree. Changes are performed during descent from the root while searching for the key in question. No return to the root ensues.
+There is an alternative set of procedures for performing Insert and Delete in WAVL tree. Changes are performed during descent from the root while searching for the key in question. No return to the root ensues.
 
-For insert, we know that problematic vertices that cause promote to be passed upwards are $(0,1)$. Such vertices come to exist from $(1,1)$-vertices by promoting one of their children. Passing through a vertex other than $(1,1)$ ensures that rebalancing will not proceed through that vertex upwards. We thus only need to worry about long chains of $(1,1)$-vertices when descending during the find phase of insert. When we traverse the tree down from the root during the find phase, these must removed.
+For Insert, we know that problematic vertices that cause promote to be passed upwards are always $(0,1)$. Such vertices come to exist from $(1,1)$-vertices by promoting one of their children. Passing through a vertex other than $(1,1)$ ensures that rebalancing will not proceed through that vertex upwards. We thus only need to worry about long chains of $(1,1)$-vertices when descending during the find phase of insert. When we traverse the tree down from the root during the find phase, these must removed.
 
-Top-down rebalancing utilizes \emph{forced reset} to remove these long chains of $(1,1)$-vertices. Forced reset is triggered by passing through the $k$-th $(1,1)$-vertex (denoted $d$) in a row during the find phase of insert. The last passed node that is not $(1,1)$ (or root) is called \textit{safe node}. We know that promoting $d$ might require rebalancing to be performed starting at $d$ to restore rank rules. We know however that this rebalancing will end at the safe node, taking \bigO{1} operations.
-With forced-reset prevents returning arbitrarily close to the root during rebalancing after the insert is performed.
+Top-down rebalancing utilizes \emph{forced reset} to remove these long chains of $(1,1)$-vertices. Forced reset is triggered by passing through the $k$-th $(1,1)$-vertex (denoted $d$) in a row during the find phase of Insert. The last passed node that is not $(1,1)$ (or root) is called a \textit{safe node}. We know that promoting $d$ might require rebalancing to be performed starting at $d$ to restore rank rules. We know however that this rebalancing will end at the safe node, taking \bigO{1} operations.
+Forced reset prevents returning arbitrarily close to the root during rebalancing after the insert is performed.
 
-Similarly with delete, in which case problematic nodes are $(2,2)$ and $(2,1)$ with the 1-child being $(2,2)$. The remaining nodes are safe. Forced-reset triggers demote after passing through $l$ non-safe nodes. (Subsequent rebalancing ends after \bigO{1} steps.)
+Similarly with delete, in which case problematic nodes are $(2,2)$ and $(2,1)$ with the 1-child being $(2,2)$. The remaining nodes are safe. Forced reset triggers demote after passing through $l$ non-safe nodes. (Subsequent rebalancing ends after \bigO{1} steps.)
 
-As the next theorem claims, we can preserve the upper bound on rebalancing steps, the number of rotations during one operation unfortunately can be as high as \bigO{\log n}.
+As the next theorem claims, we can preserve the upper bound on rebalancing steps, but the number of rotations during one operation can unfortunately be as high as $\Theta(\log n)$.
 
 \begin{thm}
 Setting $k=5$ and $l=3$, top-down rebalancing takes \bigO{m+d} steps where $m$ denotes the number of inserts and $d$ the number of deletes.
@@ -130,9 +143,9 @@ Setting $k=5$ and $l=3$, top-down rebalancing takes \bigO{m+d} steps where $m$ d
 We also get another pleasant property with top-down rebalancing.
 
 \begin{defn}
-Insert and delete operation is said to be of rank $r$ if the highest rank of a vertex where rotation or rank change takes place is $r$.
+Insert or delete operation is said to be of rank $r$ if the highest rank of a vertex where rotation or rank change takes place is $r$.
 \end{defn}
 
 \begin{thm}
-With $k=5$ and $l=3$, there exists a positive constant $c > 1$ such that top-down rebalancing takes \bigO{mc^{-r}} rebalancing steps of order $r$ where $m$ denotes the number of total inserts.
+With $k=5$ and $l=3$, there exists a positive constant $c > 1$ such that top-down rebalancing takes \bigO{mc^{-r}} rebalancing steps of order $r$ where $m$ denotes the total number of inserts.
 \end{thm}

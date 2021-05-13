@@ -1,49 +1,49 @@
-In this chapter basic terminology concerning trees will be established. Then a quick review of Weak-AVL (WAVL) trees is given. Next, our modified balancing algorithm is introduced. Finally, weight-balanced trees are defined since these will be needed as an auxiliary structure in persistent BSTs.
+In this chapter basic, terminology concerning trees will be established. Then a~quick review of Weak-AVL (WAVL) trees is given. Next, our modified balancing algorithm is introduced. Finally, weight-balanced trees are defined since these will be needed as an auxiliary structure in persistent binary search trees.
 
 \section{Terminology}
 
-For the purposes of this thesis, \emph{binary search tree} (BST) will be a data structure composed of internal vertices (or nodes). Every internal vertex carries a key. Keys are members of a set of linearly ordered items and naturally extend this ordering to vertices. In addition, internal vertices are allowed to carry constant amount of information in fields (for example about tree structure) and to have constant number of pointers to other vertices. An internal node has two pointers to child vertices -- left and right. Any of the pointers can target an external vertex. 
+For the purposes of this thesis, \emph{binary search tree} (BST) will be a~data structure composed of internal vertices (or nodes). Every internal vertex carries a~key. Keys are members of a~set of linearly ordered items and we naturally extend this ordering to vertices. In addition, internal vertices are allowed to carry constant amount of information in fields (for example about tree structure) and to have constant number of pointers to other vertices. An internal node has two pointers to child vertices -- left and right. Any of the pointers can target an external vertex. 
 
-External vertices are not represented in memory, all pointers (null-pointers) to external vertices are equal and must not be dereferenced. For the specific application, it can be beneficial to assume external vertices have some default values of their fields. An internal left child must precede its parent in the linear order, conversely an internal right child must come after its parent in the linear order.
+External vertices are not represented in memory, all pointers (null-pointers) to external vertices are equal and must not be dereferenced. For the specific application, it can be beneficial to assume that external vertices have some default values of their fields. For every vertex $v$, all vertices in the subtree induced by left child of $v$ must precede its parent in the linear order, conversely vertices in the subtree induced by left child of $v$ must come after its parent in the linear order. By subtree induced by vertex $u$ we mean the tree with $u$ as parent and all internal vertices which are descendants of $u$.
 
 Binary search trees naturally represent finite rooted ordered (i.e. order of children is also relevant) trees where every vertex has degree at most three and the root has degree at most two.
 
-When we work with binary search trees, we typically use a specific algorithm that only accepts a specific subclass of BSTs on input. (Think for example 2-3 trees.) Should it modify the BST, the resulting tree will still belong to the same class. Standard operations with BSTs are:
+When we work with binary search trees, we typically use a~specific algorithm that only accepts a~specific subclass of BSTs on input. (Think for example 2-3 trees.) Should it modify the BST, the resulting tree will still belong to the same class. Standard operations with BSTs are:
 
 \begin{itemize}
-	\item \texttt{Find(Tree, Key)} tries to locate a vertex with the specified \texttt{Key} in \texttt{Tree} and returns its value. 
-	\item \texttt{Insert(Tree, Key, Value)} creates a new vertex in \texttt{Tree} with specified \texttt{Key} and \texttt{Value}.
+	\item \texttt{Find(Tree, Key)} tries to locate a~vertex with the specified \texttt{Key} in \texttt{Tree} and returns its value. 
+	\item \texttt{Insert(Tree, Key, Value)} creates a~new vertex in \texttt{Tree} with specified \texttt{Key} and \texttt{Value}.
 	\item \texttt{Delete(Tree, Key)} removes vertex with specified \texttt{Key} from \texttt{Tree}.
 	\item \texttt{Min(Tree)} returns the minimum value over all vertices in \texttt{Tree}.
 	\item \texttt{Max(Tree)} returns the maximum value over all vertices in \texttt{Tree}.
-	\item \texttt{Predecessor(Tree, Key)} returns the maximum key among vertices of \texttt{Tree} lesser than \texttt{Key}.
+	\item \texttt{Predecessor(Tree, Key)} returns the maximum key among vertices of \texttt{Tree} smaller than \texttt{Key}.
 	\item \texttt{Successor(Tree, Key)} returns the minimum key among vertices of \texttt{Tree} greater than \texttt{Key}.
 \end{itemize}
 
-If none of the latter four operations is required, it is usually advantageous to use hashing rather then BSTs.
+If none of the latter four operations is required, it is usually better to resort to hashing rather than BSTs. That choice would typically lead to quadratic time complexity in the worst-case though.
 
-Of the operations described here, typically only \texttt{Insert} and \texttt{Delete} alter the BST. (Notable exception to this are splay trees.) We will call operations that modify the BST {\em updates} or {\em altering} and remaining operations {\em non-altering}.
+Of the operations described here, typically only \texttt{Insert} and \texttt{Delete} alter the BST. (Splay trees \cite{splay} are a~notable exception to this.) We will call operations that modify the BST {\em updates} or {\em altering} and remaining operations {\em queries} or {\em non-altering}.
 
 \subsection{Standard Implementations}
 
-We will mention here a basic implementation for some of those operations. This will also be the implementation used by modified WAVL-trees, which will be defined later. The reader is expected to be mostly familiar with these operations already. Detailed description are attached in an appendix for reference.
+We will mention here a~basic implementation for some of those operations. This will also be the implementation used by modified WAVL-trees, which will be defined later. The reader is expected to be mostly familiar with these operations already. Detailed description is attached in an appendix for reference.
 
 \subsubsection*{Find}
-Search for a key $k$ begins by assigning the root to a variable current vertex $v$. If $v$ has the searched key, the vertex is found. Otherwise if $k$ is greater than the key of $v$. We try to move the right child of $v$, otherwise to the left child. If such child we want to move to is external, we end unsuccessfully. 
+Search for a~key $k$ begins by assigning the root to a~current vertex variable $v$. If $v$ has the searched key, the vertex is found. Otherwise if $k$ is greater than the key of $v$. We try to move the right child of $v$, otherwise to the left child. If we were to move an external vertex, we report that $k$ is not present in the tree.
 
 \subsubsection*{Insert}
-The place where a vertex should be inserted is the same as for most BSTs. Descending from the root going to left child if the key being inserted is lower than the key of current vertex, to right child otherwise. This is repeated until a null-pointer is reached -- which will replaced by pointer to the new vertex. 
+The place where a~vertex should be inserted is uniquely determined in all BSTs. Descending from the root going to left child if the key being inserted is lower than the key of current vertex, to right child otherwise. This is repeated until a~null-pointer is reached -- which will replaced by pointer to the new vertex. 
 
-After the change a process of \textit{rebalancing} will typically follow, goal of this process is to perform checking and modify the tree to belong to the correct class of BSTs.
+After the change a~process of \textit{rebalancing} will typically follow. The goal of this process is to ensure that the tree remains in the correct class of BSTs, modifying it when needed.
 
 \subsubsection*{Delete}
-For deletion, the vertex $v$ subject to deletion is located first using find. If it is a leaf, it is then deleted. If it has only one child, it is deleted and its only child becomes child of the parent of $v$ directly. Otherwise predecessor of $v$ is found, it cannot have two children, so it is possible to swap Key and Value between those vertices and then run the deletion again, this time certainly removing a vertex. After a vertex is deleted, rebalancing follows.
+For deletion, the vertex $v$ subject to deletion is located first using Find. If it only has external children, it is simply deleted. If it has only one internal child, it is deleted and the child becomes direct child of $v$'s parent. Otherwise the predecessor of $v$ is found, it cannot have two children, so it is possible to swap key and value between those vertices and then run the deletion again, this time certainly removing a~vertex. After a~vertex is deleted, rebalancing follows.
 
-We will also describe here one common rebalancing step which is rotate.
+We will also describe here one common rebalancing step which is a rotation.
 
-\subsection*{Rotate}
+\subsubsection*{Rotate}
 
-For a vertex $y$ with parent $p$ and left child $x$ and right subtree $C$ where $x$ has left subtree $A$ and right subtree $B$, a rotate step (or rotation) along $xy$ makes $x$ to have parent $p$, left subtree $A$ and right child $y$. Subsequently, $y$ gets left subtree $B$ and keeps its right subtree $C$.
+For a~vertex $y$ with parent $p$ and left child $x$ and right subtree $C$ where $x$ has left subtree $A$ and right subtree $B$, a~rotate step (or rotation) along $xy$ makes $x$ to have parent $p$, left subtree $A$ and right child $y$. Subsequently, $y$ gets left subtree $B$ and keeps its right subtree $C$.
 
 For symmetry, rotating along $xy$ again from the resulting state, we would get the original tree before any rotations.
 

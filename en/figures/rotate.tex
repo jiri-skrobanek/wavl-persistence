@@ -2,8 +2,9 @@
 \begin{center}
 \begin{tikzpicture}[sibling distance=32pt, frontier/.style={distance from root=4cm}]
 \Tree
-[ [.y
-    [   .x 
+[ [.$y$
+	\edge[very thick];
+    [   .$x$ 
     	\edge[tosubtree];
         \node[draw,triangle]{A};
         \edge[tosubtree];
@@ -15,10 +16,11 @@
 \qquad
 \begin{tikzpicture}[sibling distance=32pt, frontier/.style={distance from root=4cm}]
 \Tree
-[ [.x
+[ [.$x$
 	\edge[tosubtree];
     \node[draw,triangle]{A};
-    [   .y 
+    \edge[very thick];
+    [   .$y$ 
     	\edge[tosubtree];
         \node[draw,triangle]{B}; 
         \edge[tosubtree];

@@ -8,10 +8,10 @@
         .$y$
         \edge[tosubtree] node[auto=right] {3};
         \node[draw,triangle]{A};
-        \edge node[auto=left] {1};
+        \edge[very thick] node[auto=left] {1};
         [   
             .$x$ 
-            \edge node[auto=right] {1};
+            \edge[very thick] node[auto=right] {1};
             [
                 .$w$
                 \edge[tosubtree];
@@ -29,7 +29,7 @@
 \begin{tikzpicture}[sibling distance=8pt, frontier/.style={distance from root=4cm}]
 \Tree
 [ \edge node[auto=right]{1 or 2}; [.w
-    \edge node[auto=right] {2};
+    \edge[very thick] node[auto=right] {2};
     [ 
         .$y$
         \edge[tosubtree] node[auto=right] {1};
@@ -37,7 +37,7 @@
         \edge[tosubtree];
         \node[draw,triangle]{B};
     ]
-    \edge node[auto=left] {2};
+    \edge[very thick] node[auto=left] {2};
     [   .$x$ 
     	\edge[tosubtree];
         \node[draw,triangle]{C}; 

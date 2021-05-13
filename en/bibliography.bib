@@ -11,6 +11,17 @@
 %
 %  ===========================================================================
 
+ @inproceedings{red-black-trees, 
+ title={A dichromatic framework for balanced trees}, 
+ url={http://dx.doi.org/10.1109/SFCS.1978.3}, 
+ DOI={10.1109/sfcs.1978.3}, 
+ booktitle={19th Annual Symposium on Foundations of Computer Science}, 
+ publisher={IEEE}, 
+ author={Guibas, Leo J. and Sedgewick, Robert}, 
+ year={1978}, 
+ month={Oct} 
+ } 
+
 @ARTICLE{rank-balanced-trees,
   title = {Rank-Balanced Trees},
   author = {Haeupler, B. and Sen, S. and Tarjan, R.},
@@ -48,14 +59,14 @@ issn = {0004-5411},
 url = {https://doi.org/10.1145/185675.185791},
 doi = {10.1145/185675.185791},
 abstract = {This paper considers the problem of representing stacks with catenation so that any stack, old or new, is available for access or update operations. This problem arises in the implementation of list-based and functional programming languages. A solution is proposed requiring constant time and space for each stack operation except catenation, which requires O(log log k) time and space. Here k is the number of stack operations done before the catenation. All the resource bounds are amortized over the sequence of operations.},
-journal = {J. ACM},
+journal = {Journal of the ACM},
 month = sep,
 pages = {943–959},
 numpages = {17},
 keywords = {amortization, stack, functional programming, queue, LISP, data structures, list, concatenation, catenation}
 }
 
-@article{link-cut,
+@article{splay,
 author = {Sleator, Daniel Dominic and Tarjan, Robert Endre},
 title = {Self-Adjusting Binary Search Trees},
 year = {1985},
@@ -68,11 +79,22 @@ issn = {0004-5411},
 url = {https://doi.org/10.1145/3828.3835},
 doi = {10.1145/3828.3835},
 abstract = {The splay tree, a self-adjusting form of binary search tree, is developed and analyzed. The binary search tree is a data structure for representing tables and lists so that accessing, inserting, and deleting items is easy. On an n-node splay tree, all the standard search tree operations have an amortized time bound of O(log n) per operation, where by “amortized time” is meant the time per operation averaged over a worst-case sequence of operations. Thus splay trees are as efficient as balanced trees when total running time is the measure of interest. In addition, for sufficiently long access sequences, splay trees are as efficient, to within a constant factor, as static optimum search trees. The efficiency of splay trees comes not from an explicit structural constraint, as with balanced trees, but from applying a simple restructuring heuristic, called splaying, whenever the tree is accessed. Extensions of splaying give simplified forms of two other data structures: lexicographic or multidimensional search trees and link/cut trees.},
-journal = {J. ACM},
+journal = {Journal of the ACM},
 month = jul,
 pages = {652–686},
 numpages = {35}
 }
+
+@inproceedings{link-cut, 
+title={A data structure for dynamic trees}, 
+url={http://dx.doi.org/10.1145/800076.802464}, 
+DOI={10.1145/800076.802464}, 
+booktitle={Proceedings of the thirteenth annual ACM symposium on Theory of computing},
+series={STOC ’81}, 
+publisher={ACM Press}, 
+author={Sleator, Daniel D. and Tarjan, Robert Endre}, 
+year={1981} 
+} 
 
 @article{range-trees,
 author = {Bentley, Jon Louis},
@@ -121,7 +143,7 @@ pages={379–394}
 }
 
 @article{y-fast-trie, 
-title={Log-logarithmic worst-case range queries are possible in space {O}(N)}, 
+title={Log-logarithmic worst-case range queries are possible in space $\mathcal{O}(N)$}, 
 volume={17}, 
 url={http://dx.doi.org/10.1016/0020-0190(83)90075-3}, 
 DOI={10.1016/0020-0190(83)90075-3}, 
@@ -164,7 +186,7 @@ month = jan,
 pages = {16-58},
 title = {Making data structures confluently persistent.},
 volume = {48},
-journal = {J. Algorithms}
+journal = {Journal of Algorithms}
 }
 
 @InProceedings{lca,
@@ -206,7 +228,7 @@ issn = {0001-0782},
 url = {https://doi.org/10.1145/364099.364331},
 doi = {10.1145/364099.364331},
 abstract = {An algorithm for assigning storage on the basis of EQUIVALENCE, DIMENSION and COMMON declarations is presented. The algorithm is based on a tree structure, and has reduced computation time by 40 percent over a previously published algorithm by identifying all equivalence classes with one scan of the EQUIVALENCE declarations. The method is applicable in any problem in which it is necessary to identify equivalence classes, given the element pairs defining the equivalence relation.},
-journal = {Commun. ACM},
+journal = {Communications of the ACM},
 month = may,
 pages = {301–303},
 numpages = {3}

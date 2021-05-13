@@ -1,15 +1,15 @@
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 
-This thesis strives to enhance the existing knowledge of persistent data structures, predominantly we will seek to use weak-AVL trees to construct fully-persistent binary search trees.
-
 Speaking in general terms, persistent data structures maintain their previous versions when modified. Operations can thus also be executed on any earlier state of the structure. When such an operation updates the structure, a new version is created branching out of the original sequence of updates.
 
-Use of term \emph{persistent} was introduced by Driscoll, Sarnak, Sleator, and Tarjan in their joint 1986 article \emph{Making data structures persistent} \cite{persistence-DSST}. It turned out that much more efficient algorithms than copying the whole data structure are attainable. In this article a general scheme for converting regular pointer-based data structures into persistent ones is given. Persistent binary search tree was constructed from adapted Red-Black trees.
+This thesis strives to enhance the existing knowledge of persistent data structures, predominantly we will seek to use weak-AVL trees to construct fully-persistent binary search trees.
 
-Haeupler, Sen, and Tarjan \cite{weight-balanced} introduced weak-AVL (WAVL) trees as part of a framework of rank balanced trees in 2015. WAVL trees were named after AVL trees which form a subset of them.
+Use of term \emph{persistent} was introduced by Driscoll, Sarnak, Sleator, and Tarjan in their joint 1986 article \emph{Making data structures persistent} \cite{persistence-DSST}. It turned out that much more efficient algorithms than copying the whole data structure are attainable. In this article, a general scheme for converting regular pointer-based data structures into persistent ones is given. A persistent binary search tree was constructed from adapted red-black trees \cite{red-black-trees}.
 
-The algorithms for WAVL operations given by Haeupler at al. cannot be directly plugged into the persistence scheme by Driscoll at al. Modifications are needed alike those done to red-black trees during their conversion into persistent binary search trees. These modifications are the main topic in this thesis. The structure of the binary tree remains unmodified, the method of storing ranks must undergo considerable changes however.
+Haeupler, Sen, and Tarjan \cite{weight-balanced} introduced weak-AVL (WAVL) trees as part of a framework of rank-balanced trees in 2015. WAVL trees were named after AVL trees which form a subset of them.
+
+The algorithms for WAVL operations given by Haeupler at al.~cannot be directly plugged into the persistence scheme by Driscoll at al. Modifications are needed alike those done to red-black trees during their conversion into persistent binary search trees. These modifications are the main topic in this thesis. The structure of the binary tree remains unmodified, the method of storing ranks must undergo considerable changes however.
 
 We also describe a variant of persistent WAVL trees which supports queries on earlier versions and is suitable for concurrent operations.
 
