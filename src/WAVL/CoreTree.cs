@@ -65,6 +65,7 @@ namespace WAVL
             else if (current.Left == null)
             {
                 current.Key = current.Right.Key;
+                current.Value = current.Right.Value;
                 current.Right = null;
 
                 BalancePath(GetPath(current.Key));
@@ -73,6 +74,7 @@ namespace WAVL
             else if (current.Right == null)
             {
                 current.Key = current.Left.Key;
+                current.Value = current.Left.Value;
                 current.Left = null;
 
                 BalancePath(GetPath(current.Key));
@@ -85,6 +87,7 @@ namespace WAVL
                 while (current.Right != null) { prev = current; current = current.Right; };
 
                 sub.Key = current.Key;
+                sub.Value = current.Value;
 
                 if (current.Left == null)
                 {
@@ -94,6 +97,7 @@ namespace WAVL
                 else
                 {
                     current.Key = current.Left.Key;
+                    current.Value = current.Left.Value;
                     current.Left = null;
                     BalancePath(GetPath(current.Key));
                 }
@@ -105,6 +109,7 @@ namespace WAVL
                 while (current.Left != null) { prev = current; current = current.Left; };
 
                 sub.Key = current.Key;
+                sub.Value = current.Value;
 
                 if (current.Right == null)
                 {
@@ -114,6 +119,7 @@ namespace WAVL
                 else
                 {
                     current.Key = current.Right.Key;
+                    current.Value = current.Right.Value;
                     current.Right = null;
                     BalancePath(GetPath(current.Key));
                 }
