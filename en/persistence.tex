@@ -1,44 +1,57 @@
-In this chapter we finally arrive to our main interest. First of all we introduce the hierarchy of data structures with respect to persistence.
+In this chapter we finally arrive at our main interest. First of all we introduce the hierarchy of data structures with respect to persistence.
 
 \begin{itemize}
 \item {\bfseries Ephemeral data structures} are the most widespread. 
-Past states are destroyed by "destructive" updates and irretrievably lost.
+Past states are destroyed by ``destructive" updates and irretrievably lost.
 \item {\bfseries Semi-persistent data structures} (sometimes partially persistent) 
-still support modifying operations only on the most recent version. 
-Updates produce a new version of the structure. 
+support queries on any version. It is only possible to update the most recent version, producing a new version. 
 Historical versions form a linear order. 
-Past states can be reconstructed efficiently for reading.
 \item {\bfseries (Fully-)persistent data structures} directly extend their semi-persistent counterparts. 
 An update can be done on any version of the structure, resulting in a rooted tree of versions. 
-An update corresponds to adding a new child vertex to an existing vertex in the tree.
+An update corresponds to adding a new child version to an existing version in the tree.
 \item {\bfseries Functional data structures} permit no changes to data once written. 
 Naturally, persistence is guaranteed under such an assumption, 
 as all versions appear as if just created by the last update.
-This enforced immutability completely freezes past version in time.
+This enforced immutability completely freezes past versions in time.
 This concept is intrinsic to functional languages such as Haskell, 
-but proves to be useful even in imperative programming. 
+but it proves to be useful even in imperative programming. 
 Multi-threading is easier when there is confidence that existing objects will not be modified.
 \end{itemize}.
 
-This division is by no means universally adopted, but provides an interesting perspective regardless.
+This division is by no means universally adopted, but it provides an interesting perspective regardless.
 
-With a persistent data structure, we essentially want to have one data structure for every existing version. Insert and delete return a new version handle instead of making changes to the existing version. Obviously, copying the data structure every time is one option how to achieve this, albeit not a great one. To prevent using extra memory and increased time complexity of operations however, more intricate methods must be employed.
+With a persistent data structure, we essentially want to have one data structure for every existing version. 
+Insert and delete return a new version handle instead of making changes to the existing version. 
+Obviously, copying the data structure every time is one option how to achieve this, albeit not a great one. 
+To prevent using extra memory and increased time complexity of operations, more intricate methods must be employed.
 
-Going beyond this hierarchy, if fully-persistent data structure also supports merging or melding two different versions, it is said to be \emph{confluently persistent}. Confluently persistent data structures are the subject of studies for example by Driscoll, Sleator, and Tarjan\cite{confluently-persistent-a} or Fiats and Kaplan\cite{confluently-persistent-b}. We will not investigate confluent persistence in this thesis further.
+Going beyond this hierarchy, if fully-persistent data structure also supports merging or melding two different versions, it is said to be \emph{confluently persistent}. 
+Confluently persistent data structures are the subject of studies for example by Driscoll, Sleator, and Tarjan \cite{confluently-persistent-a} or Fiats and Kaplan \cite{confluently-persistent-b}. 
+We will not investigate confluent persistence further in this thesis.
 
-\section{Persistence through Path-Copying}
+Driscoll et al.~\cite{persistence-DSST} developed a framework for persistence of pointer-based data structures. 
+Some of the techniques which we will use will be nearly identical to those of Driscoll at al.
+We limit ourselves to the context of binary search trees. 
+Nonetheless, the algorithms typically naturally generalize to other kinds of pointer-based data structures.
 
-Let us open with a few simple constructions first. Binary search tree can be converted into a fully-persistent one rather easily.
+
+\section{Persistence through path-copying}
+
+Let us open with a few simple constructions first. A binary search tree can be converted into a fully-persistent one rather easily.
 The straight-forward approach is called path-copying. It is based on the observation that most of the tree does not change during an update.
 
-When a new version of the tree should by created by delete or insert, new copies are allocated only for vertices that are changed by the operation and their ancestors. 
-This typically means that only path from the inserted/deleted vertex to the root is newly allocated, plus constant number of other vertices. 
-The new vertices carry pointers to the old vertices where subtree rooted at such a vertex is not modified in any way.
-Here we tacitly assume that only pointers to children are stored. Updating root in a tree with pointers to parents would involve creating new instances for all nodes in the tree.
+When a new version of the tree should by created by delete or insert, new copies are allocated only for vertices that are changed by the operation, and for their ancestors. 
+This typically means that only the path from the inserted/deleted vertex to the root is newly allocated, plus a constant number of other vertices. 
+The new vertices carry pointers to the old vertices where the subtree rooted at such a vertex is not modified in any way.
+As the root is changed by every update, it is used to represent its version of the data structure.
 
-With reasonable variants of binary search trees, achieved time complexity in a tree with $n$ vertices is $\Theta(\log n)$ per operation and $\Theta(\log n)$ memory for insert/delete.
+Here we tacitly assume that only pointers to children are stored. 
+Updating root in a tree with pointers to parents would involve creating new instances for all nodes in the tree.
 
-The downside of this method is the increased space complexity. There is no apparent construction that would not increase memory complexity by copying the paths.
+With reasonable variants of binary search trees, achieved time complexity in a tree with $n$ vertices is $\Theta(\log n)$ per operation and $\Theta(\log n)$ memory for one insert/delete is needed.
+
+The downside of this method is the increased space complexity. 
+There is no apparent construction that would not increase memory complexity by copying the paths.
 
 \section{Multiple versions in one vertex}
 
@@ -70,7 +83,7 @@ Y-fast trie \cite{y-fast-trie} & \bigO{\log n \cdot \log \log n}, semi-persisten
 
 \input{figures/version-dictionaries}
 
-\section{Fat Vertices}
+\section{fat vertices}
 
 Following up on the idea of multiple versions in one vertex, fat vertices were devised. 
 We will explain this technique only for semi-persistence first. 
@@ -223,7 +236,7 @@ Otherwise, an entirely new data structure may be built from the latest versions 
 
 \input{figures/path-copying}
 
-\section{List Ordering}
+\section{List ordering}
 
 Moving from semi-persistence to full-persistence we encounter an obstacle -- versions no longer form implicit linear order. (By versions we mean states of the tree in between updates. We will also use some auxiliary versions not directly mappable to any such state.) Nonetheless, to work with fat vertices, we need to be able to determine slots that carry values correct for current version. To achieve this, we need to identify an interval of versions the current vesion would fall into. For this purpose we will try to introduce an ordering to versions of the persistent data structure.
 
@@ -250,7 +263,7 @@ For every vertex in the weight-balanced tree, we will store encoding of the path
 
 Before moving to the next section, we remark that it is possible to get \bigO{1} amortized complexity for insert and delete with weight-balanced trees via indirection as described by Tsakalidis \cite{list-ordering}.
 
-\section{Fully-Persistent Trees}
+\section{Fully-Persistent trees}
 
 Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing the operation on that version, thus consuming super-linear amount of space, (Potentially even time complexity may increase.)
 
@@ -330,7 +343,7 @@ One last thing we have not yet considered are pointers to the data structure fro
 
 This can be repaired by adding a special kind of pointer to slots indicating that there is a record  connected to this version of this vertex. When the fat node is then split, the record is updated with correct fat node. (This forces us to insert a slot to the root for each update though.) Pointers to other vertices can be achieved similarly.
 
-\section{Alternative Constructions}
+\section{Alternative constructions}
 
 In the previous section, we described fat nodes, where every slot bears all information about the tree vertex. There are other possibilities.
 
