@@ -91,16 +91,16 @@ Full persistence requires the use of a few extra tricks and establishing an orde
 
 A \emph{fat vertex} stores a collection of standard vertices indexed by versions. 
 We call values of this collection \emph{slots}. 
-The maximum size of this dictionary is set to a constant which is to be determined later. 
+The maximum size of this collection is set to a constant which is to be determined later. 
 Temporarily, we will allow the capacity of a fat vertex to be exceeded. 
 This will have to be fixed however, before the ongoing operation finishes.
 By placing a restriction on the size we may circumvent the increased complexity of search within one vertex.
-Instead of copying the vertex, we simply add a new slot into the dictionary. 
+Instead of copying the vertex, we simply add a new slot into the collection. 
 Provided the maximum has not been exceeded yet, this insertion of a slot stops the propagation of changes toward the root. 
 The reader should recall that this propagation was the major weakness of path-copying.
-Because of the limit on size of this dictionary, it may be implemented simply as a linked list.
+Because of the limit on size of this collection, it may be implemented simply as a linked list.
 
-Contents of one slot are a version handle, all pointers a vertex would have, then inverse pointers to fat vertices that have slots pointing to this fat vertex for this version and some fields, notably key and value as a bare minimum.
+Contents of one slot are a version handle, all pointers a vertex would have, and some fields, notably key and value as a bare minimum.
 Not all fields need to be versioned. 
 For example balancing information may be stored only for the latest version, i.e, in a red-black trees color is only used for balancing and is thus not needed to be persisted for old versions. 
 (Until full-persistence comes into play.)
@@ -112,13 +112,13 @@ As all slots become occupied in the last fat vertex and it needs to be modified,
 Modifications of a single vertex during one operation are all written to single slot, there is no need for using more slots.
 
 We will need to be able to determine for any fat vertex $x$ which other fat vertices have their most recent slot pointing to $x$. 
-This problem is resolved by adding some number of \emph{inverse pointers} to vertices. 
-We define an invariant of inverse pointers: If vertex $v$ points to vertex $u$ in version $\alpha$, then $u$ in version $\alpha$ contains an inverse pointer to $v$. This invariant is maintained by also changing the inverse pointers whenever some proper pointers change. 
+This problem is resolved by adding some number of \emph{inverse pointers} to each series of fat vertices of the same vertex. 
+We define an invariant of inverse pointers: If vertex $v$ points to vertex $u$ in the most recent version, then $u$ must contain an inverse pointer to $v$. This invariant is maintained by also changing the inverse pointers whenever some proper pointers change. 
 
 When a new fat vertex $x$ is allocated, one of its slots is immediately taken. 
-Pointers must be updated in other fat vertices whose latest slot  pointed to the fat vertex preceding $x$ in the list. 
-This is done by going through inverse pointers and either creating slots (copying all values from the latest slot and replacing pointers to the predecessor by pointers to $x$), or directly updating the pointers if the slot for the right version is already present. 
-Also, we need to go through proper pointers and update inverse pointers in other fat vertices in a similar fashion.
+Pointers must be updated in other fat vertices whose latest slot pointed to the fat vertex preceding $x$ in the list. 
+This is done by going through vertices pointed to by the inverse pointers and either creating slots (copying all values from the latest slot and replacing pointers to the predecessor by pointers to $x$), or directly updating the pointers if the slot for the right version is already present. 
+Also inverse pointers must be updated to $x$ for vertices pointed to by $x$ in the latest version.
 
 Recursive allocations may be triggered, which is not a problem if there is only a small amount of them. 
 This is ensured by setting the size of fat vertices suitably. 
@@ -143,7 +143,7 @@ Then this algorithm with the addition of fat vertices for semi-persistence, cons
 \end{prop}
 
 \begin{myproof}
-We denote the number of pointer fields per vertex by $p$ and the maximum number of vertices pointing to one vertex at a time by $k$. 
+The number of pointer fields per vertex is denoted by $p$ and the maximum number of vertices pointing to one vertex at a time by $k$. 
 We then define the number of slots in one fat node as $s = p + k + 1$ and add $k$ inverse pointers to vertices.
 
 We define the potential of the structure as the total number of occupied slots in all fat vertices that are the last in their doubly-linked list. 
@@ -218,7 +218,7 @@ Also recall that there are at most \bigO{1} modifications of the structure per u
 
 What seems a bit unfortunate, is the delete procedure, which must locate an additional vertex to swap values in case of the deleted vertex having two children. So we will assume that delete is not possible for now.
 
-First of all two kinds of supported operations must be identified. 
+First of all, two kinds of supported operations must be identified. 
 
 \begin{itemize}
 	\item Query on any version of the tree (i.e., find, minimum, maximum and range functions)
@@ -252,28 +252,39 @@ Otherwise, an entirely new data structure may be built from the latest versions 
 
 \section{List ordering}
 
-Moving from semi-persistence to full-persistence we encounter an obstacle -- versions no longer form implicit linear order. (By versions we mean states of the tree in between updates. We will also use some auxiliary versions not directly mappable to any such state.) Nonetheless, to work with fat vertices, we need to be able to determine slots that carry values correct for current version. To achieve this, we need to identify an interval of versions the current version would fall into. For this purpose we will try to introduce an ordering to versions of the persistent data structure.
+Moving from semi-persistence to full persistence we encounter an obstacle -- versions no longer form an implicit linear order. (By versions we mean states of the tree in~between updates. We will also use some auxiliary versions not directly mappable to any such state.) Nonetheless, to work with fat vertices, we need to be able to determine slots that carry values correct for current version. To achieve this, we need to identify an interval of versions the current version would fall into. For this purpose we will try to introduce an ordering to versions of the persistent data structure.
 
-Version do form a rooted tree with the original version in the root. We can also order children of every vertex by the order of their creation (latest creation first). We then define the desired ordering as the order of vertices corresponding to versions as they are visited by an in-order traversal. %TODO: Reformulate in-order.
+Versions do form a rooted tree with the original version in the root. We can also order children of every version by the order of their creation (latest creation first). We then define the desired ordering as the order in which the versions are discovered by a depth-first search respecting the order of children. %TODO: Reformulate in-order.
 
-In reality, we will also insert other elements into the ordering that will be helper version and will not be used to represent the state of the entire structure after a sequence of operations. This can be disregarded for now.
+In reality, we might also want to insert other elements into the ordering serving as helper versions and not representing any concrete state of the data structure. This can be disregarded for now.
 
 With the ordering defined, we still need a way to efficiently represent it in memory. The operations we really need are two:
 
 \begin{itemize}
 	\item \texttt{InsertSuccessor(Version)} -- this operation will insert a new version between \texttt{Version} and its successor (if any). The newly created version is returned.
-	\item \texttt{Compare(VersionA, VersionB)} -- returns 1, $-1$, or 0 indicating whether \texttt{VersionA} precedes, succeeds, or equals \texttt{VersionB}.
+	\item \texttt{Compare(VersionA, VersionB)} -- returns 1, $-1$, or 0 indicating whether \texttt{VersionA} precedes, succeeds, or is equal to \texttt{VersionB}.
 \end{itemize}
 
 We will strive to find a way to assign an integer to each version, these integers will be comparable in constant time. This assignment problem is called \emph{list-labeling} and there are several options to tackling it.
 
-The straight-forward idea would be to assign 0 to the first version and $2^m$ to an artificial upper bound. All newer versions will be assigned the arithmetic average of its successor and predecessor. Now, we see that if $v = (p + s)/2$ and $ 2^k \mid p, s$, then $2^{k-1} \mid v$. The first two integers are divisible by $2^m$ guaranteeing capacity $\Omega(m)$. 
+Suppose we want to be able to assign up to $m$ labels. The straight-forward idea would be to assign 0 to the first item and $2^m$ to an artificial upper bound. All newly inserted will be assigned the arithmetic mean of its successor and predecessor. Now, we see that if $v = (p + s)/2$ and $ 2^k \mid p, s$, then $2^{k-1} \mid v$. The first two integers are divisible by $2^m$, so by induction item inserted by $i$-th subsequent inserted has label divisible by at least $2^{m-i}$, thus guaranteeing capacity $\Omega(m)$. 
 
-Let us denote the total number of updates to the persistent tree as $n$. It would be reasonable to  assume that arithmetic operations on non-negative integers less than or equal to $n$ can be done in constant time. We are therefore permitted to create only \bigO{\log n} versions using the straight-forward idea if constant time per operation is needed. This is not sufficient.
+Let us denote the total number of updates to the persistent tree by $n$. It would be reasonable to  assume that arithmetic operations on non-negative integers less than or equal to $n$ can be done in constant time. We are therefore permitted to create only \bigO{\log n} versions using the straight-forward idea if constant time per operation is needed. This is not sufficient.
 
-To preserve the speed of semi-persistence, \texttt{Compare} must be \bigO{1} and \texttt{InsertSuccessor} \bigO{\log n} at least amortized. Weight-balanced trees that were introduced in the previous chapter are ideally suited for this purpose.
+To preserve the speed of semi-persistence, \texttt{Compare} must take \bigO{1} and \linebreak \texttt{InsertSuccessor} \bigO{\log n} at least amortized. Weight-balanced trees that were introduced in the previous chapter are ideally suited for this purpose. Every vertex in the tree will correspond to one version.
 
-For every vertex in the weight-balanced tree, we will store encoding of the path from root to it in form of sequence of 0s and 1s. 1 for right child, 0 for left child. We know that depth of the tree must be logarithmic, compared integers are composed of \bigO{\log n} bits, so comparison of versions is efficient. Inserting a successor version is also simple. Rebuilding of some subtree will not change order of versions as all path encodings will be recalculated.
+For every vertex in the weight-balanced tree, we will store encoding of the path from the root to it in form of sequence of zeros and ones. 1 for going to a right child and 0 for a left child. Also distance from the root is stored in every vertex. We know that height of the tree must be logarithmic, so the encodings are made of \bigO{\log n} each and can be interpreted as integers in binary notation. Therefore we can store these encodings as integers.
+
+Comparison of versions then translates to comparison of these integers.
+Suppose we compare two vertices $u$ and $v$ with distances from the root $d_u$ and $d_v$ and paths encoded as integers $e_u$, $e_v$. 
+We only want to compare the first $d$ bits, where $d = min(d_u,d_v)$. 
+In order to compare only the first $d$ bits of the encodings, one of $e_u$, $e_v$ can be divided by an appropriate power of two. 
+If one of the compared numbers is greater, the corresponding vertex is clearly greater. 
+In case of equality, either $u = v$, or one is an ancestor of the other. We can decide between the two options by comparing $e_u$ and $e_v$ for equality for example. 
+If the latter is true and $u$ is without loss of generality ancestor of $v$, the bit at position $d+1$ in the encoding of $v$ determines whether $v$ is the left or right subtree of $u$. 
+We have demonstrated that the comparison can be made in \bigO{1} time. 
+
+Inserting a successor version is also simple. Rebuilding of some subtree will not change order of versions as all path encodings will be recalculated. Integer arithmetic can be used to efficiently update encodings of paths to the root.
 
 Before moving to the next section, we remark that it is possible to get \bigO{1} amortized complexity for insert and delete with weight-balanced trees via indirection as described by Tsakalidis \cite{list-ordering}.
 
