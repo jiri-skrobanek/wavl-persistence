@@ -4,15 +4,19 @@
 		\Tree[
 		.B A [ .C \edge[blank]; \node[blank]{}; D ]
 		]
+		\node at (0,1) {Version 1};
 		\end{tikzpicture}
-		\qquad
+		\qquad\hspace{40mm}
 		\begin{tikzpicture}[sibling distance=8pt]
 		\Tree[
 		.B A [ .D C E ]
 		]
+		\node at (0,1) {Version 3};
 		\end{tikzpicture}
 	\end{center}
+\raggedcolumns
 \begin{multicols}{2}
+\centering
 \footnotesize
 \begin{vdTable}{Vertex}
 	Version & Left & Right   & Key & Value
@@ -35,7 +39,7 @@
 \end{vdTable}
 \begin{vdTable}{E}
 	3 & $\Lambda$ & $\Lambda$ & 50 & 99
-\end{vdTable}
+\end{vdTable}\\
 \end{multicols}
 
 Tree is shown for version 1 (left) and 3 (right). Internal collections for each vertex are displayed. Operation that created version 2 changed value of key 10. Operation that created version 3 inserted vertex E and triggered a rotation. Faithful to The Art of Computer Programming, $\Lambda$ represents a null pointer.
