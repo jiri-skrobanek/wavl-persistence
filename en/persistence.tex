@@ -286,87 +286,115 @@ We have demonstrated that the comparison can be made in \bigO{1} time.
 
 Inserting a successor version is also simple. Rebuilding of some subtree will not change order of versions as all path encodings will be recalculated. Integer arithmetic can be used to efficiently update encodings of paths to the root.
 
+Our use of list ordering will involve one more trick. 
+Suppose we have some versions $a$, $b$, $c$ in that order and a fat vertex with slots for $a$ and $c$. 
+When we insert a successor $a'$ to version $a$ and a slot for that version, we by mistake modify also state of the vertex for version $b$. 
+Therefore, we also need to undo the changes by creating $a''$, a successor to $a'$, and inserting a slot for $a''$ directly after the slot for $a'$. 
+This would result in a fat vertex with slots for $a$, $a'$, $a''$, and $c$.
+
 Before moving to the next section, we remark that it is possible to get \bigO{1} amortized complexity for insert and delete with weight-balanced trees via indirection as described by Tsakalidis \cite{list-ordering}.
 
-\section{Fully-Persistent trees}
+\section{Fully-persistent trees}
 
-Before delving into the details of modified fat vertices for full-persistence, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing the operation on that version, thus consuming super-linear amount of space, (Potentially even time complexity may increase.)
+To achieve full persistence, we will build upon the technique of fat vertices from previous sections. 
+Before delving into the details of modified fat vertices, we must note that amortized constant number of changes per operation will no longer suffice. If there exist a version of the structure and an operation that causes large amount of changes to the structure, nothing is stopping us from repeatedly performing the operation on that version, thus consuming super-linear amount of space and breaking amortization of time per operation.
 
-To achieve full persistence, we will build upon the technique of fat vertices from previous sections. All pointers and fields will need to be versioned this time. Now however, simply allocating new vertex when we run out of empty slots in the old one will not do. It remains crucial that occupied slots of one fat vertex form an interval of existing versions. In particular, It will be needed to insert between existing versions.
+All pointers and fields will need to be versioned for full persistence. Actually even inverse pointers will be per slot. Furthermore, simply allocating a new fat vertex whenever we run out of empty slots in the old one will not do. It remains crucial that occupied slots of one fat vertex form an interval of existing versions. It will be needed in particular to insert versions between two existing ones.
 
-Fat nodes of one vertex in the tree will be linked into a list in the order of increasing version-intervals that those fat nodes represent. A new maximum size $m$ of fat vertices will have to be set. If $p$ is the number of pointer fields in original vertices and $k$ the number of required inverse pointers, we set $m = 2(p+k+1)$.
-When searching a fat vertex, the slot that applies has the greatest version not exceeding the version that is currently being searched for.
+Fat nodes of one vertex in the tree will be linked into a list in the order of increasing version-intervals that those fat nodes represent. A new maximum size~$m$ of fat vertices will have to be set. If $p$ is the number of pointer fields in original vertices and $k$ the number of required inverse pointers, we set $m = 2(p+k+1)$.
+When searching for a fat vertex, the slot that applies has the greatest version not exceeding the version that is currently being searched for.
 
-A process modifying the BST data structure may be broken down into a series of updates that only change one vertex or insert a new one. A deleted vertex is not reachable from the root, but technically still exists.
-Every such update of the data structure will produce a new version (more than one typically). Since we were are only interested in the versions that are associated with the modification that completed an operation on the data structure, existence of other versions can be safely ignored. The total number of versions created will still be in linear with the number of total operations, preserving time complexity.
+Queries stay the same as before. The search for a vertex begins at the fat vertex for root of the correct version. Inside the current fat vertex the slot with valid version is identified and pointers inside followed.
 
-The process of performing one update involves first of all locating the slot that will be updated. If there exists a slot with the exact same version $v$, it will be updated. Otherwise the slot $s$ corresponding to $v$ is located and copied twice, creating slots $s'$ and $s''$. Slot $s'$ is given the version $v$ and $s''$ a newly created version that succeeds $v$. Then values in $s'$ are updated.
-If the update is insert, a new fat vertex with one slot is created instead and its field and pointer values are initialized.
+The process of performing one update involves first of all creating a new version $v$ via an insert into a list ordering. Also we need to create another version $v'$ a successor to $v$. Then all the changes are made. If there exists a slot with the exact same version $v$, it will be updated. Otherwise the slot $s$ corresponding to $v$ is located and copied twice, creating slots $s'$ and $s''$. Slot $s'$ is given the version $v$ and $s''$ is given $v'$. Then values in $s'$ are updated.
+If the change is an insert, a new fat vertex with one slot for $v$ is created instead and its field and pointer values are initialized.
 
-All inverse pointers must be updates accordingly. Either directly if version of their slots match, or by using the addition of two do/undo slots as explained. Of course this addition of slots may have exhausted the capacity of some fat nodes. We see however that at most constant number of slots was added altogether. 
+All inverse pointers must be updated accordingly. Either directly if version of their slots match, or by using the addition of two do/undo slots as explained. Of course this addition of slots may exhaust the capacity of some fat nodes. We see however that the number of slots which were added altogether is proportional to the number of changes done by this update to the tree. 
 
-We now need a process to somehow split the fat nodes which are over their capacity. Intuitively, for every fat node $f$ in excess of its capacity we would like to create a new fat node $f'$ and insert it after $f$ into the list of fat nodes for the same vertex. Then it would be possible to redistribute slots in $f$ between $f$ and $f'$ equally while preserving the invariant that fat nodes correspond to an interval of versions. Of course, when we do the splitting, we need to update pointers to $f$ in other vertices if they fall into the interval covered by $f'$.
+We now need a process to somehow split the fat nodes which are over their capacity. 
+Intuitively, for every fat node $f$ in excess of its capacity we would like to create a new fat node $f'$ and insert it after $f$ into the list of fat nodes for the same vertex. 
+Then it would be possible to redistribute slots in $f$ between $f$ and $f'$ equally while preserving the invariant that fat nodes correspond to an interval of versions.
+Of course, we would need to somehow update pointers in slots of other vertices with interval not covered fully by $f$ anymore, thus inserting more slots.
+Unfortunately as it turns out, during the process of mode-splitting, we could exceed the capacity so much that splitting in half would not be enough. 
 
-This is roughly what the process will be. Unfortunately, when we split a fat node, some slots in other vertices may suddenly correspond to versions in both $f$ and $f'$. Pointer $t$ in a slot $s$ is called \emph{overlapping} if $s$ represents more versions than the fat node pointed to by $t$.
-From the interval property of slots, this may happen for at most one slot $o$ in a vertex. We can solve this by inserting a new slot after $o$ with version of $f'$ and values equal to those of $o$ except the one problematic overlapping pointer which will point to $f'$.
+We need to find a better approach. 
+We will split into as many fat vertices as needed. 
+What is worse, when fat nodes grow beyond constant size, complexity will suffer. 
+There seems to be no clever method of selecting the next node to be split without the size of some fat nodes growing beyond \bigO{1} before coming to be split. 
+We therefore choose to delay the insertion of slots that correct overlapping pointers.
 
-Naturally, this insertion of slots may cause other fat nodes to exceed their capacity. What is worse, when fat nodes grow beyond constant size, complexity will suffer. There seems to be no clever method of selecting the next node to be split without the potential of some fat nodes growing beyond \bigO{1} before coming to be split. We therefore choose to delay the insertion of slots that correct overlapping pointers.
+When we split a fat node, some slots in other vertices may suddenly correspond to intervals covered by a series of newly created fat nodes. Pointer $t$ in a slot $s$ is called \emph{overlapping} if $s$ represents more versions than the fat node pointed to by $t$.
+Suppose we create a fat node $y$ by splitting. 
+Let $t$ be a (proper or inverse) pointer in fat node $z$ overlapping due to existence of $y$. 
+From the interval property of slots, we know that either the first slot in $y$ contains a pointer to $z$ and the fat vertex preceding $y$ also contains a pointer to $z$ in the last slot. 
+Or the last slot in $y$ contains a pointer to $z$ and the fat vertex after $z$ contains a pointer to $z$ in the first slot. 
+We can resolve this overlapping by inserting a new slot for every new fat vertex in the interval of validity of $t$. 
+Naturally, this insertion of slots may cause other fat nodes to exceed their capacity. 
 
-The full process for invariant maintenance follows. (The reader may see some similarities with the concept of fractional cascading.) We maintain a list $l$ of fat nodes, all vertices modified in this update are added to it. Until $l$ is not empty, we extract a vertex $w$ from $l$ and do the following steps with it:
+The full process for invariant maintenance follows. 
+(The reader may see some similarities with the concept of fractional cascading.) 
+We maintain a list $l$ of fat nodes, all vertices modified in this update are added to it. 
+As long as $l$ is not empty, we extract a vertex $w$ from $l$ and do the following steps with it:
 
 \begin{itemize}
 \item {\bf Removal of overlapping pointers.} Going from the slot with the lowest version to the highest, we identify overlapping pointers. From the logic of this algorithm, overlapping pointer $r$ always point to the first fat node representing versions contained in the slot of $r$. 
 
 When an overlapping pointer $q$ is found, we schedule an addition of a slot. This new slot should be inserted when we reach the place inside the list of slots where $q$'s fat node's interval of versions ends. This new slots takes the rest of pointers and fields from its predecessor. (We can have an insertion scheduled for all types of pointers at the same time.) If there are still some versions remaining to be covered from $q$'s original interval, another addition of a slot is scheduled.
 
-\item {\bf Allocation of new nodes.} If capacity of $w$ is not exceeded, continue with processing the next vertex in $l$. Otherwise, We set $x$ equal to the number of slots in $w$ divided by $m$ rounded down. Then we distribute slots evenly between $w$ and $(x-1)$ new fat vertices which are linked after $w$ into the list of fat nodes for this vertex.
+\item {\bf Allocation of new nodes.} If the capacity of $w$ is not exceeded, we continue with processing the next vertex in $l$. Otherwise, we set $x$ equal to the number of slots in $w$ divided by $m$ rounded down. Then we distribute slots evenly between $w$ and $(x-1)$ new fat vertices which are linked after $w$ into the list of fat nodes for this vertex.
 
-\item {\bf Identification of overlapping pointers.} We now inspect all fat nodes pointed to by newly created fat nodes in previous step. We look at the pointers to those new vertices, we correct those pointers to point to the first fat node $t$ in the with $w$ such that there is an intersection of the versions represented by $t$ and the slot containing this pointer.
+\item {\bf Identification of overlapping pointers.} We now go through newly created fat nodes in order of increasing version intervals that correspond to them. For every such fat vertex we must inspect all (proper and inverse) pointers in its slots. For each target of such a pointer we go through all slots in that fat vertex. Some of those slots may point to $w$, if that is the case, we check whether the interval of version for that slot intersects with the new interval of this fat vertex in processing. If it does, we set the pointer to this fat vertex.
 
-All fat nodes that were identified to contain an overlapping pointer must be added to $l$ if not added already.
+This way it can be seen that all pointers to $w$ were changed to point to the first fat vertex for the same vertex as $w$ whose interval intersects interval of validity for that pointer. Those pointers are prepared to be processed in some following iteration by removal of overlapping pointers.
+
+Meanwhile all fat nodes that are identified to contain an overlapping pointer are added to $l$ if not already present.
 \end{itemize}
 
 \input{figures/nodesplitting}
 
-We see that once $l$ is empty, no pointers are overlapping. Also capacity is not exceeded for no fat nodes. Now it is in order to show that $l$ will eventually become empty and what the time complexity is.
+We see that once $l$ is empty, no pointers are overlapping. Also capacity is not exceeded for any fat node. Now it is in order to show that $l$ will eventually become empty and what the time complexity is.
 
 \begin{prop}
 Starting with an initially empty fully-persistent binary search tree data structure (as described above), a sequence of $n$ updates produces a data structure taking \bigO{n} space while taking \bigO{n \log n} time.
 \end{prop}
 
 \begin{proof}
-First of all we observe that the invariant restoring process of one vertex takes time linear with the amount of newly created fat nodes plus one and as such can be ignored.
+First of all we observe that the invariant-restoring process of one vertex takes time linear with the amount of newly created fat nodes plus one and as such can be ignored from complexity standpoint.
 	
 Let us define a potential function for a persistent BST as the sum of potential energy stored in all of its fat nodes. 
-Every fat node must always store at least as many units of potential as many slots it contains minus $m$. 
-Initially (for empty tree) the potential is zero and may never be negative. One unit of potential can be used to allocate one fat node and execute constant number of other computation steps.
+Every fat node must always store at least as many units of potential as many slots it contains minus $p+k+1$, but can never be negative. 
+Initially, (for an empty tree) the potential is zero and it may never be negative. One unit of potential can be used to allocate one fat node and execute constant number of other computation steps.
 
-During the first phase, i.e. writing actual changes in the tree nodes, at most constant number of extra slots become occupied, the increase in potential from these insertions is charged on the update.
+During the first phase, i.e., writing actual changes in the tree nodes, at most constant number of extra slots become occupied, the increase in potential from these insertions is charged on the update.
 
 We also must analyze processing of fat nodes in $l$ during the second phase. Let us denote by $d$ the fat node that is being processed. 
 During removal of overlapping pointers we add some slots, this must be covered in advance by transfer of potential from other vertices when these are split. 
 If the node does not need to be split, constant amount of work was carried out. 
 No additional pointers become overlapping, so no transfers of potential are required.
 
-Otherwise for each newly created fat node overall potential of $d$ and its new successors is allowed to decrease by $m$.
+Otherwise, for each newly created fat node overall potential of $d$ and its new successors is allowed to decrease by $p+k+1$.
 This free potential is used to pay for allocation of new vertices (1 unit per new node). 
-On top of that, some pointers may become overlapping. It can be seen that it suffices to transfer 1 unit to fat nodes which are pointed to by the first slot in a new fat node. Up to additional $p+k$ units are transferred to vertices which are pointed to by first slots in new fat nodes.
-Identification of overlapping pointers is linear with number of new vertices linked after $d$.
+On top of that, after pointers to $d$ get updated in the step of identification of overlapping pointers, some of them become overlapping. 
+It can be seen that it suffices to transfer 1 unit to fat nodes which are pointed to by the first slot in a new fat node. 
+Up to additional $p+k$ units are transferred to vertices which are pointed to by first slots in new fat nodes.
+Identification of overlapping pointers is linear with the number of new fat vertices linked after $d$.
 
-From this argument we also see that the number of node-splitting occurring during one update is limited by the amount of potential available at the start of that update, so it must come to an end. Moreover constant amount is added to potential by updates in each operation, therefore space complexity is linear.
+From this argument we also see that the number of node-splitting occurring during one update is limited by the amount of potential available at the start of that update. 
+So the process must come to an end. 
+Moreover, a constant amount is added to potential by updates in each operation, therefore space complexity is linear.
 
 Every action is now accounted for and the proof is complete.
 \end{proof}
 
 \begin{cor}
-A sequence of any $n$ tree-operations and $q$ queries on a fully persistent WAVL tree (initially empty) produces a data structure which consumes \bigO{n} memory and takes \bigO{(n+q) \log n} time.
+A sequence of any $n$ updates and $q$ queries on a fully persistent WAVL tree (initially empty) takes \bigO{(n+q) \log n} time and produces a data structure consuming \bigO{n} memory.
 \end{cor}
 
-We should note that the size of vertices is so large, because we did not place any constraint on what updates are allowed to change. If update is only able to change one pointer field for example, we could reduce the size significantly. This would need to be analysed separately for each data structure.
+We should note that the size of vertices is so large, because we did not place any constraint on what updates are allowed to change. If update is only able to change one pointer field for example, we could reduce the size significantly. This would need to be analyzed separately for each data structure.
 
 One last thing we have not yet considered are pointers to the data structure from outside it. Surely, we need to store root for the tree in every version. For this purpose, we create a record with a pointer to a fat node together with the required version. Of course this by itself does not work, notably it does prevent the correct slot from leaving that fat node. 
 
-This can be repaired by adding a special kind of pointer to slots indicating that there is a record  connected to this version of this vertex. When the fat node is then split, the record is updated with correct fat node. (This forces us to insert a slot to the root for each update though.) Pointers to other vertices can be achieved similarly.
+This can be repaired by adding a special kind of pointer to slots indicating that there is a record connected to this version of this vertex. When the fat node is then split, the record is updated with the correct fat node. (This forces us to insert a slot to the root for each update though.) Other kinds of external pointers can be maintained similarly.
 
 \section{Alternative constructions}
 
@@ -375,9 +403,9 @@ In the previous section, we described fat nodes, where every slot bears all info
 As was already mentioned, we may choose to have a set of default values for all fields and pointers.
 These would be initialized to the first version in that fat vertex. Changes would then be stored in form of ordered triples. First would come version, second field or pointer identifier, and last the actual new value. Changing some information by adding a version thus means identifying what are the relevant values first and then inserting update triples.
 
-Yet another option is similar to the last one with the difference that only updates of pointers are allowed. If field needs to be changed, new fat vertex must be allocated.
+Yet another option is similar to the previous one with the difference that only updates of pointers are allowed. If a field needs to be changed, a new fat vertex must be allocated.
 
 It is difficult to decide which of these constructions is superior. Complexity will vary for each data structure, ratios between different operations, and other factors.
 
-Finally, let us conclude this chapter with a remark that this approach may be generalized further beyond binary search trees to other pointer-based data structures provided that the constraint on number of pointers targeting one node simultaneously applies to them.
-We do not give more attention to such structures in this thesis.
+Finally, let us conclude this chapter with a remark that this approach to full persistence may be generalized further beyond binary search trees to other pointer-based data structures provided that the constraint on number of pointers targeting one node simultaneously applies to them.
+We do not pay more attention to such structures in this thesis.
