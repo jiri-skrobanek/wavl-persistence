@@ -1,53 +1,51 @@
 Going from theory to practice, additional considerations need to be made, these are subject of this short chapter.
 
-\section{Separating Persistence from Other Logic}
+\section{Separating persistence from other logic}
 
 Having to consider persistence while implementing every function or method of the data structure may prove very difficult and error-prone.
 
 For this reason it may be useful to create a layer of persistence and isolate it from the remainder of BST logic. 
-This way tree operations will appear almost as if the tree structure were not persistent.
+This way tree operations will appear almost as if the tree structure were not persistent for the most part.
 
-One possibility is to introduce a wrapper object around the structure for slots (\emph{nodes}) which would hold a pointer to the correct slot in a \emph{fat note}, corresponding to the required version. 
+One possibility is to introduce a wrapper object around the structure for slots (\emph{nodes}) which would hold a pointer to the correct slot in a \emph{fat node}, corresponding to the required version. 
 This wrapper will be referred to as \emph{node accessor} and will provide functions to retrieve records for pointer fields in the correct version from the fat node pointer stored in the node. 
 
-Similarly another set of functions will be dedicated to setting these pointers based on a given node accessor. 
+Similarly, another set of functions will be dedicated to setting these pointers based on a given node accessor. 
 If write is needed for a version different than the node was created for, there will be two new nodes created one to hold the changed version and one to undo the changes. 
-Then regular algorithm for handling fat vertices over capacity is triggered, provided that capacity of the fat node is exhausted.
+Then the regular algorithm for handling fat vertices over capacity is triggered, provided that capacity of the fat node is exhausted.
 
-For temporary storage of additional data for vertices during one update, \emph{full node} structure is used. It contains a reference to node accessor of the correct version.
+For temporary storage of additional data for vertices during one update, a \emph{full node} structure is used. It contains a reference to a node accessor of the correct version.
 
-The \emph{tree} object is then a mere reference to node accessor with the right version.
+The \emph{tree} object is then a mere reference to a node accessor with the right version.
 
-Significant caveat of this strategy is that acessors might need to be updated should a node split (e.g. by a change of one of its field), any of the three new nodes might be relevant. 
+Significant caveat of this strategy is that acessors might need to be updated should a node be copied (e.g., by a change of one of its fields), any of the three new nodes might be relevant. 
 This is indeed possible through a list of inverse pointers from the node. Nothing is limiting the number of such accessors though and complexity would increase. 
 Therefore we only allow one new accessor to be preserved after the operation ends -- root of the newly created tree. 
-In addition before terminating the operation we manually split its node such that the versions match. 
-Also during one operation we only create accessors for one version, so there can be one shared for every node that needs to be accessed. 
-In this way we assure that there will not be any complicated handling of accessors required. 
+In addition, before terminating the operation we manually copy its node such that the versions match.
 
-This division is depicted in figure \ref{fig-layers}.
+This division is depicted by Figure \ref{fig-layers}.
 
 \input{figures/layers}
 
-\section{Author's Implementation}
+\section{Author's implementation}
 
-To state the algorithms described in more exact manner the author implemented alternative balancing for WAVL-trees and persistent WAVL-trees as an attachment to this thesis. 
+To state the algorithms described in more exact manner and to verify that no piece of theory is missing, the author implemented alternative balancing for WAVL-trees and persistent WAVL-trees as an attachment to this thesis. 
 The format chosen was C\# libraries for .NET Standard platform. 
-This code is available under the MIT License at\newline
+This code is available under the MIT License at\linebreak
 {\ttfamily https://github.com/jiri-skrobanek/wavl-persistence}.
 
-The goal of the implementation is solely to provide additional clarity into the algorithms. 
-It is not meant to be included into other projects as a library, rather to inspire possible re-implementation with an application to a specific problem in mind.
+The code should be treated as a proof of concept, not a stable library. The goal of the implementation is solely to provide additional clarity into the algorithms. 
+It is not meant to be included into other projects to provide classes for binary search trees, but rather to inspire possible re-implementation with an application to a specific problem in mind.
 No special optimization has been carried out as this would likely only hinder understanding. 
 
 \section{Size of fat vertices}
 
-In the previous chapter we have derived minimum size of fat vertices which guarantees logarithmic asymptotic complexity per operation and constant space per operation. 
-It may be beneficial however to increase the size further.
+In the previous chapter, we have derived the minimum size of fat vertices which guarantees logarithmic asymptotic complexity per operation and constant space per operation. 
+Performance may improve by increasing the size further.
 
 Recall that every splitting may result in additional slots being filled. 
-This presents a memory overhead and slowdown of altering operations. 
-Having more slots in a fat vertex, node-splitting will be less frequent on average. 
+This presents a memory overhead and a slowdown of altering operations. 
+Having more slots in a fat vertex, node splitting will be less frequent on average. 
 On the other hand, large number of slots causes slower lookup of the one bearing the relevant version. 
 
 Striving to reach the best performance with this data structure, the size of fat vertices must be set experimentally with respect to the ratio of operation types for every specific use-case.

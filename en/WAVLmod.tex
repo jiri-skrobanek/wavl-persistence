@@ -221,7 +221,7 @@ The changes are written both to the walking path and the ranked tree. Since the 
 
 We see that this procedure will update at most constant number of vertices in the tree structure. (The walking path is not counted as it is not preserved beyond the end of current operation.)
 
-Let us give an example for better understanding. If we had a walking path $r,v_1,v_2,v_3,v_4,v_5,v_6,...,v_n$ with demotion paths $p_1 = v_1,v_2,v_3,v_4,v_5,v_6$ and $p_2 = v_2,v_3,v_4$, removing $v_3$ would destroy $p_2$ completely as its remaining parts are too short. This would force the upper part of $p_1$, that is $v_1,v_2$ to be removed too. Similarly, $v_4$ would have to be removed from the lower part $v_4,v_5,v_6$ which would still contain at least 2 vertices and would be preserved.
+Let us give an example for better understanding. If we had a walking path \linebreak $r,v_1,v_2,v_3,v_4,v_5,v_6,...,v_n$ with demotion paths $p_1 = v_1,v_2,v_3,v_4,v_5,v_6$ and $p_2 = v_2,v_3,v_4$, removing $v_3$ would destroy $p_2$ completely as its remaining parts are too short. This would force the upper part of $p_1$, that is $v_1,v_2$ to be removed too. Similarly, $v_4$ would have to be removed from the lower part $v_4,v_5,v_6$ which would still contain at least 2 vertices and would be preserved.
 
 This procedure is implicitly used by other procedures when removal from demotion path is needed.
 
