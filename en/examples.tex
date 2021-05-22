@@ -5,7 +5,9 @@ Some of the examples may have more elegant solutions using a different approach.
 
 Imagine a version control system is used in a repository with branching history. Each version is stored as a patch to another parent version. Naturally, one would expect to use persistent data structures for varying tasks in this scenario. A persistent binary tree could be used for example for queries of files by the last time of modification in history of that particular version.
 
-\section{Point localization in a plane}
+Although in reality the situation is more complicated and some sort of reintegration of branches that diverged is needed.
+
+\section{Point location in a plane}
 
 Given a bounded connected subset of a plane partitioned into a finite set of faces, the goal is to respond to queries asking to which face a point $p$ belongs. We limit ourselves to polygonal faces.
 One special case of particular importance of this problem is finding the closest point, i.e. when the faces are Voronoi cells.
@@ -13,7 +15,7 @@ One special case of particular importance of this problem is finding the closest
 To build the data structure we will follow a general idea of line sweeping. We start by sorting vertices of all faces by the first coordinate $x$. We will continually process these vertices in the order of increasing coordinate $x$. We maintain $S$, a sorted list of edges (in a semi-persistent BST) during this processing. The list $S$ contains edges that intersect with a sweeping line parallel to the secondary axis~$y$ in order of the intersections (sorted by the second coordinate $y$).
 
 Initially the list is empty and we set the sweeping line to intersect the first vertex.
-When we start processing a new vertex we imagine moving the sweeping line along the primary axis to intersect with the new vertex. We can easily observe that the order of edges cannot change during this virtual movement. (None of the edges can intersect except at a vertex.) It will happen, however, that edges must be either removed from the list or added to the list.
+When we start processing a new vertex, we imagine moving the sweeping line along the primary axis to intersect with the new vertex. We can easily observe that the order of edges cannot change during this virtual movement. (None of the edges can intersect except at a vertex.) It will happen, however, that edges must be either removed from the list or added to the list.
 
 We cannot store keys inside $S$ because the coordinates of intersections with the sweeping line change as it moves. To find the correct edge in $S$ one must start in the root and at each vertex calculate the intersection with the sweeping line at the given $x$ coordinate (in constant time).
 

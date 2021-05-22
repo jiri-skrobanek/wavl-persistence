@@ -20,20 +20,19 @@ Multi-threading is easier when there is confidence that existing objects will no
 
 This division is by no means universally adopted, but it provides an interesting perspective regardless.
 
-With a persistent data structure, we essentially want to have one data structure for every existing version. 
-Insert and delete return a new version handle instead of making changes to the existing version. 
-Obviously, copying the data structure every time is one option how to achieve this, albeit not a great one. 
-To prevent using extra memory and increased time complexity of operations, more intricate methods must be employed.
-
 Going beyond this hierarchy, if fully-persistent data structure also supports merging or melding two different versions, it is said to be \emph{confluently persistent}. 
 Confluently persistent data structures are the subject of studies for example by Driscoll, Sleator, and Tarjan \cite{confluently-persistent-a} or Fiats and Kaplan \cite{confluently-persistent-b}. 
 We will not investigate confluent persistence further in this thesis.
+
+With a persistent binary search tree, we essentially want to have one data structure for every existing version. 
+Insert and delete return a new version handle instead of making changes to the existing version. 
+Obviously, copying the data structure every time is one option how to achieve this, albeit not a great one. 
+To prevent using extra memory and increased time complexity of operations, more intricate methods must be employed.
 
 Driscoll et al.~\cite{persistence-DSST} developed a framework for persistence of pointer-based data structures. 
 Some of the techniques which we will use will be nearly identical to those of Driscoll et al.
 We limit ourselves to the context of binary search trees. 
 Nonetheless, the algorithms typically naturally generalize to other kinds of pointer-based data structures.
-
 
 \section{Persistence through path-copying}
 
@@ -102,7 +101,7 @@ Because of the limit on size of this collection, it may be implemented simply as
 
 Contents of one slot are a version handle, all pointers a vertex would have, and some fields, notably key and value as a bare minimum.
 Not all fields need to be versioned. 
-For example balancing information may be stored only for the latest version, i.e, in a red-black trees color is only used for balancing and is thus not needed to be persisted for old versions. 
+For example balancing information may be stored only for the latest version, i.e, in a~red-black trees color is only used for balancing and is thus not needed to be persisted for old versions. 
 (Until full-persistence comes into play.)
 
 One vertex in the original binary search then corresponds to a doubly-linked list of fat vertices.
@@ -120,7 +119,7 @@ Pointers must be updated in other fat vertices whose latest slot pointed to the 
 This is done by going through vertices pointed to by the inverse pointers and either creating slots (copying all values from the latest slot and replacing pointers to the predecessor by pointers to $x$), or directly updating the pointers if the slot for the right version is already present. 
 Also inverse pointers must be updated to $x$ for vertices pointed to by $x$ in the latest version.
 
-Recursive allocations may be triggered, which is not a problem if there is only a small amount of them. 
+Recursive allocations may be triggered, which is not a problem if there is only a small number of them. 
 This is ensured by setting the size of fat vertices suitably. 
 The order in which these allocations are executed can be arbitrary.
 We can place an upper bound on the number of newly allocated fat vertices -- total number of vertices in the tree (including deleted vertices). 
@@ -144,40 +143,30 @@ Then this algorithm with the addition of fat vertices for semi-persistence, cons
 
 \begin{myproof}
 The number of pointer fields per vertex is denoted by $p$ and the maximum number of vertices pointing to one vertex at a time by $k$. 
-We then define the number of slots in one fat node as $s = p + k + 1$ and add $k$ inverse pointers to vertices.
+We then define the number of slots in one fat node as $s = k + 1$ and add $k$ inverse pointers to vertices.
 
 We define the potential of the structure as the total number of occupied slots in all fat vertices that are the last in their doubly-linked list. 
 (Thus initially zero.) 
 Allocation of a new fat vertex will cost one unit of energy. 
-This cost can be paid from the potential or the operation. 
+This cost can be paid from the potential or by the operation. 
 We will show that the operation needs to be charged only a constant amount of energy per one vertex modification by the original algorithm (to compensate for the increase in potential or to pay for allocations), from which the proposition follows.
 
-For insert, a new fat node is created with one occupied slot and one slot is occupied in the parent of the newly created vertex (which increases potential by a constant). 
-This increase is paid for by the operation. During rebalancing of the tree, $r$ vertices are to be modified. 
-The situation is similar for delete.
-Let us consider this sequence of modifications one by one. 
-The operation sends one floating unit of energy to each of the $r$ vertices.
+Allocation of a new fat vertex associated with the insertion of a new vertex into the tree is paid for by the insert operation.
 
-If a modification of $v$ is second or later modification of $v$ during an ongoing update, changes are simply written to the slot for the created version. 
-Otherwise, the number of used slots is checked. 
-If there is one or more empty slots available, one of the is used. 
-The new slot takes values of unchanged fields and pointers from the preceding slot. 
-This increases the potential by one, which is covered by the floating unit of energy.
+All other modifications changing a field or a proper pointer must pay one unit of energy. 
+Modification of inverse pointers does not need any extra space.
+For modifications triggered by the insert, delete, or the balancing algorithm directly the operation covers this cost.
+If a modification constitutes an insertion of a slot into an existing fat vertex, the unit of energy is deposited into the potential.
+Otherwise the unit is used to pay for allocation of a new fat vertex. This allocation causes the potential to decrease by $k$ units. 
+These can be used to give one unit of energy to each of up to $k$ subsequent modification triggered by checking inverse pointers.
+If a slot for the same version already exists, no additional space is needed and the unit of potential is in vain.
 
-If no slots are available, new fat vertex $v'$ is allocated and one of its slots is used. 
-This step triggers a decrease in the potential by $p+k$. 
-The floating unit of energy is used to pay for allocation of the new vertex. 
-Next, fat vertices to corresponding current version interval of vertices having pointers to $v$ need to have this reflected. 
-Additionally, inverse pointers to $v'$ need to be set. 
-These are at most $p+k$ changes to other vertices that may use their new empty slots. 
-The decrease in potential is used to send one unit of energy to every such vertex that need an update. 
-Changes are executed recursively and will not require extra energy to be charged on this modification.
-
-The operation is charged only constant amount of work for every change it does.
-Space complexity consumed is bounded by the number changes done by update operations. Thus space complexity is \bigO{n}. 
+All allocations of new fat vertices are thus paid for while the operation is charged only constant amount of work for every change it does.
+Consumed space complexity is bounded by the number of changes done by update operations. Thus space complexity is \bigO{n}. 
 \end{myproof}
 
-Regarding the time complexity, searching the correct slot in a fat vertex produces only constant overhead. Realizing that every operation can be charged on a memory allocation of a fat vertex such that there is a constant $c$ depending only on the balancing algorithm such that for every allocated fat vertex the number of operations charged on it is at most $c$.
+Regarding the time complexity, searching the correct slot in a fat vertex produces only constant overhead. 
+Realizing that every operation can be charged on a memory allocation of a fat vertex such that there is a constant $c$ depending only on the balancing algorithm such that for every allocated fat vertex the number of operations charged on it is at most $c$.
 
 \begin{obs}
 Assuming the conditions from the previous proposition, the cost to write changes into fat vertices is amortized to \bigO{1} per operation.
@@ -206,7 +195,7 @@ Rank of WAVL trees is not used for navigation, only for balancing the tree. So i
 \caption{Layout for WAVL semi-persistent tree fat vertex}
 \end{figure}
 
-\section{Parallel Semi-persistence with WAVL trees}
+\section{Parallel semi-persistence with WAVL trees}
 
 In this section we explore the potential of semi-persistent WAVL trees as a parallel data structure. 
 We begin by issuing a lock to every fat vertex.
@@ -389,8 +378,6 @@ Every action is now accounted for and the proof is complete.
 \begin{cor}
 A sequence of any $n$ updates and $q$ queries on a fully persistent WAVL tree (initially empty) takes \bigO{(n+q) \log n} time and produces a data structure consuming \bigO{n} memory.
 \end{cor}
-
-We should note that the size of vertices is so large, because we did not place any constraint on what updates are allowed to change. If update is only able to change one pointer field for example, we could reduce the size significantly. This would need to be analyzed separately for each data structure.
 
 One last thing we have not yet considered are pointers to the data structure from outside it. Surely, we need to store root for the tree in every version. For this purpose, we create a record with a pointer to a fat node together with the required version. Of course this by itself does not work, notably it does prevent the correct slot from leaving that fat node. 
 

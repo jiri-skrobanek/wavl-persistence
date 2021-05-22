@@ -6,8 +6,8 @@ We introduced a family of binary search trees called rank-balanced trees as a~us
 We modified Weak AVL trees to only require a constant number of changes per operation while preserving their structural properties. 
 This construction is not known to have been discovered earlier.
 
-We reiterated a general process described by Driscoll et al. \cite{persistence-DSST} for making pointer data structures persistent. 
-The described process was applied to obtain fully-persistent WAVL trees through our modification of that BSTs. 
+We reiterated a general process described by Driscoll et al. \cite{persistence-DSST} for making pointer data structures persistent specifically for binary search trees. 
+The described process was applied to obtain fully-persistent WAVL trees through our modification of those BSTs. 
 More precise formulation of the algorithms was also provided in the form of an implementation of the core procedures for .NET. 
 Although the data structure was successfully constructed, 
 it does not seem to provide a more feasible alternative to the approach of Driscoll et al.~to obtaining persistent binary search trees by employment of modified red-black trees. 
@@ -16,6 +16,5 @@ It is the impression of the author that the construction of persistent weak AVL 
 For further work it would be useful to find a simplification of the algorithms given in this thesis. This is not the only potential improvement.
 Driscoll et al. used \textit{displacement paths} to deamortize time complexity of insert and delete operations for fully-persistent red-black trees. 
 It remains to investigate the possibility of worst-case time complexities per operation for WAVL trees. A technique like that used for red-black trees might be used.
-
 
 Finally some applications of persistence were demonstrated.
