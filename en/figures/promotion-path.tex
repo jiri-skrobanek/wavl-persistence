@@ -1,0 +1,54 @@
+\begin{figure}
+    \begin{center}
+    \begin{tikzpicture}[sibling distance=8pt]
+    \Tree
+    [
+    .~
+    \edge node[auto=right] {1};
+    [ 
+        .~
+        \edge node[auto=right] {1};
+        [  .~ \edge node[auto=right] {1}; [.~ \edge node[auto=right] {0}; $x$ \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {1}; ~ ]
+        \edge node[auto=left] {1};
+        [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+    ] 
+    \edge node[auto=left] {1};
+    [ 
+        .~
+        \edge node[auto=right] {1};
+        [  .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+        \edge node[auto=left] {1};
+        [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+    ]
+    ]
+    \end{tikzpicture}
+    \qquad
+    \begin{tikzpicture}[sibling distance=8pt]
+    \Tree
+    [
+    .\node[very thick]{~};
+    \edge[very thick] node[auto=right] {1};
+    [ 
+        .\node[very thick]{~};
+        \edge[very thick] node[auto=right] {1};
+        [  .\node[very thick]{~}; \edge[very thick] node[auto=right] {1}; [.\node[very thick]{~}; \edge node[auto=right] {1}; $x$ \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {2}; ~ ]
+        \edge node[auto=left] {2};
+        [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+    ] 
+    \edge node[auto=left] {2};
+    [ 
+        .~
+        \edge node[auto=right] {1};
+        [  .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+        \edge node[auto=left] {1};
+        [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
+    ]
+    ]
+    \end{tikzpicture}
+    \end{center}
+    \caption{An example of a promotion path creation}
+    The vertex $x$ has just been inserted into the upper tree. 
+    A promotion path (thick) has been created during rebalancing in the lower tree. 
+    We see that this pattern can be extended to make the promotion path arbitrarily long.
+    \end{figure}
+    

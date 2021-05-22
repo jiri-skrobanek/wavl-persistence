@@ -8,7 +8,7 @@ Why this is a problem will become apparent in the next chapter.
 Fortunately, the algorithm can be modified in such a way that no operation requires more than \bigO{1} changes to be written. 
 Ranks of vertices will be calculated from the actual rank field, but offset by a certain amount determined from different auxiliary fields. 
 This will come at the price of substantially more complicated rules for balancing though. 
-Although WAVL trees are rouhly as difficult to implement as AVL trees, this balancing makes them ill-suited for the use as a general-purpose binary search tree. 
+Although WAVL trees are roughly as difficult to implement as AVL trees, this balancing makes them ill-suited for the use as a general-purpose binary search tree. 
 
 The problems in WAVL trees arose from promote and demote operations which can propagate along a path from the inserted (respectively deleted) vertex all the way to the root. 
 Fortunately, there is a remedy for this. 
@@ -55,7 +55,7 @@ How modifying paths are marked is determined by this set of rules.
 
 \item If a vertex must be removed from a path, that is achieved by dividing all the paths the vertex lies on into top and bottom part, the vertex itself is part of neither. If a part obtained by splitting would have a single vertex, it is not created.
 
-\item If a vertex would be rotated, it must be removed from all paths it is on.
+\item If a vertex were to be rotated, it must be removed from all paths it is on.
 
 \item If a vertex changes rank relative to its parent, but the rank invariant at parent is kept, the parent must be removed from all paths it is on. (This is the case where the vertex is promoted/demoted during balancing but its parent is not.)
 
@@ -250,7 +250,7 @@ It should be noted that the specified vertex will have a child on the walking pa
 The kind of rotation needed can be deduced locally. Should there be additional modifications from modifying paths, these would be apparent (as marked as such at the top of corresponding modifying path). Required rotation is performed, it may be needed to remove one more vertex from modifying path in case of double rotation.
 
 It suffices to write all changes to the original ranked tree since balancing will end by this step and walking path will be abandoned. 
-This procedure returns a new root of the tree, this is either the the original root or the vertex that was rotated above.
+This procedure returns a new root of the tree, this is either the original root or the vertex that was rotated above.
 
 \subsection{Rotate demotion}
 
@@ -322,109 +322,9 @@ The proposition below follows from this algorithm.
 WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the structure are needed for insert and delete, while $\mathcal{O}(n)$ space is needed to store the structure and complexity of every operation with the tree remains $\mathcal{O}(\log n)$.
 \end{prop}
 
-\begin{figure}
-\begin{center}
-\begin{tikzpicture}[sibling distance=8pt]
-\Tree
-[
-.~
-\edge node[auto=right] {1};
-[ 
-    .~
-    \edge node[auto=right] {1};
-    [  .~ \edge node[auto=right] {1}; [.~ \edge node[auto=right] {0}; $x$ \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {1}; ~ ]
-    \edge node[auto=left] {1};
-    [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
-] 
-\edge node[auto=left] {1};
-[ 
-    .~
-    \edge node[auto=right] {1};
-    [  .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
-    \edge node[auto=left] {1};
-    [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
-]
-]
-\end{tikzpicture}
-\qquad
-\begin{tikzpicture}[sibling distance=8pt]
-\Tree
-[
-.\node[very thick]{~};
-\edge[very thick] node[auto=right] {1};
-[ 
-    .\node[very thick]{~};
-    \edge[very thick] node[auto=right] {1};
-    [  .\node[very thick]{~}; \edge[very thick] node[auto=right] {1}; [.\node[very thick]{~}; \edge node[auto=right] {1}; $x$ \edge[blank]; \node[blank]{}; ] \edge node[auto=left] {2}; ~ ]
-    \edge node[auto=left] {2};
-    [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
-] 
-\edge node[auto=left] {2};
-[ 
-    .~
-    \edge node[auto=right] {1};
-    [  .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
-    \edge node[auto=left] {1};
-    [ .~ \edge node[auto=right] {1}; ~ \edge node[auto=left] {1}; ~ ]
-]
-]
-\end{tikzpicture}
-\end{center}
-\caption{An example of a promotion path creation}
-The vertex $x$ has just been inserted into the upper tree. 
-A promotion path (thick) has been created during rebalancing in the lower tree. 
-We see that this pattern can be extended to make the promotion path arbitrarily long.
-\end{figure}
+\input{figures/promotion-path.tex}
 
-\begin{figure}
-\begin{center}
-\begin{tikzpicture}[sibling distance=8pt, 
-	frontier/.style={distance from root=3.75cm}]
-\Tree
-[ \edge node[auto=right]{2}; [.$y$
-    \edge[tosubtree] node[auto=right] {3};
-    \node[draw,triangle]{~};
-    \edge node[auto=left] {2};
-    [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
-] ]
-\end{tikzpicture}
-\qquad
-\begin{tikzpicture}[sibling distance=8pt, 
-	frontier/.style={distance from root=3.75cm}]
-\Tree
-[ \edge node[auto=right]{2}; [.$y$
-    \edge[tosubtree] node[auto=right] {2};
-    \node[draw,triangle]{~};
-    \edge node[auto=left] {1};
-    [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
-] ]
-\end{tikzpicture}
-\qquad
-\begin{tikzpicture}[sibling distance=8pt, 
-	frontier/.style={distance from root=3.75cm}]
-\Tree
-[ \edge node[auto=right]{2}; [.$y$
-    \edge[tosubtree] node[auto=right] {3};
-    \node[draw,triangle]{~};
-    \edge node[auto=left] {1};
-    [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
-] ]
-\end{tikzpicture}
-\qquad
-\begin{tikzpicture}[sibling distance=8pt, 
-	frontier/.style={distance from root=3.75cm}]
-\Tree
-[ \edge node[auto=right]{2}; [.$y$
-    \edge[tosubtree] node[auto=right] {2};
-    \node[draw,triangle]{~};
-    \edge node[auto=left] {1};
-    [.~ \edge[tosubtree] node[auto=right] {1}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {1}; \node[draw,triangle]{~};]
-] ]
-\end{tikzpicture}
-\end{center}
-\caption{The only case where double demotion can arise}
-The node $y$ is demoted once and put onto a demotion path. Since its 1-child outside the path cannot change ranks while $y$ is on the demotion path, the 1-child cannot change ranks. The second demote on $y$ must then be of the second kind.
-\end{figure}
+\input{figures/double-demotion}
 
 \section{Keys in place of pointers for path ends}
 

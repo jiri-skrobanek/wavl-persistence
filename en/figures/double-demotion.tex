@@ -1,0 +1,49 @@
+\begin{figure}
+    \begin{center}
+    \begin{tikzpicture}[sibling distance=8pt, 
+        frontier/.style={distance from root=3.75cm}]
+    \Tree
+    [ \edge node[auto=right]{2}; [.$y$
+        \edge[tosubtree] node[auto=right] {3};
+        \node[draw,triangle]{~};
+        \edge node[auto=left] {2};
+        [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
+    ] ]
+    \end{tikzpicture}
+    \qquad
+    \begin{tikzpicture}[sibling distance=8pt, 
+        frontier/.style={distance from root=3.75cm}]
+    \Tree
+    [ \edge node[auto=right]{2}; [.$y$
+        \edge[tosubtree] node[auto=right] {2};
+        \node[draw,triangle]{~};
+        \edge node[auto=left] {1};
+        [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
+    ] ]
+    \end{tikzpicture}
+    \qquad
+    \begin{tikzpicture}[sibling distance=8pt, 
+        frontier/.style={distance from root=3.75cm}]
+    \Tree
+    [ \edge node[auto=right]{2}; [.$y$
+        \edge[tosubtree] node[auto=right] {3};
+        \node[draw,triangle]{~};
+        \edge node[auto=left] {1};
+        [.~ \edge[tosubtree] node[auto=right] {2}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {2}; \node[draw,triangle]{~};]
+    ] ]
+    \end{tikzpicture}
+    \qquad
+    \begin{tikzpicture}[sibling distance=8pt, 
+        frontier/.style={distance from root=3.75cm}]
+    \Tree
+    [ \edge node[auto=right]{2}; [.$y$
+        \edge[tosubtree] node[auto=right] {2};
+        \node[draw,triangle]{~};
+        \edge node[auto=left] {1};
+        [.~ \edge[tosubtree] node[auto=right] {1}; \node[draw,triangle]{~}; \edge[tosubtree] node[auto=left] {1}; \node[draw,triangle]{~};]
+    ] ]
+    \end{tikzpicture}
+    \end{center}
+    \caption{The only case where double demotion can arise}
+    The node $y$ is demoted once and put onto a demotion path. Since its 1-child outside the path cannot change ranks while $y$ is on the demotion path, the 1-child cannot change ranks. The second demote on $y$ must then be of the second kind.
+    \end{figure}
