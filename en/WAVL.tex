@@ -7,7 +7,7 @@ A binary tree is said to be a {\em ranked binary tree} if all vertices have non-
 \end{defn}
 
 \begin{defn}
-Vertex $v$ having left child $l$ and right child $r$ (both of which may be external) in a ranked binary tree is said to be either $(a,b)$-vertex or $(b,a)$-vertex if $\rank(v) - \rank(l) = a$ and $\rank(v) - \rank(r) = b$. $L$ and $R$ are called an $a$-child and a $b$-child of $v$.
+Vertex $v$ having left child $l$ and right child $r$ (both of which may be external) in a ranked binary tree is said to be either $(a,b)$-vertex or $(b,a)$-vertex if $\rank(v) - \rank(l) = a$ and $\rank(v) - \rank(r) = b$. Vertices $l$ and $l$ are called an $a$-child and a $b$-child of $v$.
 \end{defn}
 
 \begin{prop}
@@ -16,10 +16,12 @@ Let $S$ be a finite subset of ${(\mathbb{Z} _ +)}^2$ and $T$ a ranked tree with 
 \end{prop}
 
 \begin{myproof}
-Let us denote $m$ the maximum allowed rank difference in $S$.
+Let us denote by $m$ the maximum allowed rank difference in $S$.
 We prove by induction on the rank of the root vertex an exponential lower bound on size of $T$. We establish a lower bound on the number of vertices in a tree with a root of rank $r$. 
 
-Suppose that it holds for every rank $q$ lower than $r$, that the number of vertices in a tree with root of rank $q$ is at least $\exp(qc)$ for some positive constant $c$. We set this constant to $\log(2)/m$.
+To address the base case of the induction, we observe that the inequality obviously holds for leaves -- only possible vertices with rank zero.
+
+Suppose that it holds for every rank $q$ lower than $r$, that the number of vertices in a tree with the root of rank $q$ is at least $\exp(qc)$ for some positive constant $c$. We set this constant to $\log(2)/m$.
 We now derive the minimum size of tree with root of rank $r$, for $r>m$:
 \begin{align*}
 	\log 2            & \geq cm       \\
@@ -29,17 +31,14 @@ We now derive the minimum size of tree with root of rank $r$, for $r>m$:
 \end{align*}
 The expression on the left-hand side of the final inequality is precisely lower bound on the size of a tree of rank $r$, the vertex itself and the size of two trees having the root of rank at least $r-m$.
 
-For $r \leq m$ the expression $\exp(rc)$ is less then 1, so the condition is met trivially. Therefore the induction holds also for $r$.
-
-The base case of rank zero: The inequality obviously holds for leaves (only possible vertices with rank zero).
-
+For $r \leq m$ the expression $\exp(rc)$ is less than 1, so the condition is met trivially. Therefore the induction holds also for $r$.
 
 With the induction complete, it follows that $n \geq \exp(qc)$, if $q$ is the rank of root of $T$. The height of $T$ is in turn at most $ \log(n)/c $. 
 
 Since all BSTs have at least logarithmic height, we have proven the proposition.
 \end{myproof}
 
-The theory of ranked trees permits a nice definition of AVL trees \cite{avl}.
+The theory of ranked trees permits a nice definition of AVL trees \cite{avl} and weak-AVL trees.
 
 \begin{defn}
 A ranked tree is said to be an {\em AVL tree} if its every vertex is either $(1,1)$, $(1,2)$, or $(2,1)$ and all leaves are of rank $0$.
@@ -61,7 +60,7 @@ By default, WAVL trees use the set of standard operations as outlined earlier wi
 
 % Rebalancing consists of checking rank invariant for vertices on the path from the changed vertex back to the root one by one, while performing balancing steps where needed. 
 
-\subsubsection*{Rebalancing after Insert}
+\subsubsection*{Rebalancing after insert}
 
 Inserting a new leaf $\ell$ itself may only introduce one type of violation, making the parent of $\ell$ into a $(0,1)$- or a $(0,2)$-vertex. It will become apparent that the existence of one $(0,1)$- or $(0,2)$-vertex in the tree is the only violation that may happen during this rebalancing. 
 
@@ -83,7 +82,7 @@ At the first checked vertex $v$, one of its children has just been inserted. If 
 
 \input{figures/insert-steps}
 
-\subsubsection*{Rebalancing after Delete}
+\subsubsection*{Rebalancing after delete}
 
 This process is analogous to reblancing after insert in many ways. Deleting a leaf may cause its former parent to become either a~$(3,1)$-vertex, a~$(3,2)$-vertex, a~$(2,2)$-vertex that is a leaf, or a~$(2,1)$-vertex. This is easily seen from examining all possibilities. 
 
@@ -125,9 +124,9 @@ WAVL trees have good properties when we consider the amortized number of promote
 
 \subsection{Top-down rebalancing}
 
-There is an alternative set of procedures for performing Insert and Delete in WAVL tree. Changes are performed during descent from the root while searching for the key in question. No return to the root ensues.
+There is an alternative set of procedures for performing insert and delete in WAVL tree. Changes are performed during descent from the root while searching for the key in question. No return to the root ensues.
 
-For Insert, we know that problematic vertices that cause promote to be passed upwards are always $(0,1)$. Such vertices come to exist from $(1,1)$-vertices by promoting one of their children. Passing through a vertex other than $(1,1)$ ensures that rebalancing will not proceed through that vertex upwards. We thus only need to worry about long chains of $(1,1)$-vertices when descending during the find phase of insert. When we traverse the tree down from the root during the find phase, these must removed.
+For insert, we know that problematic vertices that cause promote to be passed upwards are always $(0,1)$. Such vertices come to exist from $(1,1)$-vertices by promoting one of their children. Passing through a vertex other than $(1,1)$ ensures that rebalancing will not proceed through that vertex upwards. We thus only need to worry about long chains of $(1,1)$-vertices when descending during the find phase of insert. When we traverse the tree down from the root during the find phase, these must be removed.
 
 Top-down rebalancing utilizes \emph{forced reset} to remove these long chains of $(1,1)$-vertices. Forced reset is triggered by passing through the $k$-th $(1,1)$-vertex (denoted $d$) in a row during the find phase of Insert. The last passed node that is not $(1,1)$ (or root) is called a \textit{safe node}. We know that promoting $d$ might require rebalancing to be performed starting at $d$ to restore rank rules. We know however that this rebalancing will end at the safe node, taking \bigO{1} operations.
 Forced reset prevents returning arbitrarily close to the root during rebalancing after the insert is performed.

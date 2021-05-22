@@ -3,9 +3,9 @@
 
 Speaking in general terms, persistent data structures maintain their previous versions when modified. Operations can thus also be executed on any earlier state of the structure. When such an operation updates the structure, a new version is created branching out of the original sequence of updates.
 
-This thesis strives to enhance the existing knowledge of persistent data structures, predominantly we will seek to use weak-AVL trees to construct fully-persistent binary search trees.
-
 Use of term \emph{persistent} was introduced by Driscoll, Sarnak, Sleator, and Tarjan in their joint 1986 article \emph{Making data structures persistent} \cite{persistence-DSST}. It turned out that much more efficient algorithms than copying the whole data structure are attainable. In this article, a general scheme for converting regular pointer-based data structures into persistent ones is given. A persistent binary search tree was constructed from adapted red-black trees \cite{red-black-trees}.
+
+This thesis strives to enhance the existing knowledge of persistent data structures, predominantly we will seek to use weak-AVL trees to construct fully-persistent binary search trees.
 
 Haeupler, Sen, and Tarjan \cite{weight-balanced} introduced weak-AVL (WAVL) trees as part of a framework of rank-balanced trees in 2015. WAVL trees were named after AVL trees which form a subset of them.
 
@@ -13,6 +13,8 @@ The algorithms for WAVL operations given by Haeupler at al.~cannot be directly p
 
 We also describe a variant of persistent WAVL trees which supports queries on earlier versions and is suitable for concurrent operations.
 
-We begin the thesis by swiftly establishing fundamentals of binary search trees. These topics are covered in Chapter 1. Chapter 2 moves to construct our modification of WAVL trees suitable for persistence. Several approaches to persistence of binary search trees are described in Chapter 3. A structure for handling versions as elements of an ordering is also covered. Persistent data structures were motivated by many direct and obscured applications, we mention some of them in Chapter 4. Implementation of persistent WAVL trees is the focus of Chapter 5.
-
-% Since the original publication on persistence great number of other works addressing this topic appeared.
+We begin the thesis by swiftly establishing fundamentals of binary search trees. These topics are covered in Chapter 1. 
+Chapter 2 moves to construct our modification of WAVL trees suitable for persistence. 
+Several approaches to persistence of binary search trees are described in Chapter 3. A structure for handling versions as elements of an ordering is also covered. 
+Persistent data structures were motivated by many direct and obscured applications, we mention some of them in Chapter 4. 
+Implementation of persistent WAVL trees is the focus of Chapter 5. Sample implementation of the author is also discussed.

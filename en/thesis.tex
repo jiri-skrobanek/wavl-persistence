@@ -1,5 +1,3 @@
-%%% The main file. It contains definitions of basic parameters and includes all other parts.
-
 \documentclass[12pt,a4paper]{report}
 \setlength\textwidth{160mm}
 \setlength\textheight{247mm}
@@ -55,21 +53,14 @@
 
 %%% Basic information on the thesis
 
-% Thesis title in English (exactly as in the formal assignment)
 \def\ThesisTitle{Persistent Weak-AVL Trees}
 
-% Author of the thesis
 \def\ThesisAuthor{Jiří Škrobánek}
 
-% Year when the thesis is submitted
 \def\YearSubmitted{2021}
 
-% Name of the department or institute, where the work was officially assigned
-% (according to the Organizational Structure of MFF UK in English,
-% or a full name of a department outside MFF)
 \def\Department{Department of Applied Mathematics}
 
-% Is it a department (katedra), or an institute (ústav)?
 \def\DeptType{Department}
 
 % Thesis supervisor: name, surname and titles
@@ -82,8 +73,6 @@
 \def\StudyProgramme{Computer Science}
 \def\StudyBranch{General Computer Science}
 
-% An optional dedication: you can thank whomever you wish (your supervisor,
-% consultant, a person who lent the software, etc.)
 \def\Dedication{%
 \vspace{50mm}
 
@@ -91,13 +80,12 @@
 I hereby express many thanks to my supervisor Martin Mareš for guiding me through the labyrinth of algorithms and data structures.
 }
 
-% Abstract (recommended length around 80-200 words; this is not a copy of your thesis assignment!)
 \def\Abstract{%
-Persistence, i.e. preservation of data by updates, has been an interesting topic in the study of data structures. 
-This thesis investigates persistence of binary search trees. 
-In particular we explore how weak-AVL trees may be converted into efficient fully-persistent data structures.
+This thesis investigates persistence (i.e., preservation of data by updates) of binary search trees. 
+In particular, we explore how weak-AVL trees may be converted into efficient fully-persistent data structures.
 After mentioning all important properties of weak-AVL trees, we present a new method to store them with worst-case constant number of changes per update. 
-We then show a general scheme for conversion of pointer-based data structures into their persistent variants. Finally this scheme is used to obtain fully-persistent weak-AVL trees.
+Then we show some general schemes for conversion of binary search trees (and possibly other pointer-based data structures) into their persistent variants. 
+Finally the established theory is used to obtain fully-persistent weak-AVL trees.
 }
 
 % 3 to 5 keywords (recommended), each enclosed in curly braces
@@ -149,19 +137,6 @@ We then show a general scheme for conversion of pointer-based data structures in
 %%% Bibliography
 \include{bibliography}
 
-
-
-%%% Attachments to the bachelor thesis, if any. Each attachment must be
-%%% referred to at least once from the text of the thesis. Attachments
-%%% are numbered.
-%%%
-%%% The printed version should preferably contain attachments, which can be
-%%% read (additional tables and charts, supplementary text, examples of
-%%% program output, etc.). The electronic version is more suited for attachments
-%%% which will likely be used in an electronic form rather than read (program
-%%% source code, data files, interactive charts, etc.). Electronic attachments
-%%% should be uploaded to SIS and optionally also included in the thesis on a~CD/DVD.
-%%% Allowed file formats are specified in provision of the rector no. 72/2017.
 \appendix
 \chapter{Attachments}
 
