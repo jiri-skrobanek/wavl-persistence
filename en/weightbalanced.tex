@@ -7,7 +7,8 @@ Weight-balanced trees form a class of binary search trees. The strategy of maint
 A vertex of a weight-balanced tree contains the {\em size} of the subtree rooted at that vertex and pointers to. That is of course in addition to key, value and pointers to {\em left} and {\em right} child. By definition the size of external vertex is 0. {\em Weight} of a vertex is then defined as size plus one.
 
 \begin{defn}
-Let $\alpha \in (0,1/2)$ be constant. We call a binary search $T$ an {\em $\alpha$-weight-balanced tree (BB[$\alpha$] tree)} if it holds for every vertex $v$ of T that $\weightit(\leftit(v)) \geq \alpha \cdot \weightit(v) \wedge \weightit(\rightit(v)) \geq \alpha \cdot \weightit(v) $.
+Let $\alpha \in (0,1/2)$ be constant. We call a binary search $T$ an {\em $\alpha$-weight-balanced tree (BB[$\alpha$] tree)} if it holds for every vertex $v$ of T that 
+$$\weightit(\leftit(v)) \geq \alpha \cdot \weightit(v) \wedge \weightit(\rightit(v)) \geq \alpha \cdot \weightit(v). $$
 \end{defn}
 
 \begin{prop}

@@ -110,10 +110,12 @@
 	\node at (-1,2.5) {\tt Right};
 \end{tikzpicture}
 \vspace{10mm}
-
-\caption{An example of node splitting}
 \end{center}
-One fat node is depicted in four stages of an update. Intervals of validity of its pointers are indicated by thick vertical lines. Beginning of a slot is illustrated by dashed vertical lines.
+{
+	\small
+	One fat node is depicted in four stages of an update. Intervals of validity of its pointers are indicated by thick vertical lines. Beginning of a slot is illustrated by dashed vertical lines.
 
-In the topmost stage, no changes have been done to the fat node. In the second stage, we see that several fat nodes have been split and there are multiple fat nodes of {\tt Right} and {\tt Parent} corresponding to intervals of one slot. In the third stage we see that additional slots have been created. In the last stage, the fat node has been split in two.
+	In the topmost stage, no changes have been done to the fat node. In the second stage, we see that several fat nodes have been split and there are multiple fat nodes of {\tt Right} and {\tt Parent} corresponding to intervals of one slot. In the third stage we see that additional slots have been created. In the last stage, the fat node has been split in two.
+}
+\caption{An example of node splitting}
 \end{figure}

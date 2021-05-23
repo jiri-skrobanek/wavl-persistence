@@ -149,7 +149,10 @@ Furthermore, we need a limit on the number of pointers that can target one verte
 			Left6 &  Right6  & Key6 & Value6 & Version6 \\ \hline
 		\end{tabular}
 	\end{center}
+{
+\small
 All fat vertices in one linked list share an inverse pointer to the parent in the most recent version. Also rank of WAVL trees is not used for navigation, only for balancing the tree. So it need not be maintained for older versions and only is stored for the most recent version. Size was chosen to be six, even though a smaller size would still guarantee the same asymptotic complexity.
+}
 \caption{Layout for WAVL semi-persistent tree fat vertex}
 \label{fig:semi-layout}
 \end{figure}
