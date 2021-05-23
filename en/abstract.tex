@@ -9,10 +9,14 @@
 \usepackage{lmodern}
 \usepackage{textcomp}
 
+\pagenumbering{gobble}
+
 \begin{document}
 
-%% Do not forget to edit abstract.xmpdata.
-
-This is an example abstract.
+This thesis investigates persistence (i.e., preservation of data by updates) of binary search trees. 
+In particular, we explore how weak-AVL trees may be converted into efficient fully-persistent data structures.
+After mentioning all important properties of weak-AVL trees, we present a new method to store them with worst-case constant number of changes per update. 
+Then we show some general schemes for conversion of binary search trees (and possibly other pointer-based data structures) into their persistent variants. 
+Finally the established theory is used to obtain fully-persistent weak-AVL trees.
 
 \end{document}

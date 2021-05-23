@@ -2,6 +2,6 @@
 
 \Author{Jiří Škrobánek}
 \Title{Persistent Weak-AVL Trees}
-\Keywords{keywords\sep more such\sep yet another}
-\Subject{Abstract of thesis}
+\Keywords{Persistence\sep Weak-AVL trees\sep Ranked-balanced trees}
+\Subject{This thesis investigates persistence (i.e., preservation of data by updates) of binary search trees. In particular, we explore how weak-AVL trees may be converted into efficient fully-persistent data structures. After mentioning all important properties of weak-AVL trees, we present a new method to store them with worst-case constant number of changes per update. Then we show some general schemes for conversion of binary search trees (and possibly other pointer-based data structures) into their persistent variants. Finally the established theory is used to obtain fully-persistent weak-AVL trees.}
 \Publisher{Charles University}
