@@ -2,8 +2,10 @@
 
 For the purposes of obtaining an efficient fully-persistent BST, standard algorithm for working with WAVL trees cannot be used. 
 It is guaranteed that no more than one rotation occurs during insert or delete. 
-Nonetheless, the number of rank changes can be up to \bigO{\log n}. 
+Nonetheless, the number of rank changes can be up to \bigO{\log n}. See Figure \ref{fig:promotion-path}.
 Why this is a problem will become apparent in the next chapter.
+
+\input{figures/promotion-path.tex}
 
 Fortunately, the algorithm can be modified in such a way that no operation requires more than \bigO{1} changes to be written. 
 Ranks of vertices will be calculated from the actual rank field, but offset by a certain amount determined from different auxiliary fields. 
@@ -155,6 +157,9 @@ Possibly $p$'s parent could be on a demotion path due to a demote of second kind
 If there is a sufficient amount of candidate vertices for a path from the third or fourth rule, the path is created. 
 We know that the candidate vertices are not on a promotion path or two demotion paths, so adding them to a demotion path does not violate the proposition.
 \end{myproof}
+
+See Figure \ref{fig:double-demotion} for a situation where presence on two demotion paths is needed.
+\input{figures/double-demotion}
 
 \begin{prop}
 Only a constant number of modifying path changes ever arises during one altering tree operation (insert or delete). Path creation, splitting, and deletion are counted as changes.
@@ -321,10 +326,6 @@ The proposition below follows from this algorithm.
 \begin{prop}
 WAVL tree can be stored in such a way that $\mathcal{O}(1)$ modifications of the structure are needed for insert and delete, while $\mathcal{O}(n)$ space is needed to store the structure and complexity of every operation with the tree remains $\mathcal{O}(\log n)$.
 \end{prop}
-
-\input{figures/promotion-path.tex}
-
-\input{figures/double-demotion}
 
 \section{Keys in place of pointers for path ends}
 

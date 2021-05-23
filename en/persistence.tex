@@ -52,6 +52,10 @@ With reasonable variants of binary search trees, achieved time complexity in a t
 The downside of this method is the increased space complexity. 
 There is no apparent construction that would not increase memory complexity by copying the paths.
 
+Look at Figure \ref{fig:path-copying} to see an insertion of a vertex with path-copying.
+
+\input{figures/path-copying}
+
 \section{Multiple versions in one vertex}
 
 To limit memory consumption we may rather choose to let vertices carry their properties for all versions. This in reality means that we must store a collection of changes together with versions when those changes happened. This makes a vertex a kind of dictionary with keys being versions and values the descriptions of changes.
@@ -114,6 +118,8 @@ We will need to be able to determine for any fat vertex $x$ which other fat vert
 This problem is resolved by adding some number of \emph{inverse pointers} to each series of fat vertices of the same vertex. 
 We define an invariant of inverse pointers: If vertex $v$ points to vertex $u$ in the most recent version, then $u$ must contain an inverse pointer to $v$. This invariant is maintained by also changing the inverse pointers whenever some proper pointers change. 
 
+One possible layout of one vertex in semi-persistent WAVL tree (with the original balancing algorithm) is visible in Figure \ref{fig:semi-layout}.
+
 When a new fat vertex $x$ is allocated, one of its slots is immediately taken. 
 Pointers must be updated in other fat vertices whose latest slot pointed to the fat vertex preceding $x$ in the list. 
 This is done by going through vertices pointed to by the inverse pointers and either creating slots (copying all values from the latest slot and replacing pointers to the predecessor by pointers to $x$), or directly updating the pointers if the slot for the right version is already present. 
@@ -129,6 +135,24 @@ To take advantage of fat vertices, we need the balancing algorithm to limit the 
 It is sufficient that the changes can be amortized to a constant number per update, ideally it should be a constant even in the worst case.
 This was the goal of modified WAVL-balancing algorithm all along. 
 Furthermore, we need a limit on the number of pointers that can target one vertex at one time.
+
+\begin{figure}
+	\begin{center}
+		\ttfamily
+		\begin{tabular}{ccccc}
+			Next  & Previous &      &        &          \\ \hline
+			Left1 &  Right1  & Key1 & Value1 & Version1 \\ \hline
+			Left2 &  Right2  & Key2 & Value2 & Version2 \\ \hline
+			Left3 &  Right3  & Key3 & Value3 & Version3 \\ \hline
+			Left4 &  Right4  & Key4 & Value4 & Version4 \\ \hline
+			Left5 &  Right5  & Key5 & Value5 & Version5 \\ \hline
+			Left6 &  Right6  & Key6 & Value6 & Version6 \\ \hline
+		\end{tabular}
+	\end{center}
+All fat vertices in one linked list share an inverse pointer to the parent in the most recent version. Also rank of WAVL trees is not used for navigation, only for balancing the tree. So it need not be maintained for older versions and only is stored for the most recent version. Size was chosen to be six, even though a smaller size would still guarantee the same asymptotic complexity.
+\caption{Layout for WAVL semi-persistent tree fat vertex}
+\label{fig:semi-layout}
+\end{figure}
 
 \begin{prop}
 Consider any binary search tree balancing algorithm satisfying the following properties:
@@ -178,23 +202,6 @@ In fact, for semi-persistence fat vertices may be defined differently. It suffic
 Thus each fat vertex carries a set of default values for every field and pointer, these values are used if not overridden by a slot. 
 This approach may lead to lower memory consumption, but it is not directly compatible with the approach to full persistence described later.
 
-\begin{figure}
-\begin{center}
-	\ttfamily
-	\begin{tabular}{cccccc}
-		Rank  & Previous &  Next   &      & &          \\ \hline
-		Left1 &  Right1  & Parent1 & Key1 & Value1 &  Version1 \\ \hline
-		Left2 &  Right2  & Parent2 & Key2 & Value2 & Version2 \\ \hline
-		Left3 &  Right3  & Parent3 & Key3 & Value3 & Version3 \\ \hline
-		Left4 &  Right4  & Parent4 & Key4 & Value4 & Version4 \\ \hline
-		Left5 &  Right5  & Parent5 & Key5 & Value5 & Version5 \\ \hline
-		Left6 &  Right6  & Parent6 & Key6 & Value6 & Version6 \\ \hline
-	\end{tabular}
-\end{center}
-Rank of WAVL trees is not used for navigation, only for balancing the tree. So it need not be maintained for older versions.
-\caption{Layout for WAVL semi-persistent tree fat vertex}
-\end{figure}
-
 \section{Parallel semi-persistence with WAVL trees}
 
 In this section we explore the potential of semi-persistent WAVL trees as a parallel data structure. 
@@ -236,8 +243,6 @@ If we increase the number of slots in a fat vertex by at least one, asymptotic m
 Let us turn back to enabling delete. If delete operations are rare, we may simply treat them as inserts locking-wise and acknowledge that blocking may ensue. Another approach would be to use the technique of \textit{ghost vertices}. That is to add a deleted flag to vertex layout, deleting would simply set this flag in corresponding slot. This will increase size of the tree. For the number of deleted vertices bounded by a polynomial in the number of remaining vertices for every version of the data structure, this preserves the asymptotic time complexity. 
 
 Otherwise, an entirely new data structure may be built from the latest versions of all vertices in the tree if the amount of deleted vertices exceeds a certain ratio to remaining vertices. The cost to build this new tree is amortized into the deletes from the preceding data structure.
-
-\input{figures/path-copying}
 
 \section{List ordering}
 
