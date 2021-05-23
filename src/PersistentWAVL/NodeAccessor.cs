@@ -178,7 +178,7 @@ namespace PersistentWAVL
                         // Remove old inverse pointer
                         if (!(Node._left is null)
                             && Node._left.GetNodeForVersion(Version)._parent == Node.FatNode
-                            && Node._left.GetNodeForVersion(Version) != value.Node)
+                            && Node._left.GetNodeForVersion(Version) != value?.Node)
                         {
                             var left = Node._left;
                             var inverseNode = left.GetNodeForVersion(Version);
@@ -252,7 +252,7 @@ namespace PersistentWAVL
                         // Remove old inverse pointer
                         if (!(Node._right is null) 
                             && Node._right.GetNodeForVersion(Version)._parent == Node.FatNode 
-                            && Node._right.GetNodeForVersion(Version) != value.Node)
+                            && Node._right.GetNodeForVersion(Version) != value?.Node)
                         {
                             var right = Node._right;
                             var inverseNode = right.GetNodeForVersion(Version);

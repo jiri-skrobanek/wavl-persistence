@@ -68,31 +68,22 @@ namespace PersistentWAVL
             /// </summary>
             private static void CheckOne(FatNode n)
             {
-                VersionHandle leftHandle = null;
-                Node overlappingLeft = null;
-
                 // Split overlapping slots
 
                 var current = n.Slots.First;
 
                 while (!(current is null))
                 {
-                    var next = current.Next.Value?.Version;
+                    var next = current.Next?.Value?.Version;
                     if (next is null && !(n.Next is null))
                     {
                         next = n.Next.Slots.First.Value.Version;
                     }
 
                     var cn = current.Value;
-                    var nextVersion = current.Next.Value.Version;
 
-                    var llow = cn._left?.Slots.First.Value;
                     var lnext = cn._left?.Next?.Slots.First.Value;
-
-                    var rlow = cn._right?.Slots.First.Value;
                     var rnext = cn._right?.Next?.Slots.First.Value;
-
-                    var plow = cn._parent?.Slots.First.Value;
                     var pnext = cn._parent?.Next?.Slots.First.Value;
 
                     if (!(next is null)
