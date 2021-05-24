@@ -250,8 +250,8 @@ namespace PersistentWAVL
                         }
 
                         // Remove old inverse pointer
-                        if (!(Node._right is null) 
-                            && Node._right.GetNodeForVersion(Version)._parent == Node.FatNode 
+                        if (!(Node._right is null)
+                            && Node._right.GetNodeForVersion(Version)._parent == Node.FatNode
                             && Node._right.GetNodeForVersion(Version) != value?.Node)
                         {
                             var right = Node._right;
@@ -287,7 +287,7 @@ namespace PersistentWAVL
                                     oldparent.CopyForVersion(Version);
                                     FatNode.CheckScheduled.Add(oldparent.FatNode);
                                 }
-                                if(oldparent._left == inverseNode.FatNode)
+                                if (oldparent._left == inverseNode.FatNode)
                                 {
                                     oldparent._left = null;
                                 }
@@ -298,7 +298,7 @@ namespace PersistentWAVL
                             }
 
                             inverseNode._parent = Node.FatNode;
-                            
+
                             Node._right = value.Node.FatNode;
                         }
                     }

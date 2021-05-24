@@ -48,11 +48,11 @@ namespace WAVL
 
             if (current.Left == null && current.Right == null)
             {
-                if (prev == null) 
-                { 
+                if (prev == null)
+                {
                     // Deleted last vertex.
-                    Root = null; 
-                    return; 
+                    Root = null;
+                    return;
                 }
 
                 // Leaf
@@ -270,19 +270,19 @@ namespace WAVL
             if (first.Left != null && first.Right != null)
             {
                 // Insert
-                if(first.Demoted > 0)
+                if (first.Demoted > 0)
                 {
                     DeleteFromDemotionPath(path, 0);
                 }
-                if(first.Promoted)
+                if (first.Promoted)
                 {
                     DeleteFromPromotionPath(path, 0);
                 }
                 // No further action needed
                 return path.Last().Base;
             }
-            
-            if(first.Rank == 2 && (first.Left == null || first.Right == null))
+
+            if (first.Rank == 2 && (first.Left == null || first.Right == null))
             {
                 // 3-child, demote
                 return MoveDemotionUp(path);
@@ -290,7 +290,7 @@ namespace WAVL
 
             // Demote is not required
             // Try finding 0-son, the vertex must have rank 0 and internal child.
-            if(first.Rank == 0)
+            if (first.Rank == 0)
             {
                 return MovePromotionUp(path);
             }

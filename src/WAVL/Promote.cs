@@ -6,7 +6,7 @@ namespace WAVL
 {
     public partial class Tree<K, V> where K : IComparable<K>, IEquatable<K>
     {
-     
+
         private void DeleteFromPromotionPath(List<FullNode<K, V>> path, int index)
         {
             var removed = path[index];
@@ -105,9 +105,6 @@ namespace WAVL
         /// <summary>
         /// This vertex or its 0-son must not be part of any path
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="i"></param>
-        /// <returns></returns>
         Node<K, V> PickRotationPromote(List<FullNode<K, V>> path, int i)
         {
             var z = path[i].Base;
@@ -273,7 +270,6 @@ namespace WAVL
         /// <summary>
         /// Promote the first vertex and continue upwards.
         /// </summary>
-        /// <param name="path"></param>
         private Node<K, V> MovePromotionUp(List<FullNode<K, V>> path)
         {
             var lastrank = 0;
@@ -404,7 +400,7 @@ namespace WAVL
             }
         }
 
-        private void FinishPromotionPath(List<FullNode<K,V>> path, int index)
+        private void FinishPromotionPath(List<FullNode<K, V>> path, int index)
         {
             if (index < 0) return;
             if (index == 0)

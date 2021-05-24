@@ -8,10 +8,11 @@ namespace PersistentWAVL.Tests
     class BuildFromScratch
     {
         [Test]
-        public void TestBuild() { 
-            
+        public void TestBuild()
+        {
+
             // Set up
-            
+
             var t0 = Tree<IntClass, int>.GetNew;
             var t1 = t0.Insert(100, 100);
             var t2 = t1.Insert(200, 200);

@@ -17,7 +17,7 @@ namespace PersistentWAVL
 
             for (int i = index; i > 0; i--)
             {
-                if (GetPromotionContinuation(path[i]) == path[i - 1].Base) lowerlen++; 
+                if (GetPromotionContinuation(path[i]) == path[i - 1].Base) lowerlen++;
                 else break;
             }
 

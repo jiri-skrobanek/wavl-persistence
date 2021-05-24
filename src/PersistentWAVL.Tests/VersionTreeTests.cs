@@ -29,7 +29,7 @@ namespace PersistentWAVL.Tests
 
             VersionNode.FromList(null, array, 0);
 
-            for(int i = 0; i < array.Length; i++)
+            for (int i = 0; i < array.Length; i++)
             {
                 for (int j = i + 1; j < array.Length; j++)
                     Assert.Greater(array[j].CompareTo(array[i]), 0);

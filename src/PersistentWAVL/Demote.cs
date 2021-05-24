@@ -405,19 +405,6 @@ namespace PersistentWAVL
                 }
             }
 
-
-            // Update rank at index
-
-            void WriteDemotionBoth(int pos)
-            {
-                DemoteChildIfNeeded(pos);
-                path[pos].Demoted--;
-                path[pos].DemotedChild = false;
-                path[pos].PathStart = null;
-                path[pos].Base.rank--;
-                path[pos].Base.ModPathEnd = default;
-            }
-
             Node.NodeAccessor GetDemotionContinuation(FullNode node)
             {
                 if (node.Base == path[index].PathStart.Base.ModPathEnd)

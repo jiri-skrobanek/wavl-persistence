@@ -39,7 +39,7 @@ namespace WAVL
 
         public int CompareTo(Node<K, V> other) => Key.CompareTo(other.Key);
 
-        public static bool operator <(Node<K,V> a, Node<K,V> b) => a.CompareTo(b) < 0;
+        public static bool operator <(Node<K, V> a, Node<K, V> b) => a.CompareTo(b) < 0;
 
         public static bool operator >(Node<K, V> a, Node<K, V> b) => a.CompareTo(b) > 0;
 
@@ -68,7 +68,7 @@ namespace WAVL
 
                 rank++;
             }
-            
+
             if (DemotionStart2)
             {
                 // Is it short?
@@ -101,14 +101,14 @@ namespace WAVL
 
                 rank--;
             }
-            
-            if(DemotionStart)
+
+            if (DemotionStart)
             {
                 // Is it short?
                 var next = ModPathEnd.CompareTo(this) > 0 ? Right : Left;
                 var other = ModPathEnd.CompareTo(this) > 0 ? Left : Right;
 
-                if(other.RankWithOwnOffset == rank - 1)
+                if (other.RankWithOwnOffset == rank - 1)
                 {
                     // Demote child if needed
                     other.rank--;
@@ -117,7 +117,7 @@ namespace WAVL
                 if (next == ModPathEnd)
                 {
                     // Demote child if needed
-                    if(next.Left != null && next.Left.RankWithOwnOffset + 1 == next.rank)
+                    if (next.Left != null && next.Left.RankWithOwnOffset + 1 == next.rank)
                     {
                         next.Left.rank--;
                     }
@@ -129,7 +129,7 @@ namespace WAVL
                     // Last vertex
                     next.rank--;
                 }
-                else if(next.DemotionStart)
+                else if (next.DemotionStart)
                 {
                     next.DemotionStart2 = true;
                     next.ModPathEnd2 = ModPathEnd;
@@ -142,7 +142,7 @@ namespace WAVL
 
                 rank--;
             }
-            
+
 
             PromotionStart = false;
             DemotionStart = false;

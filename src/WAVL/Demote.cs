@@ -584,7 +584,7 @@ namespace WAVL
                 {
                     var (l, r) = GetTypeOf1ChildVertex(current.Base);
 
-                    if(current.Rank - l == 2 || current.Rank - r == 2)
+                    if (current.Rank - l == 2 || current.Rank - r == 2)
                     {
                         // Rotate
                         DemoteWithChild(i - 1);
@@ -687,7 +687,7 @@ namespace WAVL
 
                 for (int i = 0; i <= pos; i++)
                 {
-                    if(path[i].Demoted == 1)
+                    if (path[i].Demoted == 1)
                     {
                         path[i].PathStart2 = path[pos];
                         path[i].DemotedChild = true;
@@ -699,10 +699,10 @@ namespace WAVL
                     }
 
                     path[i].Demoted++;
-                    
+
                 }
 
-                if(path[pos].Base.ModPathEnd != null)
+                if (path[pos].Base.ModPathEnd != null)
                 {
                     path[pos].Base.ModPathEnd2 = path[0].Base;
                     path[pos].Base.DemotionStart2 = true;
