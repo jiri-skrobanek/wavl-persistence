@@ -27,7 +27,7 @@ Of the operations described here, typically only insert and delete alter the BST
 
 \section{Standard operation}
 
-We will mention here a~basic implementation for some of those basic tree operations. This will also be the implementation used by modified WAVL-trees, which will be defined later. The reader is expected to be mostly familiar with these operations already. Detailed description is attached in an appendix for reference.
+We will mention here a~basic implementation for some of those basic tree operations. This will also be the implementation used by modified WAVL trees, which will be defined later. The reader is expected to be mostly familiar with these operations already. Detailed description is attached in an appendix for reference.
 
 \subsubsection*{Find}
 Search for a~key $k$ begins by assigning the root to a~current vertex variable $v$. If $v$ has the searched key, the vertex is found. Otherwise if $k$ is greater than the key of $v$. We try to move the right child of $v$, otherwise to the left child. If we were to move an external vertex, we report that $k$ is not present in the tree.
