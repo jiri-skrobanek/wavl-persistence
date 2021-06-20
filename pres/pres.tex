@@ -1,0 +1,468 @@
+\documentclass{beamer}
+
+\mode<presentation>
+{
+  \usetheme{Madrid}
+  % or ...
+
+  % \setbeamercovered{transparent}
+  % or whatever (possibly just delete it)
+}
+
+
+\usepackage[czech]{babel}
+% or whatever
+
+\usepackage[utf8]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+
+\usepackage{tikz,tikz-qtree}
+
+\title{Persistentní weak-AVL stromy}
+\subtitle{Persistent Weak-AVL Trees}
+
+\author
+{Jiří Škrobánek}
+% - Give the names in the same order as the appear in the paper.
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+
+\date{2. červenec 2021}
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+\pgfdeclareimage[height=0.5cm]{university-logo}{../img/logo-en}
+\logo{\pgfuseimage{university-logo}}
+
+
+% If you wish to uncover everything in a step-wise fashion, uncomment
+% the following command: 
+
+%\beamerdefaultoverlayspecification{<+->}
+
+
+
+\newtheoremstyle{mytheoremstyle} % name
+{\topsep}                    % Space above
+{\topsep}                    % Space below
+{\slshape}                   % Body font
+{}                           % Indent amount
+{\bfseries}                   % Theorem head font
+{.}                          % Punctuation after theorem head
+{.5em}                       % Space after theorem head
+{}  % Theorem head spec (can be left empty, meaning ‘normal’)
+
+\theoremstyle{mytheoremstyle}
+\newtheorem{dfn}{Definice}
+\newtheorem{thm}{Věta}
+
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{positioning}
+\tikzset{every tree node/.style={minimum size=7mm,draw,circle},
+         blank/.style={draw=none},
+         edge from parent path={(\tikzparentnode)--(\tikzchildnode)},
+         level distance=1.2cm,
+         triangle/.style={regular polygon, regular polygon sides=3},
+         tosubtree/.style={edge from parent path={(\tikzparentnode)--(\tikzchildnode.north)}},
+         }
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Zadání}
+\begin{itemize}
+\item
+Driscoll et al.~upravili červeno-černé stromy a získali tak persistentní vyhledávací stromy.
+\item
+%Weak-AVL trees possess interesting properties for persistence.
+Weak-AVL stromy mají některé vlastnosti indikující, že by bylo možné provést podobou úpravu.
+\item
+Úkolem je prozkoumat, zda je možné {\bf postavit efektivní persistentní weak-AVL strom} se složitostí amortizovaně logaritmickou na operaci.
+%Investigate if weak-AVL trees could be modified similarly to red-black trees and used in persistence.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Hierarchie persistence}
+\begin{itemize}
+  \item \textbf{Efemerní} jsou běžné datové struktury.
+  \item \textbf{Semi-persistentní} datové struktury navíc zachovávají pro čtení historii. Lineární uspořádání verzí.
+  \item \textbf{(Plně) persistentní struktury} navíc připouštějí změny na starších verzí. Historie je strom.
+  \item \textbf{Funkcionální struktury} navíc nepřipouštějí žádné změny existujících verzí struktury. 
+\end{itemize}
+Cílíme na plně persistentní strukturu.
+\end{frame}
+
+
+
+\begin{frame}{Rankově vyvážené stromy}
+\begin{dfn}[Rankově vyvážený strom]
+Binární strom je rankově vyvážený, pokud je každému vrcholu přiděleno přirozené číslo jako \emph{rank}. Externí vrcholy mají rank $-1$.
+%Binary tree is said to be ranked-balanced if all vertices have non-negative integer ranks assigned. Externals vertices are assigned -1 by convention.
+\end{dfn}
+Koncept představili Haeupler et al.
+
+\pause
+
+Typicky vynucujeme konkrétní \emph{hranová pravidla}. Pokud má vrchol o $a$ vyšší rank než jeden syn a o $b$ než druhý, označíme ho jako $(a,b)$ vrchol.
+
+\pause
+
+\begin{thm}[Hloubka rankově vyvážených stromů]
+Pokud je v rankově vyváženém stromě $n$ vrcholů a všechny vrcholu mají typ z nějaké konečné množiny $R \subset \mathbb{N}^2$, hloubka stromy je $\Theta(\log n)$.
+\end{thm}
+\end{frame}
+
+\begin{frame}{Weak-AVL stromy}
+\begin{dfn}[Weak-AVL strom]
+Rankově vyvážený strom je weak-AVL, pokud všechny jeho vrcholy jsou $(1,1)$, $(2,1)$, nebo $(2,2)$.
+\end{dfn}
+
+\pause
+
+Každý AVL strom je možné orankovat, aby měly vrcholy ranky $(1,1)$ nebo $(2,1)$.
+
+\pause
+
+Existují dvě varianty vyvažování (shora, zespoda). 
+
+Vyvažování shora se děje preventivě a má horší konstanty. Dá se ale využít pro paralelní semi-persistentní strukturu. (Vedlější výsledek.)
+\end{frame}
+
+\begin{frame}
+\frametitle{Vyvažování zespoda po vkládání}
+
+\only{Vyvažování probíhá směrem ke koření, dokud je porušen rankový invariant.}<1>
+
+\only{Sekvence povyšování ranků potenciálně končící (dvojitou) rotací.}<1>
+
+\begin{center}
+
+\only{
+\begin{tikzpicture}[sibling distance=32pt]
+  \Tree
+  [ \edge node[auto=right]{1 or 2}; [.$y$
+      \edge[tosubtree] node[auto=right] {0};
+      \node[draw,triangle]{~};
+      \edge[tosubtree] node[auto=left] {1};
+      \node[draw,triangle]{~};
+  ] ]
+  \end{tikzpicture}
+  \qquad\hspace{20mm}
+  \begin{tikzpicture}[sibling distance=32pt]
+  \Tree
+  [ \edge node[auto=right]{0 or 1}; [.$y$
+      \edge[tosubtree] node[auto=right] {1};
+      \node[draw,triangle]{~};
+      \edge[tosubtree] node[auto=left] {2};
+      \node[draw,triangle]{~};
+  ] ]
+\end{tikzpicture}
+}<1>
+
+\only{
+  \begin{tikzpicture}[sibling distance=8pt, 
+    frontier/.style={distance from root=4cm}]
+  \Tree
+  [ \edge node[auto=right]{1 or 2}; [.$y$
+      \edge[very thick] node[auto=right] {0};
+      [   .$x$ 
+          \edge[tosubtree] node[auto=right] {1}; 
+          \node[draw,triangle]{A}; 
+          \edge[tosubtree] node[auto=left] {2};
+          \node[draw,triangle]{B}; ]
+      \edge[tosubtree] node[auto=left] {2};
+      \node[draw,triangle]{C};
+  ] ]
+  \end{tikzpicture}
+  \qquad
+  \begin{tikzpicture}[sibling distance=8pt, 
+    frontier/.style={distance from root=4cm}]
+  \Tree
+  [ \edge node[auto=right]{1 or 2}; [.$x$
+      \edge[tosubtree] node[auto=right] {1};
+      \node[draw,triangle]{A};
+      \edge[very thick] node[auto=left] {1};
+      [   .$y$ 
+          \edge[tosubtree] node[auto=right] {1}; 
+          \node[draw,triangle]{B}; 
+          \edge[tosubtree] node[auto=left] {1}; 
+          \node[draw,triangle]{C}; ]
+  ] ]
+  \end{tikzpicture}
+}<2>
+
+\only{
+
+\small
+
+\begin{tikzpicture}[sibling distance=4pt, frontier/.style={distance from root=5.25cm}]
+\Tree
+[ 
+    \edge node[auto=right]{1 or 2}; 
+    [
+        .$y$
+        \edge[very thick] node[auto=right] {0};
+        [   
+            .$x$ 
+            \edge[tosubtree] node[auto=right] {2}; 
+            \node[draw,triangle]{A}; 
+            \edge[very thick] node[auto=left] {1};
+            [
+                .$w$
+                \edge[tosubtree]; 
+                \node[draw,triangle]{B};
+                \edge[tosubtree]; 
+                \node[draw,triangle]{C}; 
+            ]
+        ]
+        \edge[tosubtree] node[auto=left] {2};
+        \node[draw,triangle]{D};
+    ] 
+]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=4pt, frontier/.style={distance from root=4cm}]
+\Tree
+[ \edge node[auto=right]{1 or 2}; [.$w$
+    \edge[very thick] node[auto=right] {1};
+    [ 
+        .$x$
+        \edge[tosubtree] node[auto=right] {1};
+        \node[draw,triangle]{A};
+        \edge[tosubtree];
+        \node[draw,triangle]{B};
+    ]
+    \edge[very thick] node[auto=left] {1};
+    [   .$y$ 
+    	\edge[tosubtree];
+        \node[draw,triangle]{C}; 
+        \edge[tosubtree] node[auto=left] {1}; 
+        \node[draw,triangle]{D}; ]
+] ]
+\end{tikzpicture}
+}<3>
+
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Vyvažování zespoda po odstranění}
+  
+\only{Sekvence ponižování ranků potenciálně končící (dvojitou) rotací.}<1>
+
+\begin{center}
+
+\only{
+\begin{tikzpicture}[sibling distance=32pt, frontier/.style={distance from root=2cm}]
+  \Tree
+  [ \edge node[auto=right]{1 or 2}; [.$y$
+  \edge[tosubtree] node[auto=right] {3};
+  \node[draw,triangle]{~};
+  \edge[tosubtree] node[auto=left] {2};
+  \node[draw,triangle]{~};
+  ] ]
+  \end{tikzpicture}
+  \qquad
+  \begin{tikzpicture}[sibling distance=32pt, frontier/.style={distance from root=2cm}]
+  \Tree
+  [ \edge node[auto=right]{2 or 3}; [.$y$
+  \edge[tosubtree] node[auto=right] {2};
+  \node[draw,triangle]{~};
+  \edge[tosubtree] node[auto=left] {1};
+  \node[draw,triangle]{~};
+  ] ]
+\end{tikzpicture}
+
+\vspace{10mm}
+
+\small
+
+\begin{tikzpicture}[sibling distance=8pt, frontier/.style={distance from root=3.5cm}]
+  \Tree[ 
+  \edge node[auto=right] {1 or 2};
+  [   
+  .$x$ 
+  \edge[tosubtree] node[auto=right] {3}; 
+  \node[draw,triangle]{A}; 
+  \edge node[auto=left] {1};
+  [
+  .$y$
+  \edge[tosubtree] node[auto=right] {2};
+  \node[draw,triangle]{B};
+  \edge[tosubtree] node[auto=left] {2};
+  \node[draw,triangle]{C}; 
+  ] ] ]
+  \end{tikzpicture}
+  \qquad
+  \begin{tikzpicture}[sibling distance=8pt, frontier/.style={distance from root=3.5cm}]
+  \Tree[ 
+  \edge node[auto=right] {2 or 3};
+  [   
+  .$x$ 
+  \edge[tosubtree] node[auto=right] {2}; 
+  \node[draw,triangle]{A}; 
+  \edge node[auto=left] {1};
+  [
+  .$y$
+  \edge[tosubtree] node[auto=right] {1};
+  \node[draw,triangle]{B};
+  \edge[tosubtree] node[auto=left] {1};
+  \node[draw,triangle]{C}; 
+  ] ] ]
+  \end{tikzpicture}
+}<1>
+
+
+\only{
+  \begin{tikzpicture}[sibling distance=16pt, frontier/.style={distance from root=4cm}]
+    \Tree
+    [ \edge node[auto=right]{1 or 2}; [.$y$
+        \edge[tosubtree] node[auto=right] {3};
+        \node[draw,triangle]{A};
+        \edge[very thick] node[auto=left] {1};
+        [   .$x$ 
+            \edge[tosubtree] node[auto=right] {1 or 2}; 
+            \node[draw,triangle]{B}; 
+            \edge[tosubtree] node[auto=left] {1};
+            \node[draw,triangle]{C}; ]
+    ] ]
+    \end{tikzpicture}
+    \qquad
+    \begin{tikzpicture}[sibling distance=16pt, frontier/.style={distance from root=4cm}]
+    \Tree
+    [ \edge node[auto=right]{1 or 2}; [.$x$
+        \edge[very thick] node[auto=right] {1};
+        [ .$y$ 
+            \edge[tosubtree] node[auto=right] {2}; 
+            \node[draw,triangle]{A}; 
+            \edge[tosubtree] node[auto=left] {1 or 2}; 
+            \node[draw,triangle]{B}; ]
+        \edge[tosubtree] node[auto=left] {2};
+        \node[draw,triangle]{C};
+    ] ]
+    \end{tikzpicture}
+}<2>
+
+\small
+
+\only{
+\begin{tikzpicture}[sibling distance=4pt, frontier/.style={distance from root=5.25cm}]
+\Tree
+[ 
+    \edge node[auto=right]{1 or 2}; 
+    [
+        .$y$
+        \edge[tosubtree] node[auto=right] {3};
+        \node[draw,triangle]{A};
+        \edge[very thick] node[auto=left] {1};
+        [   
+            .$x$ 
+            \edge[very thick] node[auto=right] {1};
+            [
+                .$w$
+                \edge[tosubtree];
+                \node[draw,triangle]{B};
+                \edge[tosubtree];
+                \node[draw,triangle]{C}; 
+            ]
+            \edge[tosubtree] node[auto=left] {2}; 
+            \node[draw,triangle]{D}; 
+        ]
+    ] 
+]
+\end{tikzpicture}
+\qquad
+\begin{tikzpicture}[sibling distance=4pt, frontier/.style={distance from root=4cm}]
+\Tree
+[ \edge node[auto=right]{1 or 2}; [.$w$
+    \edge[very thick] node[auto=right] {2};
+    [ 
+        .$y$
+        \edge[tosubtree] node[auto=right] {1};
+        \node[draw,triangle]{A};
+        \edge[tosubtree];
+        \node[draw,triangle]{B};
+    ]
+    \edge[very thick] node[auto=left] {2};
+    [   .$x$ 
+    	\edge[tosubtree];
+        \node[draw,triangle]{C}; 
+        \edge[tosubtree] node[auto=left] {1}; 
+        \node[draw,triangle]{D}; ]
+] ]
+\end{tikzpicture}
+}<3>
+
+\end{center}
+
+\end{frame}
+
+\begin{frame}{Konstrukce persistence}
+Chceme použít obecné schéma pro konstrukci persistentních pointerových struktur. (Driscoll et al.)
+
+\begin{itemize}
+\item
+Souvislý interval verzí je reprezentován \emph{tlustým vrcholem}. 
+\item 
+Tlustý vrchol obsahuje $\Theta(1)$ informace o sousedech (i přidané pointery) a hodnoty vrcholu.
+\item
+Když přeteče kapacita tlustého vrcholu, proběhne dělící fáze.
+\end{itemize}
+
+\pause
+
+\begin{block}{Předpoklady}
+\begin{itemize}
+  \item {\color{green!80!black}Omezené stupně vrcholů.}
+  \item {\color{red}Omezený počet změn struktury v jedné operaci.}
+  \item Uspořádání verzí. (Váhově vyváženým stromem)
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Spojování změn}
+\begin{itemize}
+\item Zavedeme cestové změny pro sérii povýšení nebo ponížení.
+\item Cesta bude označena pouze horním vrcholem.
+\item Cesty se mohou rozdělit na dvě části.
+\item Vrchol bude ležet nejvýše na dvou cestách najednou.
+\item Spousta detailů...
+\end{itemize}
+
+\pause
+
+\begin{thm}
+Pozměněný algoritmus vyvažující weak-AVL stromy potřebuje $\Theta(1)$ změn na operaci.
+\end{thm}
+
+Nový Weak-AVL strom můžeme použít pro persistenci.
+\end{frame}
+
+\begin{frame}{Závěr}
+\begin{enumerate}
+\item
+Navržena struktura pro persistentní Weak-AVL strom.
+\item
+Implementován proof of concept.
+\item
+Struktura je ještě složitější než persistentní červeno-černé stromy.
+\end{enumerate}
+\end{frame}
+
+\end{document}
