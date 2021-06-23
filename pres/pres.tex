@@ -39,7 +39,7 @@
 % is a graphic format that can be processed by latex or pdflatex,
 % resp., then you can add a logo as follows:
 
-\pgfdeclareimage[height=0.5cm]{university-logo}{../img/logo-en}
+\pgfdeclareimage[height=0.5cm]{university-logo}{../img/logo-cz}
 \logo{\pgfuseimage{university-logo}}
 
 
@@ -109,7 +109,7 @@ Cílíme na plně persistentní strukturu.
 
 \begin{frame}{Rankově vyvážené stromy}
 \begin{dfn}[Rankově vyvážený strom]
-Binární strom je rankově vyvážený, pokud je každému vrcholu přiděleno přirozené číslo jako \emph{rank}. Externí vrcholy mají rank $-1$.
+Binární strom je rankově vyvážený, pokud je každému (vnitřnímu) vrcholu přiděleno přirozené číslo jako \emph{rank}. Externí vrcholy mají rank $-1$.
 %Binary tree is said to be ranked-balanced if all vertices have non-negative integer ranks assigned. Externals vertices are assigned -1 by convention.
 \end{dfn}
 Koncept představili Haeupler et al.
@@ -454,14 +454,144 @@ Pozměněný algoritmus vyvažující weak-AVL stromy potřebuje $\Theta(1)$ zm�
 Nový Weak-AVL strom můžeme použít pro persistenci.
 \end{frame}
 
-\begin{frame}{Závěr}
+\begin{frame}
+
+\centering
+
+\only{
+  \begin{tikzpicture}[sibling distance=8pt]
+    \Tree
+    [
+    .3
+    [ 
+        .2
+        [ .1 0 0 ]
+        [ .1 0 0 ]
+    ] 
+    [ 
+        .2
+        [ .1 0 0 ]
+        [ .1 0 0 ]
+    ] 
+    ]
+    \end{tikzpicture}
+  }<1>
+
+  \only{
+  \begin{tikzpicture}[sibling distance=8pt]
+    \Tree
+    [
+    .3
+    [ 
+        .2
+        [ .1 0 0 ]
+        [ .1  [.\node[red]{0}; 0 \edge[blank]; \node[blank]{}; ] 0 ]
+    ] 
+    [ 
+        .2
+        [ .1 0 0 ]
+        [ .1 0 0 ]
+    ] 
+    ]
+    \end{tikzpicture}
+  }<2>
+
+  \only{
+    \begin{tikzpicture}[sibling distance=8pt]
+      \Tree
+      [
+      .4
+      [ 
+          .3
+          [ .1 0 0 ]
+          [ .2  [.1 0 \edge[blank]; \node[blank]{}; ] 0 ]
+      ] 
+      [ 
+          .2
+          [ .1 0 0 ]
+          [ .1 0 0 ]
+      ] 
+      ]
+      \end{tikzpicture}
+    }<3>
+
+  \only{
+    \begin{tikzpicture}[sibling distance=8pt]
+    \Tree
+    [
+    .\node[very thick]{3};
+    \edge[very thick] node[auto=right] {~};
+    [ 
+        .\node[very thick]{2};
+        [ .1 0 0 ]
+        \edge[very thick] node[auto=right] {~};
+        [  .\node[very thick]{1}; \edge[very thick] node[auto=right] {~}; [.\node[very thick]{0}; 0 \edge[blank]; \node[blank]{}; ] 0 ]
+    ] 
+    [ 
+        .2
+        [ .1 0 0 ]
+        [ .1 0 0 ]
+    ]
+    ]
+  \end{tikzpicture}
+  }<4>
+
+  \only{
+    \begin{tikzpicture}[sibling distance=8pt]
+    \Tree
+    [
+    .\node[very thick]{3};
+    \edge[very thick] node[auto=right] {~};
+    [ 
+        .\node[very thick]{2};
+        [ .1 0 0 ]
+        \edge[very thick] node[auto=right] {~};
+        [  .\node[very thick]{1}; \edge[very thick] node[auto=right] {~}; \node[very thick,red]{0}; 0 ]
+    ] 
+    [ 
+        .2
+        [ .1 0 0 ]
+        [ .1 0 0 ]
+    ]
+    ]
+  \end{tikzpicture}
+  }<5>
+
+
+  \only{
+    \begin{tikzpicture}[sibling distance=8pt]
+    \Tree
+    [
+    .\node[very thick]{3};
+    \edge[very thick] node[auto=right] {~};
+    [ 
+        .\node[very thick]{2};
+        [ .1 0 0 ]
+        \edge[very thick] node[auto=right] {~};
+        [  .\node[very thick]{1}; 0 0 ]
+    ] 
+    [ 
+        .2
+        [ .1 0 0 ]
+        [ .1 0 0 ]
+    ]
+    ]
+  \end{tikzpicture}
+  }<6>
+\end{frame}
+
+\begin{frame}{Výsledky}
 \begin{enumerate}
 \item
-Navržena struktura pro persistentní Weak-AVL strom.
+Reprezentace weak-AVL stromu s konstantním počtem změn na operaci v nejhorším případě
 \item
-Implementován proof of concept.
+Persistentní Weak-AVL strom (Bohužel se zdá být složitější než persistentní červeno-černé stromy.)
 \item
-Struktura je ještě složitější než persistentní červeno-černé stromy.
+Proof of concept implementace
+\item
+Modifikovaná konstrukce persistentních pointerových struktur
+\item
+Semi-persistentní weak-AVL strom s paralelnímy operacemi
 \end{enumerate}
 \end{frame}
 
